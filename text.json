@@ -1,0 +1,10 @@
+{
+    "channel":"Gives you channel related commands.\n> command: `/help channel`",
+    "story":"Gives you Story specific commands.\n> command: `/help story`",
+    "addchannel":"Adds the current channel to your list of channels that receive new chapter notifications.\n> command: `/addchannel`\nExecute this command in a channel where you want to receive new chapter notifications.",
+    "removechannel":"Removes the current channel from your list of channels that receive new chapter notifications.\n> command: `/removechannel`\nExecute this command in a channel where you don't want to get new chapter notifictaions.",
+    "getchannels":"Gives you all the channels in your server that are receiving new chapter notifications.\n> command: `/getchannels`",
+    "addstory":"Your story will be added to receive new chapter notificatins.\n> command: `/addstory <url of the story>`\n Example: `/addstory https://www.wattpad.com/story/266544533-the-true-elites`",
+    "removestory":"Your current story will no longer receive the new chapter notifications.\n> command: `/removestory <url of the story>`\n Example: `/removestory https://www.wattpad.com/story/266544533-the-true-elites`",
+    "fetch":"Gives all the stories in your sever that are receiving new chapter notifications\n> command: `/getstories`"
+}
