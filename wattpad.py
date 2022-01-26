@@ -6,8 +6,9 @@ from datetime import datetime
 headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36'}   
 
 def checkStory(url):
+    domain='www.wattpad.com'
     r=requests.get(url,headers=headers)
-    if r.status_code==200:
+    if r.status_code==200 and domain in url:
         return True
     return False
 
@@ -58,4 +59,4 @@ def get_chapter(url):
                 return newchapters
 
 
-#link=get_chapter()
+

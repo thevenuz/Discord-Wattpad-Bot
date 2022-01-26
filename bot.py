@@ -9,6 +9,7 @@ bot=lightbulb.BotApp(token='OTI5Mzg0MzM5ODQwNTg1Nzk5.YdminQ.zUwPrYfycq0SQtVQefRU
 tasks.load(bot)
 
 bot.load_extensions_from('./extensions',must_exist=True)
+bot.load_extensions_from('./errorhandler',must_exist=True)
 
 #task for fetching new chapters starts, checks every 2 mins
 @tasks.task(m=2, auto_start=True)
@@ -36,6 +37,14 @@ async def getnewchapter():
 async def msg(event):
     print('bot has started')
 
+#error handler
+# @bot.listen(lightbulb.CommandErrorEvent)
+# async def on_command_error(event):
+#     await event.context.respond('OOPS!! Looks like something went wrong.') 
+    #need to check if this works
+
+#error handler
+
 
 #guild join start
 @bot.listen(hikari.GuildJoinEvent)
@@ -43,7 +52,7 @@ async def guildjoin(guild):
     with open('channels.json','r') as f:
         channels=json.load(f)
 
-    #for channel in channels:
+    
     if str(guild.guild_id) not in channels:
         channels[str(guild.guild_id)]=[]
 
@@ -54,7 +63,7 @@ async def guildjoin(guild):
         stories=json.load(s)
     
     
-    #for story in stories:
+    
     if str(guild.guild_id) not in stories:
         stories[str(guild.guild_id)]=[]
 
@@ -90,6 +99,7 @@ async def ping(ctx):
 
 #get channels start
 @bot.command
+@lightbulb.add_checks(is_AdminOrMod)
 @lightbulb.command('getchannels','Gives a list of your current channels')
 @lightbulb.implements(lightbulb.SlashCommand)
 async def getchannels(ctx):

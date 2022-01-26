@@ -1,7 +1,7 @@
-from soupsieve import purge
 import wattpad as ws
 import  lightbulb
 import json
+import hikari
 
 plugin=lightbulb.Plugin('StoryPlugin')
 
@@ -11,8 +11,22 @@ plugin=lightbulb.Plugin('StoryPlugin')
 async def story(ctx):
     await ctx.respond('story')
 
+
+#permissions
+@lightbulb.Check
+def is_AdminOrMod(ctx):
+    roles=ctx.member.get_roles()
+    if any(role.permissions.all(hikari.Permissions.ADMINISTRATOR or hikari.Permissions.MODERATE_MEMBERS) for role in roles):
+        return True
+
+    return False
+
+#permissions
+
+
 #add story start
 @plugin.command
+@lightbulb.add_checks(is_AdminOrMod)
 @lightbulb.option('url', 'your story url')
 @lightbulb.command('addstory','Add new story to your list')
 @lightbulb.implements(lightbulb.SlashCommand)
@@ -20,17 +34,19 @@ async def addstory(ctx):
     with open('stories.json','r') as s:
         stories=json.load(s)
     
-    if ctx.options.url is not None:
-        if ws.checkStory:
-            if not stories:
+    if ctx.options.url!=None and ws.checkStory(ctx.options.url):
+        if not stories:
+            stories[str(ctx.guild_id)]=[str(ctx.options.url)]
+        else:
+            if str(ctx.guild_id) not in stories:
                 stories[str(ctx.guild_id)]=[str(ctx.options.url)]
             else:
-                if str(ctx.guild_id) not in stories:
-                    stories[str(ctx.guild_id)]=[str(ctx.options.url)]
-                else:
-                    for guild in stories:
-                        if guild==str(ctx.guild_id) and str(ctx.options.url) not in stories[str(ctx.guild_id)]:
-                            stories[str(ctx.guild_id)].append(str(ctx.options.url))
+                for guild in stories:
+                    if guild==str(ctx.guild_id) and str(ctx.options.url) not in stories[str(ctx.guild_id)]:
+                        stories[str(ctx.guild_id)].append(str(ctx.options.url))
+
+    else:
+        await ctx.respond('Oops!! There is something wrong with your story link. Check the link and try again.')
 
     with open('stories.json','w') as s:
         json.dump(stories,s,indent=2)
@@ -39,6 +55,7 @@ async def addstory(ctx):
 
 #remove story start
 @plugin.command
+@lightbulb.add_checks(is_AdminOrMod)
 @lightbulb.option('url','Url of the story to be removed')
 @lightbulb.command('removestory','remove your story')
 @lightbulb.implements(lightbulb.SlashCommand)

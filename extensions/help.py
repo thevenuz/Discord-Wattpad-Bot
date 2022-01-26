@@ -5,6 +5,14 @@ import json
 plugin=lightbulb.Plugin('HelpPlugin')
 
 
+# #error handler
+# @plugin.listener(lightbulb.CommandErrorEvent)
+# async def on_command_error(event):
+#     await event.context.respond('OOPS!! Looks like something went wrong.') #need to check if this works
+
+# #error handler
+
+
 #custom help command end
 @plugin.command
 @lightbulb.option('category','Use channel for channel related help', str, choices=('channel','story'))
@@ -18,21 +26,21 @@ async def help(ctx):
         text=json.load(f)
 
     if category.lower()=='channel':
-        em=hikari.Embed(title='CHANNEL COMMANDS')
+        em=hikari.Embed(title='CHANNEL COMMANDS',  color=0Xff500a)
         em.add_field(name='addchannel', value=str(text['addchannel']), inline=False)
         em.add_field(name='removechannel',value=str(text['removechannel']), inline=False)
         em.add_field(name='getchannels',value=str(text['getchannels']),inline=False)
         await ctx.respond(embed=em)
 
     elif category.lower()=='story':
-        em=hikari.Embed(title='STORY COMMANDS')
+        em=hikari.Embed(title='STORY COMMANDS', color=0Xff500a)
         em.add_field(name='addstory', value=str(text['addstory']), inline=False)
         em.add_field(name='removestory',value=str(text['removestory']), inline=False)
         em.add_field(name='getstories',value=str(text['fetch']), inline=False)
         await ctx.respond(embed=em)
     
     else:
-        em=hikari.Embed(title='HELP')
+        em=hikari.Embed(title='HELP', color=0Xff500a)
         em.add_field(name='channel', value=str('channel'), inline=False)
         em.add_field(name='story',value=str('story'), inline=False)
         await ctx.respond(embed=em)

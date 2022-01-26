@@ -4,6 +4,19 @@ import json
 
 plugin=lightbulb.Plugin('ChannelPlugin')
 
+#TODO later: define permissions in a single place and use them in all plugins
+#permissions
+@lightbulb.Check
+def is_AdminOrMod(ctx):
+    roles=ctx.member.get_roles()
+    if any(role.permissions.all(hikari.Permissions.ADMINISTRATOR or hikari.Permissions.MODERATE_MEMBERS) for role in roles):
+        return True
+
+    return False
+
+#permissions
+
+
 @plugin.command
 @lightbulb.command('channel','test plugin')
 @lightbulb.implements(lightbulb.SlashCommand)
@@ -13,6 +26,7 @@ async def channel(ctx):
 
 #addchannel command start
 @plugin.command
+@lightbulb.add_checks(is_AdminOrMod)
 @lightbulb.command('addchannel','adds ypur channel')
 @lightbulb.implements(lightbulb.SlashCommand)
 async def addchannel(ctx):
@@ -40,6 +54,7 @@ async def addchannel(ctx):
 
 #remove channel start
 @plugin.command
+@lightbulb.add_checks(is_AdminOrMod)
 @lightbulb.command('removechannel','removes your channel')
 @lightbulb.implements(lightbulb.SlashCommand)
 async def removechannel(ctx):
@@ -59,6 +74,8 @@ async def removechannel(ctx):
 
 #remove channel end
 
+
+#TODO later: move getchannels to this plugin
 # #get channels start
 # @plugin.command
 # @lightbulb.command('getchannels','Gives a list of your current channels')
