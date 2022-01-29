@@ -4,3 +4,4 @@ extensions/__pycache__/story.cpython-310.pyc
 __pycache__/wattpad.cpython-310.pyc
 .vscode/launch.json
 errorhandler/__pycache__/error.cpython-310.pyc
+.env

@@ -5,18 +5,12 @@ import hikari
 
 plugin=lightbulb.Plugin('StoryPlugin')
 
-@plugin.command
-@lightbulb.command('story','test plugin')
-@lightbulb.implements(lightbulb.SlashCommand)
-async def story(ctx):
-    await ctx.respond('story')
-
 
 #permissions
 @lightbulb.Check
 def is_AdminOrMod(ctx):
     roles=ctx.member.get_roles()
-    if any(role.permissions.all(hikari.Permissions.ADMINISTRATOR or hikari.Permissions.MODERATE_MEMBERS) for role in roles):
+    if any(role.permissions.all(hikari.Permissions.ADMINISTRATOR) for role in roles) or any(role.permissions.all(hikari.Permissions.MODERATE_MEMBERS) for role in roles):
         return True
 
     return False
@@ -27,8 +21,8 @@ def is_AdminOrMod(ctx):
 #add story start
 @plugin.command
 @lightbulb.add_checks(is_AdminOrMod)
-@lightbulb.option('url', 'your story url')
-@lightbulb.command('addstory','Add new story to your list')
+@lightbulb.option('story url', 'Url of the story to be added')
+@lightbulb.command('addstory','Adds your current story to receive new chapter noifications')
 @lightbulb.implements(lightbulb.SlashCommand)
 async def addstory(ctx):
     with open('stories.json','r') as s:
@@ -46,18 +40,18 @@ async def addstory(ctx):
                         stories[str(ctx.guild_id)].append(str(ctx.options.url))
 
     else:
-        await ctx.respond('Oops!! There is something wrong with your story link. Check the link and try again.')
+        await ctx.respond('**Oops!! There is something wrong with your story link. Check the link and try again.**')
 
     with open('stories.json','w') as s:
         json.dump(stories,s,indent=2)
 
-    await ctx.respond('Story has been successfully added to this server\'s list.\nYou will receive new chapter notications from this story.')
+    await ctx.respond('**Story has been successfully added to this server\'s list.\nYou will receive new chapter notications from this story.**')
 
 #remove story start
 @plugin.command
 @lightbulb.add_checks(is_AdminOrMod)
-@lightbulb.option('url','Url of the story to be removed')
-@lightbulb.command('removestory','remove your story')
+@lightbulb.option('story url','Url of the story to be removed')
+@lightbulb.command('removestory','removes your current story from receiving new chapter notifications')
 @lightbulb.implements(lightbulb.SlashCommand)
 async def removestory(ctx):
     url=ctx.options.url
@@ -71,7 +65,7 @@ async def removestory(ctx):
     with open('stories.json','w') as f:
         json.dump(stories,f,indent=2)
 
-    await ctx.respond('This story has been removed.\nYou will no loger receive new chapter notifications from this story.')
+    await ctx.respond('**This story has been removed.\nYou will no loger receive new chapter notifications from this story.**')
 
 
 
@@ -80,7 +74,7 @@ async def removestory(ctx):
 
 #get stories start
 @plugin.command
-@lightbulb.command('getstories','fetch your existing stories')
+@lightbulb.command('getstories','fetch your server\'s stories that are getting new chapter updates')
 @lightbulb.implements(lightbulb.SlashCommand)
 async def getstories(ctx):
     with open('stories.json') as f:
@@ -92,9 +86,9 @@ async def getstories(ctx):
                 for key in stories[guild]:
                     msg=str(msg)+'*'+str(key)+'\n'
     if not msg:
-        msg='No stories were added to your list.'
+        msg='**So empty!! No stories were added to your list.**'
     else:
-        msg='Your stories list:\n'+msg
+        msg=f'**Your stories list:\n** {msg}'
 
     await ctx.respond(msg)
 
