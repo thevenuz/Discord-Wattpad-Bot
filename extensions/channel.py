@@ -1,3 +1,4 @@
+import msilib
 import hikari
 import lightbulb
 import json
@@ -22,12 +23,18 @@ def is_AdminOrMod(ctx):
 @lightbulb.command('addchannel','This channel will be added to receive new chapter notifications of your stories')
 @lightbulb.implements(lightbulb.SlashCommand)
 async def addchannel(ctx):
+    msgs={
+        "exists":"This channel has been already added.",
+        "success":"This channel will receive new chapter notifications of your stories from now."
+    }
     with open('channels.json','r') as f:
             channels=json.load(f)
 
+    msg=''
     if ctx.channel_id is not None:
         if not channels:
                 channels[str(ctx.guild_id)]=[str(ctx.channel_id)]
+                msg=msgs['success']
         else:
             if str(ctx.guild_id) not in channels:
                     channels[str(ctx.guild_id)]=[str(ctx.channel_id)]
@@ -35,14 +42,17 @@ async def addchannel(ctx):
                 for channel in channels:
 
                     if channel==str(ctx.guild_id) and str(ctx.channel_id) in channels[str(ctx.guild_id)]:
-                        await ctx.respond('This channel has been already added.')
+                        msg=msgs['exists']
                     elif channel==str(ctx.guild_id) and str(ctx.channel_id) not in channels[str(ctx.guild_id)]:
                         channels[str(ctx.guild_id)].append(str(ctx.channel_id))
+                        msg=msgs['success']
 
-                        with open('channels.json','w') as f:
-                            json.dump(channels,f,indent=2)
-
-                        await ctx.respond('This channel will receive new chapter notifications of your stories from now.')
+    with open('channels.json','w') as f:
+        json.dump(channels,f,indent=2)
+    if msg is not None:
+        await ctx.respond(msg)
+    else:
+        await ctx.respond('Uh-oh, something is not right. Please check /getchannels to see if the channel is added.')
 
 
 #addchannel command end

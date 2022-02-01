@@ -1,7 +1,11 @@
-import wattpad as ws
-import  lightbulb
-import json
-import hikari
+try:
+    import lightbulb
+    import json
+    import hikari
+    import wattpad as ws
+
+except Exception as e:
+    print(str(e))
 
 plugin=lightbulb.Plugin('StoryPlugin')
 
@@ -21,40 +25,43 @@ def is_AdminOrMod(ctx):
 #add story start
 @plugin.command
 @lightbulb.add_checks(is_AdminOrMod)
-@lightbulb.option('story url', 'Url of the story to be added')
+@lightbulb.option('storyurl', 'Url of the story to be added')
 @lightbulb.command('addstory','Adds your current story to receive new chapter noifications')
 @lightbulb.implements(lightbulb.SlashCommand)
 async def addstory(ctx):
     with open('stories.json','r') as s:
         stories=json.load(s)
     
-    if ctx.options.url!=None and ws.checkStory(ctx.options.url):
+    if ctx.options.storyurl!=None and ws.checkStory(ctx.options.storyurl):
         if not stories:
-            stories[str(ctx.guild_id)]=[str(ctx.options.url)]
+            stories[str(ctx.guild_id)]=[str(ctx.options.storyurl)]
         else:
             if str(ctx.guild_id) not in stories:
-                stories[str(ctx.guild_id)]=[str(ctx.options.url)]
+                stories[str(ctx.guild_id)]=[str(ctx.options.storyurl)]
             else:
                 for guild in stories:
-                    if guild==str(ctx.guild_id) and str(ctx.options.url) not in stories[str(ctx.guild_id)]:
-                        stories[str(ctx.guild_id)].append(str(ctx.options.url))
+                    if guild==str(ctx.guild_id) and str(ctx.options.storyurl) not in stories[str(ctx.guild_id)]:
+                        stories[str(ctx.guild_id)].append(str(ctx.options.storyurl))
+
+        with open('stories.json','w') as s:
+            json.dump(stories,s,indent=2)
+
+        await ctx.respond('**Story has been successfully added to this server\'s list.\nYou will receive new chapter notications from this story.**')
+
 
     else:
         await ctx.respond('**Oops!! There is something wrong with your story link. Check the link and try again.**')
+        
 
-    with open('stories.json','w') as s:
-        json.dump(stories,s,indent=2)
-
-    await ctx.respond('**Story has been successfully added to this server\'s list.\nYou will receive new chapter notications from this story.**')
-
+    
 #remove story start
 @plugin.command
 @lightbulb.add_checks(is_AdminOrMod)
-@lightbulb.option('story url','Url of the story to be removed')
+@lightbulb.option('storyurl','Url of the story to be removed')
 @lightbulb.command('removestory','removes your current story from receiving new chapter notifications')
 @lightbulb.implements(lightbulb.SlashCommand)
 async def removestory(ctx):
-    url=ctx.options.url
+    url=ctx.options.storyurl
     with open('stories.json','r') as f:
         stories=json.load(f)
     if ctx.channel_id is not None:
@@ -84,7 +91,8 @@ async def getstories(ctx):
         for guild in stories:
             if guild==str(ctx.guild_id):
                 for key in stories[guild]:
-                    msg=str(msg)+'*'+str(key)+'\n'
+                    #msg=str(msg)+'*'+str(key)+'\n'
+                    msg=f'{str(msg)} {str(key)}\n'
     if not msg:
         msg='**So empty!! No stories were added to your list.**'
     else:

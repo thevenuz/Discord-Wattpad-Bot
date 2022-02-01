@@ -9,7 +9,7 @@ import dotenv
 dotenv.load_dotenv()
 TOKEN=os.getenv('BOTTOKEN')
 
-bot=lightbulb.BotApp(token=TOKEN, default_enabled_guilds=(906917949888147477, 931555271447293962))
+bot=lightbulb.BotApp(token=TOKEN)
 tasks.load(bot)
 
 bot.load_extensions_from('./extensions',must_exist=True)
@@ -58,11 +58,11 @@ async def msg(event):
 
 #guild join start
 @bot.listen(hikari.GuildJoinEvent)
-async def guildjoin(guild):
+async def guildjoin(guild: hikari.GuildJoinEvent):
     with open('channels.json','r') as f:
         channels=json.load(f)
-
     
+
     if str(guild.guild_id) not in channels:
         channels[str(guild.guild_id)]=[]
 
@@ -72,13 +72,35 @@ async def guildjoin(guild):
     with open('stories.json','r') as s:
         stories=json.load(s)
     
-    
-    
     if str(guild.guild_id) not in stories:
         stories[str(guild.guild_id)]=[]
 
     with open('stories.json','w') as f:
         json.dump(stories,f,indent=2)   
+
+    try:
+        descwhat='Whenever you write a new chapter in your story and publish it, this bot will automatically fetch the new chapter\'s URL and post it in your server.'
+        deschow='Specify the channel/channels, story/stories that you wish to receive the new chapter updates.\nOnly members with ADMIN or MODMEMBERS permission can use the commands. That\'s it. New chapter links of the stories will be posted in the added channels whenever a new chapter is published.'
+        desccmd='This bot supports the new slash commands, so the prefix for all the commands is `/`. All the commands are self explanatory. Please use `/help` for more details about commands.'
+        descother1='Bot works pretty well already but consider this as a beta and it will be improved over time.'
+        descother2='Sometimes the slash commands take some time to register and appear in the server. So please be patient for an hour or so.'
+        descother3='Bot supports multiple servers.'
+        descother=f'{descother1}\n{descother2}\n{descother3}\n'
+
+        em=hikari.Embed(title='Thanks for inviting Wattapd bot to your server! Here\'s a rundown of this bot.',  color=0Xff500a)
+        em.add_field(name='What is this bot capable of?',value=descwhat)
+        em.add_field(name='How does this bot work?', value=deschow)
+        em.add_field(name='How to use the commands?', value=desccmd)
+        em.add_field(name='Other stuff:', value=descother)
+
+        for k,v in guild.channels.items():
+            if v.parent_id:
+                defaultchannel=k
+                await guild.app.rest.create_message(defaultchannel, embed=em)
+                break
+
+    except:
+        pass
 
 
 #guild join end
@@ -96,12 +118,11 @@ def is_AdminOrMod(ctx):
 
 
 @bot.command
-@lightbulb.add_checks(is_AdminOrMod)
 @lightbulb.command('ping','get the bot\'s latency')
 @lightbulb.implements(lightbulb.SlashCommand)
 async def ping(ctx):
     try:
-        await ctx.respond(f'**Pong! Latency: {bot.heartbeat_latency*1000:.2f}ms**')
+        await ctx.respond(f'**Bot\'s Latency: {bot.heartbeat_latency*1000:.2f}ms**')
     except Exception as e:
         print(e)
 
