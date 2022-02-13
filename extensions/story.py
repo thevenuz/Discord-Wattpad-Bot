@@ -50,11 +50,18 @@ async def addstory(ctx):
                 with open('stories.json','w') as s:
                     json.dump(stories,s,indent=2)
 
-                await ctx.respond('**Story has been successfully added to this server\'s list.\nYou will receive new chapter notications from this story.**')
+                
+                embContent='You will receive new chapter notications from this story.'
+                em=hikari.Embed(title='Story has been successfully added to this server\'s list.',description=embContent, color=0Xff500a)
+
+                await ctx.respond(embed=em)
 
 
             else:
-                await ctx.respond('**Oops!! There is something wrong with your story link. Check the link and try again.**')
+                ErrContent='Oops!! There is something wrong with your story link. Check the link and try again.'
+                emErr=hikari.Embed(title=f'🛑 Error:',description=ErrContent, color=0xFF0000)
+                
+                await ctx.respond(embed=emErr)
 
     except Exception as e:
         logger.fatal('Exception has occured in Add story command for guild %s and story %s',ctx.guild_id,ctx.options.storyurl,exc_info=1)
@@ -83,7 +90,11 @@ async def removestory(ctx):
         with open('stories.json','w') as f:
             json.dump(stories,f,indent=2)
 
-        await ctx.respond('**This story has been removed.\nYou will no loger receive new chapter notifications from this story.**')
+        
+        emContent='You will no loger receive new chapter notifications from this story.'
+        em=hikari.Embed(title='This story has been removed.', description=emContent,color=0Xff500a)
+
+        await ctx.respond(embed=em)
 
     except Exception as e:
         logger.fatal('Exception has occured in remove story command for guild %s and story %s',ctx.guild_id,ctx.options.storyurl,exc_info=1)
@@ -110,11 +121,15 @@ async def getstories(ctx):
                     for key in stories[guild]:
                         msg=f'{str(msg)} {str(key)}\n'
         if not msg:
-            msg='**So empty!! No stories were added to your list.**'
+            msg='No stories were added to your list.'
+            em=hikari.Embed(title='So empty!!',description=msg, color=0Xff500a)
+            
         else:
-            msg=f'**Your stories list:\n** {msg}'
+            msg=f'{msg}'
+            em=hikari.Embed(title='Your server\'s stories:', description=msg, color=0Xff500a)
+            
 
-        await ctx.respond(msg)
+        await ctx.respond(embed=em)
     
     except Exception as e:
         logger.fatal('Exception in getchannels command for guild %s',ctx.guild_id, exc_info=1)

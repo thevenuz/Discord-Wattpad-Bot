@@ -47,9 +47,12 @@ async def addchannel(ctx:lightbulb.SlashContext):
         with open('channels.json','w') as f:
             json.dump(channels,f,indent=2)
         if msg is not None:
-            await ctx.respond(msg)
+            em=hikari.Embed(title='Sucess:',description=msg,color=0Xff500a)
+            await ctx.respond(embed=em)
         else:
-            await ctx.respond('Uh-oh, something is not right. Please check `/getchannels` to see if the channel is added.')
+            emContent='Uh-oh, something is not right. Please check `/getchannels` to see if the channel is added.'
+            emErr=hikari.Embed(f'🛑 Error:',description=f'{emContent}',color=0xFF0000)
+            await ctx.respond(embed=emErr)
 
     except Exception as e:
         logger.fatal('Exception has occured in addchannel command for guild %s and channel %s',ctx.guild_id,ctx.channel_id,exc_info=1)
@@ -72,14 +75,21 @@ async def removechannel(ctx:lightbulb.SlashContext):
         if ctx.channel_id is not None:
             for channel in channels:
                 if channel==str(ctx.guild_id) and str(ctx.channel_id) not in channels[str(ctx.guild_id)]:
-                    await ctx.respond('This channel is not receiving new chapter notifications of your stories from the beginning.')
+                    emContent='This channel is not receiving new chapter notifications of your stories from the beginning.'
+                    em=hikari.Embed(title='Not Found:',description=emContent, color=0xFF0000)
+                    
+                    await ctx.respond(embed=em)
                 elif channel==str(ctx.guild_id) and str(ctx.channel_id) in channels[str(ctx.guild_id)]:
                     channels[str(ctx.guild_id)].remove(str(ctx.channel_id))
 
                     with open('channels.json','w') as f:
                         json.dump(channels,f,indent=2)
 
-                    await ctx.respond('This channel will not receive new chapter notifications from now.') 
+                    
+                    emContent='This channel will not receive new chapter notifications from now.'
+                    em=hikari.Embed(title='Sucsess!',description=emContent, color=0Xff500a)
+
+                    await ctx.respond(embed=em) 
     except Exception as e:
         logger.fatal('Exception has occured in removechannel command for guild %s and channel %s',ctx.guild_id,ctx.channel_id,exc_info=1)
         raise e
@@ -101,11 +111,16 @@ async def getchannels(ctx):
             for channel in channels:
                 if channel==str(ctx.guild_id):
                     if not channels[channel]:
-                        await ctx.respond('No channels in this server are receiving new chapter notifications.')
+                        emContent='No channels in this server are receiving new chapter notifications.'
+                        em=hikari.Embed(title='Empty:',description=emContent,color=0Xff500a)
+                        
+                        await ctx.respond(embed=em)
                     else:
                         for key in channels[channel]:
                             msg=f'{msg}\n <#{key}>'
-                        await ctx.respond(f'Channels in this server that are receiving new chapter notifications:\n{msg}')
+                        
+                        em=hikari.Embed(title='Channels in this server that are receiving new chapter notifications:', description=msg,color=0Xff500a)
+                        await ctx.respond(embed=em)
 
     except Exception as e:
         logger.fatal('Exception has occured in getchannels command for guild %s and channel %s',ctx.guild_id,ctx.channel_id,exc_info=1)

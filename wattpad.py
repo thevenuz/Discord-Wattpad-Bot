@@ -32,7 +32,7 @@ async def checkStory(url):
 
 async def get_chapter(url):
     try:
-        logger.error('Get a new chapter for story %s', url)
+        logger.info('Get a new chapter for story %s', url)
         newchapters=[]
         try:
             r=requests.get(url,headers=headers)
@@ -46,19 +46,20 @@ async def get_chapter(url):
             soup=BeautifulSoup(r.content,'html.parser')
 
             #check if last updated has minutes in it
-            comparetext='min'
+            comparetextmin='min'
+            comparetextsec='sec'
             lastupdate=None
             updated=None
             try:
                 lastupdate=soup.find('span',class_='table-of-contents__last-updated')
                 if lastupdate:
                     updated=lastupdate.find('strong').text
-                    logger.error('last updated %s',updated)
+                    logger.info('last updated %s',updated)
             except Exception as e:
                 logger.fatal('Exception while fetching last upadated',exc_info=1)
                 pass
 
-            if (not lastupdate) or (not updated) or (comparetext in updated):
+            if (not lastupdate) or (not updated) or (comparetextmin in updated) or (comparetextsec in updated):
                 divs=soup.find('div', class_='story-parts')
                 if divs:
                     for item in divs:
@@ -95,7 +96,7 @@ async def get_chapter(url):
                                         dateDifference=nowDate-actualDate
                                         #check the time differnce between now and published time
                                         minuteDiffernce=dateDifference.total_seconds()/60
-                                        logger.error('minutes diff of part %s is %s',chapterLink,minuteDiffernce)
+                                        logger.info('minutes diff of part %s is %s',chapterLink,minuteDiffernce)
                                         #if the time difference is less than 2 min, return this chapter link
                                         if minuteDiffernce<=2:
                                             newchapters.append(chapterLink)

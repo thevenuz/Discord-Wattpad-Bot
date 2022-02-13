@@ -22,7 +22,7 @@ async def on_error(event: lightbulb.CommandErrorEvent) -> None:
             logger.info('Error due to missing permissions')
             msg=errors["MissingPermissions"]
             errorMsg.add_field(name='Error:', value=msg, inline=False)
-            await event.context.respond(embed=errorMsg, content=msg)
+            await event.context.respond(embed=errorMsg)
 
         if isinstance(event.exception, lightbulb.CheckFailure):
             logger.info('Error due to missing permissions')
