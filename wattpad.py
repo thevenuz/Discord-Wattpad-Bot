@@ -30,7 +30,7 @@ async def checkStory(url):
         logger.fatal('Exception occured in checkstory method for story %s',url,exc_info=1)
         raise e
 
-async def get_chapter(url):
+async def get_chapter(url,lastchecked):
     try:
         logger.info('Get a new chapter for story %s', url)
         newchapters=[]
@@ -93,11 +93,16 @@ async def get_chapter(url):
                                         prefix='part.'+part+'.metadata'
                                         createDate=validJson[prefix]['data']['createDate']
                                         actualDate=datetime.strptime(createDate,"%Y-%m-%dT%H:%M:%SZ")
+                                        lastcheckeddate=datetime.strptime(lastchecked,"%Y-%m-%d %H:%M:%S")
                                         dateDifference=nowDate-actualDate
                                         #check the time differnce between now and published time
                                         minuteDiffernce=dateDifference.total_seconds()/60
                                         logger.info('minutes diff of part %s is %s',chapterLink,minuteDiffernce)
                                         #if the time difference is less than 2 min, return this chapter link
+                                        if actualDate>lastcheckeddate:
+                                            newchapters.append(chapterLink)
+                                            return newchapters,actualDate
+
                                         if minuteDiffernce<=2:
                                             newchapters.append(chapterLink)
 

@@ -36,9 +36,10 @@ async def getnewchapter():
             stories=json.load(s)
             channels=json.load(f)
         
-        
-        for story in stories:
-            for key in stories[story]:
+        for guild,story in stories.items():
+            for sty in story:
+                key=sty['url']
+                lastchecked=sty['lastupdated']
                 logger.info('Cheking for a new story of %s',key)
                 title=''
                 if 'utm' not in key:
@@ -48,16 +49,44 @@ async def getnewchapter():
                     title=f'from {title}'
 
                 try:
-                    newchapter= await ws.get_chapter(str(key))
+                    newchapter= await ws.get_chapter(str(key),lastchecked)
                     if newchapter:
-                        for ch in channels[story]:
-                            for nc in newchapter:
+                        for ch in channels[guild]:
+                            for nc in newchapter[0]:
                                 msg=f'**New chapter {title}**\n {str(nc)}'
                             await bot.rest.create_message(ch, msg)
+
+                        sty['lastupdated']=f'{newchapter[1]}'
+                        with open('stories.json','w') as s:
+                            json.dump(stories,s,indent=2)
+
+                        
 
                 except Exception as e:
                     logger.fatal('Error occured in wattpad get_chapter method', exc_info=1)
                     raise e
+        
+        # for story in stories:
+        #     for key in stories[story]:
+        #         logger.info('Cheking for a new story of %s',key)
+        #         title=''
+        #         if 'utm' not in key:
+        #             storytitle=str(key).split('/')
+        #             title=storytitle[-1].split('-',1)
+        #             title=title[-1].replace('-',' ')
+        #             title=f'from {title}'
+
+        #         try:
+        #             newchapter= await ws.get_chapter(str(key))
+        #             if newchapter:
+        #                 for ch in channels[story]:
+        #                     for nc in newchapter:
+        #                         msg=f'**New chapter {title}**\n {str(nc)}'
+        #                     await bot.rest.create_message(ch, msg)
+
+        #         except Exception as e:
+        #             logger.fatal('Error occured in wattpad get_chapter method', exc_info=1)
+        #             raise e
             
     except Exception as e:
         logger.critical('Error in getnewchapter task:',exc_info=1)
@@ -93,7 +122,38 @@ async def guildjoin(guild: hikari.GuildJoinEvent):
             stories[str(guild.guild_id)]=[]
 
         with open('stories.json','w') as f:
-            json.dump(stories,f,indent=2)   
+            json.dump(stories,f,indent=2)
+
+        #Create a new channel for sending the story updates start 
+        try:
+            current_guild=await guild.fetch_guild()
+            guild_roles=current_guild.roles
+            overwrite=[]
+            for role_id,role in guild_roles.items():
+                if (hikari.Permissions.MANAGE_CHANNELS in role.permissions) or (hikari.Permissions.ADMINISTRATOR in role.permissions) or (hikari.Permissions.MODERATE_MEMBERS in role.permissions):
+                    overwrite.append(hikari.PermissionOverwrite(id=role_id,type=hikari.PermissionOverwriteType.ROLE,allow=(hikari.Permissions.VIEW_CHANNEL|hikari.Permissions.SEND_MESSAGES|hikari.Permissions.READ_MESSAGE_HISTORY|hikari.Permissions.USE_APPLICATION_COMMANDS),deny=(hikari.Permissions.MANAGE_MESSAGES|hikari.Permissions.SPEAK)))
+
+                else:
+                    overwrite.append(hikari.PermissionOverwrite(id=role_id,type=hikari.PermissionOverwriteType.ROLE,allow=(hikari.Permissions.VIEW_CHANNEL|hikari.Permissions.READ_MESSAGE_HISTORY),deny=(hikari.Permissions.SEND_MESSAGES|hikari.Permissions.USE_APPLICATION_COMMANDS|hikari.Permissions.MANAGE_THREADS|hikari.Permissions.CREATE_PUBLIC_THREADS|hikari.Permissions.CREATE_PRIVATE_THREADS|hikari.Permissions.MANAGE_MESSAGES|hikari.Permissions.SPEAK)))
+                
+                
+            created_channel=await current_guild.create_text_channel('Wattpad_Library', permission_overwrites=overwrite)
+
+            try:
+                if created_channel:
+                    chnl_msg=f'Bot created channel for server guild Id: {guild.guild_id} and server name: {guild.guild.name}, channel Id: {created_channel.id}, channel name: {created_channel.name}'
+                    await bot.rest.create_message(LOGCHANNEL,chnl_msg)
+            except Exception as e:
+                logger.fatal('Excpetion occured when sending channel msg to log server for guild Id: %s and server name: %s',guild.guild_id,guild.old_guild.name)
+                pass
+            
+        except Exception as e:
+            logger.critical('Exception occured while creating channel for guild %s, Exception %s',guild.guild_id,e,exc_info=1)
+            chnl_msg=f'Exception occured while creating channel for guild: {guild.guild_id} and server name: {guild.guild.name}'
+            await bot.rest.create_message(LOGCHANNEL,chnl_msg)
+            pass
+
+        #Create a new channel for sending the story updates end
 
         try:
             descwhat='Whenever you write a new chapter in your story and publish it, this bot will automatically fetch the new chapter\'s URL and post it in your server.'
@@ -110,11 +170,15 @@ async def guildjoin(guild: hikari.GuildJoinEvent):
             em.add_field(name='How to use the commands?', value=desccmd)
             #em.add_field(name='Other stuff:', value=descother)
 
-            for k,v in guild.channels.items():
-                if v.parent_id:
-                    defaultchannel=k
-                    await guild.app.rest.create_message(defaultchannel, embed=em)
-                    break
+            if created_channel:
+                await guild.app.rest.create_message(created_channel.id,embed=em)
+            
+            else:
+                for k,v in guild.channels.items():
+                    if v.parent_id:
+                        defaultchannel=k
+                        await guild.app.rest.create_message(defaultchannel, embed=em)
+                        break
 
         except Exception as e:
             logger.critical('Error in sending welcome msg for guild %s', guild.guild_id, exc_info=1)
@@ -164,6 +228,8 @@ async def guildLeave(guild: hikari.GuildLeaveEvent):
         pass
 
 #Guild leave event end
+
+
 
 
 

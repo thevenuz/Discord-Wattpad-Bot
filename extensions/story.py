@@ -1,3 +1,6 @@
+from datetime import datetime
+
+
 try:
     import lightbulb
     import json
@@ -38,14 +41,18 @@ async def addstory(ctx):
         else:
             if ctx.options.storyurl!=None and (await ws.checkStory(ctx.options.storyurl)):
                 if not stories:
-                    stories[str(ctx.guild_id)]=[str(ctx.options.storyurl)]
+                    #stories[str(ctx.guild_id)]=[str(ctx.options.storyurl)]
+                    stories[str(ctx.guild_id)]=[{"url":f'{str(ctx.options.storyurl)}',"lastupdated":f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}'}]
                 else:
                     if str(ctx.guild_id) not in stories:
-                        stories[str(ctx.guild_id)]=[str(ctx.options.storyurl)]
+                        #stories[str(ctx.guild_id)]=[str(ctx.options.storyurl)]
+                        stories[str(ctx.guild_id)]=[{"url":f'{str(ctx.options.storyurl)}',"lastupdated":f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}'}]
                     else:
-                        for guild in stories:
-                            if guild==str(ctx.guild_id) and str(ctx.options.storyurl) not in stories[str(ctx.guild_id)]:
-                                stories[str(ctx.guild_id)].append(str(ctx.options.storyurl))
+                        for guild, story in stories.items():
+                            if guild==str(ctx.guild_id):
+                                if any(str(ctx.options.storyurl) not in sty['url'] for  sty in story):
+                                    story.append({"url": f'{ctx.options.storyurl}',"lastupdated": f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}' })
+                        
 
                 with open('stories.json','w') as s:
                     json.dump(stories,s,indent=2)
@@ -83,10 +90,13 @@ async def removestory(ctx):
         with open('stories.json','r') as f:
             stories=json.load(f)
         if ctx.channel_id is not None:
-            for guild in stories:
-                if guild==str(ctx.guild_id) and str(url) in stories[str(ctx.guild_id)]:
-                    stories[str(ctx.guild_id)].remove(str(url))
-
+            for guild,story in stories.items():
+                if guild==str(ctx.guild_id):
+                    for sty in story:
+                        if sty['url']==str(url):
+                            story.remove(sty)
+                        
+                    
         with open('stories.json','w') as f:
             json.dump(stories,f,indent=2)
 
@@ -116,10 +126,12 @@ async def getstories(ctx):
             stories=json.load(f)
         msg=''
         if ctx.guild_id is not None:
-            for guild in stories:
+            for guild, story in stories.items():
                 if guild==str(ctx.guild_id):
-                    for key in stories[guild]:
+                    for sty in story:
+                        key=sty['url']
                         msg=f'{str(msg)} {str(key)}\n'
+
         if not msg:
             msg='No stories were added to your list.'
             em=hikari.Embed(title='So empty!!',description=msg, color=0Xff500a)
