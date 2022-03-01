@@ -11,8 +11,8 @@ logger.setLevel(logging.ERROR)
 
 #custom help command start
 @plugin.command
-@lightbulb.option('category','Use channel for channel related help or story for story related help', str, choices=('channel','story'), required=False)
-@lightbulb.command('help','Gives you list of commands. Use empty or channel or story as categories')
+@lightbulb.option('category','Use channel/story/author/setup/about for detailed help on specific category.', str, choices=('channel','story','author','setup','about'), required=False)
+@lightbulb.command('help','Gives you help on commands. Use empty/channel/story/author/setup/about as categories')
 @lightbulb.implements(lightbulb.SlashCommand)
 async def help(ctx):
     try:
@@ -30,30 +30,56 @@ async def help(ctx):
             if category.lower()=='channel':
                 logger.info('channel help is trigered')
                 em=hikari.Embed(title='CHANNEL COMMANDS',  color=0Xff500a)
-                em.add_field(name='addchannel', value=str(text['addchannel']), inline=False)
-                em.add_field(name='removechannel',value=str(text['removechannel']), inline=False)
-                em.add_field(name='getchannels',value=str(text['getchannels']),inline=False)
+                em.add_field(name='setchannel', value=f'{text["setchannel"]}{text["setchannelex"]}', inline=False)
+                em.add_field(name='unsetchannel',value=f'{text["unsetchannel"]}{text["unsetchannelex"]}', inline=False)
+                em.add_field(name='checkchannels',value=f'{text["checkchannels"]}{text["checkchannelsex"]}',inline=False)
                 await ctx.respond(embed=em)
 
             elif category.lower()=='story':
                 logger.info('story help is trigered')
                 em=hikari.Embed(title='STORY COMMANDS', color=0Xff500a)
-                em.add_field(name='addstory', value=str(text['addstory']), inline=False)
-                em.add_field(name='removestory',value=str(text['removestory']), inline=False)
-                em.add_field(name='getstories',value=str(text['fetch']), inline=False)
+                em.add_field(name='followstory', value=f"{text['followstory']}{text['followstoryex']}", inline=False)
+                em.add_field(name='unfollowstory',value=f"{text['unfollowstory']}{text['unfollowstoryex']}", inline=False)
+                em.add_field(name='checkstories',value=f"{text['checkstories']}{text['checkstoriesex']}", inline=False)
+                await ctx.respond(embed=em)
+
+            elif category.lower()=='author':
+                logger.info('author help is trigered')
+                em=hikari.Embed(title='AUTHOR COMMANDS', color=0Xff500a)
+                em.add_field(name='followauthor', value=f"{text['followauthor']}{text['followauthorex']}", inline=False)
+                em.add_field(name='unfollowauthor',value=f"{text['unfollowauthor']}{text['unfollowauthorex']}", inline=False)
+                em.add_field(name='checkauthors',value=f"{text['checkauthors']}{text['checkauthorsex']}", inline=False)
+                await ctx.respond(embed=em)
+
+            elif category.lower()=='setup':
+                logger.info('setup help is trigered')
+                em=hikari.Embed(title='How to setup?', color=0Xff500a)
+                em.add_field(name='setchannel', value=f"{text['setup']}{text['setupex']}", inline=False)
+                await ctx.respond(embed=em)
+
+            elif category.lower()=='about':
+                logger.info('setup help is trigered')
+                em=hikari.Embed(title='What can this Bot do?', color=0Xff500a)
+                em.add_field(name='About', value=str(text['about']), inline=False)
                 await ctx.respond(embed=em)
             
             else:
                 logger.info('Empty help is trigered')
-                em=hikari.Embed(title='HELP COMMANDS', color=0Xff500a)
-                em.add_field(name='channel', value=str(text['channel']), inline=False)
-                em.add_field(name='story',value=str(text['story']), inline=False)
+                em=hikari.Embed(title='GENERAL HELP', description='You can use `/help <category>` to get help about specific category with more details. Use channel/story/author/setup/about as categories.', color=0Xff500a)
+                em.add_field(name='NOTE:', value=str(text['Note']), inline=False)
+                em.add_field(name='SETUP',value=str(text['setup']), inline=False)
+                em.add_field(name='CHANNEL RELATED COMMANDS:',value=f"**setchannel:**\n{text['setchannel']}**unsetchannel:**\n{text['unsetchannel']}**checkchannels:**\n{text['checkchannels']}", inline=False)
+                em.add_field(name='STORY RELATED COMMANDS:',value=f"**followstory:**\n{text['followstory']}**unfollowstory:**\n{text['unfollowstory']}**checkstories:**\n{text['checkstories']}", inline=False)
+                em.add_field(name='AUTHOR RELATED COMMANDS:',value=f"**followauthor:**\n{text['followauthor']}**unfollowauthor:**\n{text['unfollowauthor']}**checkauthors:**\n{text['checkauthors']}", inline=False)
                 await ctx.respond(embed=em)
         else:
             logger.info('Empty help is trigered')
-            em=hikari.Embed(title='HELP COMMANDS', color=0Xff500a)
-            em.add_field(name='channel', value=str(text['channel']), inline=False)
-            em.add_field(name='story',value=str(text['story']), inline=False)
+            em=hikari.Embed(title='GENERAL HELP', description='You can use `/help <category>` to get help about specific category with more details. Use channel/story/author/setup/about as categories.', color=0Xff500a)
+            em.add_field(name='NOTE:', value=str(text['Note']), inline=False)
+            em.add_field(name='SETUP',value=str(text['setup']), inline=False)
+            em.add_field(name='CHANNEL RELATED COMMANDS:',value=f"**setchannel:**\n{text['setchannel']}**unsetchannel:**\n{text['unsetchannel']}**checkchannels:**\n{text['checkchannels']}", inline=False)
+            em.add_field(name='STORY RELATED COMMANDS:',value=f"**followstory:**\n{text['followstory']}**unfollowstory:**\n{text['unfollowstory']}**checkstories:**\n{text['checkstories']}", inline=False)
+            em.add_field(name='AUTHOR RELATED COMMANDS:',value=f"**followauthor:**\n{text['followauthor']}**unfollowauthor:**\n{text['unfollowauthor']}**checkauthors:**\n{text['checkauthors']}", inline=False)
             await ctx.respond(embed=em)
 
     except Exception as e:
