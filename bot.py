@@ -158,6 +158,14 @@ async def guildjoin(guild: hikari.GuildJoinEvent):
 
         with open('authors.json','w') as a:
             json.dump(authors,a,indent=2)
+
+
+        try:
+            joinmsg=f'Bot joined a new server guild Id: {guild.guild_id} and server name: {guild.guild.name}'
+            await bot.rest.create_message(LOGCHANNEL,joinmsg)
+        except:
+            logger.fatal('Excpetion occured when sending join msg to log server for guild Id: %s and server name: %s',guild.guild_id,guild.old_guild.name)
+            pass
         
 
        
