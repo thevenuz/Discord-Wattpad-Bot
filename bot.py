@@ -46,11 +46,14 @@ async def getnewchapter():
                     lastchecked=sty['lastupdated']
                     logger.info('Cheking for a new story of %s',key)
                     title=''
-                    if 'utm' not in key:
-                        storytitle=str(key).split('/')
-                        title=storytitle[-1].split('-',1)
-                        title=title[-1].replace('-',' ')
-                        title=f'from {title}'
+                    try:
+                        if 'utm' not in key:
+                            storytitle=str(key).split('/')
+                            title=storytitle[-1].split('-',1)
+                            title=title[-1].replace('-',' ')
+                            title=f'from {title}'
+                    except:
+                        pass
 
                     try:
                         newchapter= await ws.get_chapter(str(key),lastchecked)
@@ -233,6 +236,16 @@ async def guildLeave(guild: hikari.GuildLeaveEvent):
         with open('stories.json', 'w') as s, open('channels.json','w') as f:
             json.dump(channels,f,indent=2)
             json.dump(stories,s,indent=2)
+
+        with open ('authors.json','r') as a:
+            authors=json.load(a)
+
+        if guild.guild_id:
+            if str(guild.guild_id) in authors:
+                del authors[str(guild.guild_id)]
+
+        with open('authors.json','w') as a:
+            json.dump(authors,a,indent=2)
 
         try:
             joinmsg=f'Bot left a server guild Id: {guild.guild_id} and server name: {guild.old_guild.name}'

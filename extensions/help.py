@@ -1,3 +1,5 @@
+from multiprocessing.sharedctypes import Value
+from unicodedata import name
 import hikari
 import lightbulb
 import json
@@ -61,6 +63,7 @@ async def help(ctx):
                 logger.info('setup help is trigered')
                 em=hikari.Embed(title='What can this Bot do?', color=0Xff500a)
                 em.add_field(name='About', value=str(text['about']), inline=False)
+                em.add_field(name='Help Server', value=str(text['helpserver']),inline=False)
                 await ctx.respond(embed=em)
             
             else:
@@ -71,6 +74,7 @@ async def help(ctx):
                 em.add_field(name='CHANNEL RELATED COMMANDS:',value=f"**setchannel:**\n{text['setchannel']}**unsetchannel:**\n{text['unsetchannel']}**checkchannels:**\n{text['checkchannels']}", inline=False)
                 em.add_field(name='STORY RELATED COMMANDS:',value=f"**followstory:**\n{text['followstory']}**unfollowstory:**\n{text['unfollowstory']}**checkstories:**\n{text['checkstories']}", inline=False)
                 em.add_field(name='AUTHOR RELATED COMMANDS:',value=f"**followauthor:**\n{text['followauthor']}**unfollowauthor:**\n{text['unfollowauthor']}**checkauthors:**\n{text['checkauthors']}", inline=False)
+                em.add_field(name='Help Server', value=str(text['helpserver']), inline=False)
                 await ctx.respond(embed=em)
         else:
             logger.info('Empty help is trigered')
@@ -80,6 +84,7 @@ async def help(ctx):
             em.add_field(name='CHANNEL RELATED COMMANDS:',value=f"**setchannel:**\n{text['setchannel']}**unsetchannel:**\n{text['unsetchannel']}**checkchannels:**\n{text['checkchannels']}", inline=False)
             em.add_field(name='STORY RELATED COMMANDS:',value=f"**followstory:**\n{text['followstory']}**unfollowstory:**\n{text['unfollowstory']}**checkstories:**\n{text['checkstories']}", inline=False)
             em.add_field(name='AUTHOR RELATED COMMANDS:',value=f"**followauthor:**\n{text['followauthor']}**unfollowauthor:**\n{text['unfollowauthor']}**checkauthors:**\n{text['checkauthors']}", inline=False)
+            em.add_field(name='Help Server', value=str(text['helpserver']), inline=False)
             await ctx.respond(embed=em)
 
     except Exception as e:
