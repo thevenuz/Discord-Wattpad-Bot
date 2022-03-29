@@ -1,5 +1,3 @@
-from multiprocessing.sharedctypes import Value
-from unicodedata import name
 import hikari
 import lightbulb
 import json

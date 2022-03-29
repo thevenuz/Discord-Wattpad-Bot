@@ -58,14 +58,15 @@ async def getnewchapter():
                     try:
                         newchapter= await ws.get_chapter(str(key),lastchecked)
                         if newchapter:
-                            for ch in channels[guild]:
-                                for nc in newchapter[0]:
-                                    msg=f'**New chapter {title}**\n {str(nc)}'
-                                await bot.rest.create_message(ch, msg)
+                            if channels[guild]:
+                                for ch in channels[guild]:
+                                    for nc in newchapter[0]:
+                                        msg=f'**New chapter {title}**\n {str(nc)}'
+                                    await bot.rest.create_message(ch, msg)
 
-                            sty['lastupdated']=f'{newchapter[1]}'
-                            with open('stories.json','w') as s:
-                                json.dump(stories,s,indent=2)
+                                sty['lastupdated']=f'{newchapter[1]}'
+                                with open('stories.json','w') as s:
+                                    json.dump(stories,s,indent=2)
 
                         
 
@@ -103,15 +104,16 @@ async def get_announcement():
                         # new_announcement_text=new_announcement
                         # new_updated_time=datetime.utcnow()
                         if new_announcement:
-                            for ch in channels[guild]:
-                                if new_announcement[0]:
-                                    msg=f'New Announcement from **{author_name}**'
-                                    em=hikari.Embed(title='Announcement:',description=f'{new_announcement[0]}',color=0Xff500a)
-                                    await bot.rest.create_message(ch,embed=em,content=msg)
+                            if channels[guild]:
+                                for ch in channels[guild]:
+                                    if new_announcement[0]:
+                                        msg=f'New Announcement from **{author_name}**'
+                                        em=hikari.Embed(title='Announcement:',description=f'{new_announcement[0]}',color=0Xff500a)
+                                        await bot.rest.create_message(ch,embed=em,content=msg)
 
-                            auth['lastupdated']=str(new_announcement[1])
-                            with open('authors.json','w') as a:
-                                json.dump(authors,a,indent=2)
+                                auth['lastupdated']=str(new_announcement[1])
+                                with open('authors.json','w') as a:
+                                    json.dump(authors,a,indent=2)
 
                     except Exception as e:
                         logger.fatal('Exception occured in task get_announcement method for author: %s',profile,exc_info=1)
