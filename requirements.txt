@@ -1,0 +1,5 @@
+beautifulsoup4==4.10.0
+hikari==2.0.0.dev105
+python-dotenv==0.19.2
+requests==2.27.1
+hikari-lightbulb==2.2.1
