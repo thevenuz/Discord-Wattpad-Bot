@@ -11,3 +11,6 @@ stories.json
 .gitignore
 logs.txt
 stories.json
+authors.json
+channels.json
+stories.json

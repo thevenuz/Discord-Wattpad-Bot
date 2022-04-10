@@ -1,3 +1,6 @@
+from datetime import datetime
+
+
 try:
     import lightbulb
     import json
@@ -15,16 +18,16 @@ logging.basicConfig(filename='logs.txt',format='%(asctime)s %(name)s %(levelname
 logger=logging.getLogger()
 logger.setLevel(logging.ERROR)
 
-
-#add story start
+#region follow story
+#add a new story
 @plugin.command
-@lightbulb.add_checks(lightbulb.checks.has_role_permissions(hikari.Permissions.ADMINISTRATOR)|lightbulb.checks.has_role_permissions(hikari.Permissions.MODERATE_MEMBERS)|lightbulb.owner_only)
-@lightbulb.option('storyurl', 'Url of the story to be added')
-@lightbulb.command('addstory','Adds your current story to receive new chapter noifications')
+@lightbulb.add_checks(lightbulb.checks.has_role_permissions(hikari.Permissions.ADMINISTRATOR)|lightbulb.checks.has_role_permissions(hikari.Permissions.MODERATE_MEMBERS)|lightbulb.checks.has_role_permissions(hikari.Permissions.MANAGE_CHANNELS)|lightbulb.owner_only)
+@lightbulb.option('storyurl', 'Url of the story you want to follow')
+@lightbulb.command('followstory','Follow a story to receive new chapter noifications')
 @lightbulb.implements(lightbulb.SlashCommand)
 async def addstory(ctx):
     try:
-        logger.info('Add story command has been triggered for guild %s and channel %s',ctx.guild_id,ctx.options.storyurl)
+        logger.info('Follow story command has been triggered for guild %s and channel %s',ctx.guild_id,ctx.options.storyurl)
         with open('stories.json','r') as s:
             stories=json.load(s)
 
@@ -37,22 +40,27 @@ async def addstory(ctx):
 
         else:
             if ctx.options.storyurl!=None and (await ws.checkStory(ctx.options.storyurl)):
+                embContent='New chapter links from this story will be shared in this server.'
+                em=hikari.Embed(title='You have succesfully followed this story.',description=embContent, color=0Xff500a)
                 if not stories:
-                    stories[str(ctx.guild_id)]=[str(ctx.options.storyurl)]
+                    #stories[str(ctx.guild_id)]=[str(ctx.options.storyurl)]
+                    stories[str(ctx.guild_id)]=[{"url":f'{str(ctx.options.storyurl)}',"lastupdated":f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}'}]
                 else:
                     if str(ctx.guild_id) not in stories:
-                        stories[str(ctx.guild_id)]=[str(ctx.options.storyurl)]
+                        #stories[str(ctx.guild_id)]=[str(ctx.options.storyurl)]
+                        stories[str(ctx.guild_id)]=[{"url":f'{str(ctx.options.storyurl)}',"lastupdated":f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}'}]
                     else:
-                        for guild in stories:
-                            if guild==str(ctx.guild_id) and str(ctx.options.storyurl) not in stories[str(ctx.guild_id)]:
-                                stories[str(ctx.guild_id)].append(str(ctx.options.storyurl))
+                        for guild, story in stories.items():
+                            if guild==str(ctx.guild_id):
+                                if any(str(ctx.options.storyurl)==sty['url'] for  sty in story):
+                                    embContent='No need to follow the same story twice.'
+                                    em=hikari.Embed(title='You\'re already following this story.',description=embContent, color=0Xff500a)
+                                else:
+                                    story.append({"url": f'{ctx.options.storyurl}',"lastupdated": f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}' })
+                        
 
                 with open('stories.json','w') as s:
                     json.dump(stories,s,indent=2)
-
-                
-                embContent='You will receive new chapter notications from this story.'
-                em=hikari.Embed(title='Story has been successfully added to this server\'s list.',description=embContent, color=0Xff500a)
 
                 await ctx.respond(embed=em)
 
@@ -64,78 +72,87 @@ async def addstory(ctx):
                 await ctx.respond(embed=emErr)
 
     except Exception as e:
-        logger.fatal('Exception has occured in Add story command for guild %s and story %s',ctx.guild_id,ctx.options.storyurl,exc_info=1)
+        logger.fatal('Exception has occured in Follow story command for guild %s and story %s',ctx.guild_id,ctx.options.storyurl,exc_info=1)
         raise e
 
-        
+#endregion follow story      
 
-    
+#region unfollow story   
 #remove story start
 @plugin.command
-@lightbulb.add_checks(lightbulb.checks.has_role_permissions(hikari.Permissions.ADMINISTRATOR)|lightbulb.checks.has_role_permissions(hikari.Permissions.MODERATE_MEMBERS)|lightbulb.owner_only)
-@lightbulb.option('storyurl','Url of the story to be removed')
-@lightbulb.command('removestory','removes your current story from receiving new chapter notifications')
+@lightbulb.add_checks(lightbulb.checks.has_role_permissions(hikari.Permissions.ADMINISTRATOR)|lightbulb.checks.has_role_permissions(hikari.Permissions.MODERATE_MEMBERS)|lightbulb.checks.has_role_permissions(hikari.Permissions.MANAGE_CHANNELS)|lightbulb.owner_only)
+@lightbulb.option('storyurl','Url of the story you want to unfollow')
+@lightbulb.command('unfollowstory','unfollow a story to stop receiving new chapter updates.')
 @lightbulb.implements(lightbulb.SlashCommand)
 async def removestory(ctx):
     try:
-        logger.info('Remove story command has been triggered for guild %s and story %s',ctx.guild_id, ctx.options.storyurl)
+        logger.info('Unfollow story command has been triggered for guild %s and story %s',ctx.guild_id, ctx.options.storyurl)
         url=ctx.options.storyurl
+
+        emContent='New chapter links from this story will no longer be posted in this  server.'
+        em=hikari.Embed(title='You have succesfully unfollowed this story.', description=emContent,color=0Xff500a)
+
         with open('stories.json','r') as f:
             stories=json.load(f)
         if ctx.channel_id is not None:
-            for guild in stories:
-                if guild==str(ctx.guild_id) and str(url) in stories[str(ctx.guild_id)]:
-                    stories[str(ctx.guild_id)].remove(str(url))
+            for guild,story in stories.items():
+                if guild==str(ctx.guild_id):
+                    if any(str(url)==sty['url'] for sty in story ):
+                        for sty in story:
+                            if sty['url']==str(url):
+                                story.remove(sty)
 
+                    else:
+                        em=hikari.Embed(title='You\'re not following this story from the beginning.',color=0Xff500a)
+                        
+                    
         with open('stories.json','w') as f:
             json.dump(stories,f,indent=2)
-
-        
-        emContent='You will no loger receive new chapter notifications from this story.'
-        em=hikari.Embed(title='This story has been removed.', description=emContent,color=0Xff500a)
 
         await ctx.respond(embed=em)
 
     except Exception as e:
-        logger.fatal('Exception has occured in remove story command for guild %s and story %s',ctx.guild_id,ctx.options.storyurl,exc_info=1)
+        logger.fatal('Exception has occured in Unfollow story command for guild %s and story %s',ctx.guild_id,ctx.options.storyurl,exc_info=1)
         raise e
 
+#endregion unfollow story
 
 
-#remove story end
-
-
-#get stories start
+#region get stories
+#get stories of a server
 @plugin.command
-@lightbulb.command('getstories','fetch your server\'s stories that are getting new chapter updates')
+@lightbulb.command('checkstories','check the stories that you are already following in this server')
 @lightbulb.implements(lightbulb.SlashCommand)
 async def getstories(ctx):
     try:
-        logger.info('get channels has been triggered for guild %s and channel %s',ctx.guild_id, ctx.channel_id)
+        logger.info('get stories has been triggered for guild %s and channel %s',ctx.guild_id, ctx.channel_id)
         with open('stories.json') as f:
             stories=json.load(f)
         msg=''
         if ctx.guild_id is not None:
-            for guild in stories:
+            for guild, story in stories.items():
                 if guild==str(ctx.guild_id):
-                    for key in stories[guild]:
+                    for sty in story:
+                        key=sty['url']
                         msg=f'{str(msg)} {str(key)}\n'
+
         if not msg:
-            msg='No stories were added to your list.'
+            msg='You\'re not following any stories in this server right now. Use `/folowstory` command to follow a new story.'
             em=hikari.Embed(title='So empty!!',description=msg, color=0Xff500a)
             
         else:
             msg=f'{msg}'
-            em=hikari.Embed(title='Your server\'s stories:', description=msg, color=0Xff500a)
+            em=hikari.Embed(title='Stories you\'re following in this server:', description=msg, color=0Xff500a)
             
 
         await ctx.respond(embed=em)
     
     except Exception as e:
-        logger.fatal('Exception in getchannels command for guild %s',ctx.guild_id, exc_info=1)
+        logger.fatal('Exception in get stories command for guild %s',ctx.guild_id, exc_info=1)
         raise e
 
-#get stories end
+
+#endregion get stories
 
 
 def load(bot):
