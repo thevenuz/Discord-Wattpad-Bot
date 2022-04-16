@@ -69,7 +69,7 @@ async def setCustomMessage(ctx:lightbulb.SlashContext):
 @plugin.command()
 @lightbulb.add_checks(lightbulb.checks.has_role_permissions(hikari.Permissions.ADMINISTRATOR)|lightbulb.checks.has_role_permissions(hikari.Permissions.MODERATE_MEMBERS)|lightbulb.checks.has_role_permissions(hikari.Permissions.MANAGE_CHANNELS)|lightbulb.owner_only)
 @lightbulb.option("category","whether you want to remove story or announcement custom message",str,choices=("story","announcement"),required=True)
-@lightbulb.command("removecustommessage","remove the custom message for updates. After removing default messages will be used")
+@lightbulb.command("unsetcustommessage","remove the custom message for updates. After removing default messages will be used")
 @lightbulb.implements(lightbulb.SlashCommand)
 async def removeCustomMessage(ctx:lightbulb.SlashContext):
     try:
@@ -77,6 +77,7 @@ async def removeCustomMessage(ctx:lightbulb.SlashContext):
 
         guildId=str(ctx.guild_id)
         category=ctx.options.category
+        isEmpty=False
 
         with open("messages.json","r") as m:
             messages=json.load(m)
@@ -85,21 +86,27 @@ async def removeCustomMessage(ctx:lightbulb.SlashContext):
             if category=="story":
                 for guild, msg in messages.items():
                     if guild==guildId:
+                        if msg["story"]=="" or msg["story"] is None:
+                            isEmpty=True
                         msg["story"]=""
         
             else:
                 for guild, msg in messages.items():
                     if guild==guildId:
+                        if msg["announcement"]=="" or msg["announcement"] is None:
+                            isEmpty=True
                         msg["announcement"]=""
             
             with open("messages.json","w") as m:
                 json.dump(messages,m,indent=2)
 
             responseMsg=f"Your {category} custom message has been removed succesfully."
+            if isEmpty:
+                responseMsg=f"You don\'t have any custom messages set up for {category} category."
             await ctx.respond(responseMsg)
 
         else:
-            responseMsg=f"No custom message was set before."
+            responseMsg=f"Empty!! No custom messages has been set before.\n Use `/setcustommessage` command to set a custom message."
             await ctx.respond(responseMsg)
 
     except Exception as e:
@@ -126,9 +133,9 @@ async def checkCustomMessage(ctx:lightbulb.SlashContext):
                         await ctx.respond(emptyMsg)
                     else:
                         if msg["story"]!="":
-                            responseMsg=responseMsg+f'Story: {msg["story"]}'
+                            responseMsg=responseMsg+f'**Story:** {msg["story"]}\n'
                         if msg["announcement"]!="":
-                            responseMsg=responseMsg+f'Announcement: {msg["announcement"]}'
+                            responseMsg=responseMsg+f'**Announcement:** {msg["announcement"]}'
 
                         await ctx.respond(responseMsg)
 

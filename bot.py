@@ -7,10 +7,12 @@ from lightbulb.ext import tasks
 import wattpad as ws
 import dotenv
 import logging
+import helpers.message_helper as customMsghelper
 
 dotenv.load_dotenv()
 TOKEN=os.getenv('BOTTOKEN')
 LOGCHANNEL=os.getenv('LOGCHANNEL')
+PUBLICLOGCHANNEL=os.getenv('PUBLICLOGCHANNEL')
 
 logging.basicConfig(filename='logs.txt',format='%(asctime)s %(name)s %(levelname)s %(message)s', filemode='a')
 logger=logging.getLogger()
@@ -62,6 +64,11 @@ async def getnewchapter():
                                 for ch in channels[guild]:
                                     for nc in newchapter[0]:
                                         msg=f'**New chapter {title}**\n {str(nc)}'
+                                        #check if a custom message has been setup for this server
+                                        customMsg=await customMsghelper.get_story_custommessage(guild)
+                                        if customMsg!="" and customMsg is not None:
+                                            msg=f"{customMsg}\n{str(nc)}"
+                                        
                                     await bot.rest.create_message(ch, msg)
 
                                 sty['lastupdated']=f'{newchapter[1]}'
@@ -101,13 +108,17 @@ async def get_announcement():
 
                     try:
                         new_announcement=await ws.get_new_announcement(profile,lastchecked)
-                        # new_announcement_text=new_announcement
-                        # new_updated_time=datetime.utcnow()
                         if new_announcement:
                             if channels[guild]:
                                 for ch in channels[guild]:
                                     if new_announcement[0]:
                                         msg=f'New Announcement from **{author_name}**'
+
+                                        #check if a custom announcement msg has been setup for this server
+                                        customMsg=await customMsghelper.get_announcement_custommessage(guild)
+                                        if customMsg!="" and customMsg is not None:
+                                            msg=customMsg
+
                                         em=hikari.Embed(title='Announcement:',description=f'{new_announcement[0]}',color=0Xff500a)
                                         await bot.rest.create_message(ch,embed=em,content=msg)
 
@@ -167,51 +178,14 @@ async def guildjoin(guild: hikari.GuildJoinEvent):
 
         try:
             joinmsg=f'Bot joined a new server guild Id: {guild.guild_id} and server name: {guild.guild.name}'
+            publicJoinMsg=f"Bot joined a new server: {guild.guild.name}"
             await bot.rest.create_message(LOGCHANNEL,joinmsg)
+            await bot.rest.create_message(PUBLICLOGCHANNEL,publicJoinMsg)
         except:
             logger.fatal('Excpetion occured when sending join msg to log server for guild Id: %s and server name: %s',guild.guild_id,guild.old_guild.name)
             pass
         
-
-       
-        #region not using
-        # try:
-        #     descwhat='Whenever you write a new chapter in your story and publish it, this bot will automatically share the new chapter\'s link in your server.'
-        #     deschow1=''
-        #     deschow='Specify the channel/channels, story/stories that you wish to receive the new chapter updates.\nOnly members with ADMIN or MODMEMBERS permission can use the commands. That\'s it. New chapter links of the stories will be posted in the added channels whenever a new chapter is published.'
-        #     desccmd='This bot supports the new slash commands, so the prefix for all the commands is `/`. All the commands are self explanatory. Please use `/help` for more details about commands.'
-        #     descother1='Bot works pretty well already but consider this as a beta and it will be improved over time.'
-        #     descother2='Sometimes the slash commands take some time to register and appear in the server. So please be patient for an hour or so if the commands do not appear.'
-        #     descother3='Bot supports multiple servers.'
-        #     descother=f'{descother1}\n{descother2}\n{descother3}\n'
-
-        #     em=hikari.Embed(title='Thanks for adding the bot to your server! Here\'s a rundown of this bot.',  color=0Xff500a)
-        #     em.add_field(name='What does this bot do?',value=descwhat)
-        #     em.add_field(name='How to use the bot?', value=deschow)
-        #     em.add_field(name='How to use the commands?', value=desccmd)
-        #     #em.add_field(name='Other stuff:', value=descother)
-
-        #     if created_channel:
-        #         await guild.app.rest.create_message(created_channel.id,embed=em)
-            
-        #     else:
-        #         for k,v in guild.channels.items():
-        #             if v.parent_id:
-        #                 defaultchannel=k
-        #                 await guild.app.rest.create_message(defaultchannel, embed=em)
-        #                 break
-
-        # except Exception as e:
-        #     logger.critical('Error in sending welcome msg for guild %s', guild.guild_id, exc_info=1)
-        #     pass
-
-        # try:
-        #     joinmsg=f'Bot joined a new server guild Id: {guild.guild_id} and server name: {guild.guild.name}'
-        #     await bot.rest.create_message(LOGCHANNEL,joinmsg)
-        # except Exception as e:
-        #     logger.fatal('Excpetion occured when sending join msg to log server for guild Id: %s and server name: %s',guild.guild_id,guild.old_guild.name)
-        #     pass
-        #endregion not using
+        
     except Exception as e:
         logger.critical('Error in guild join event for guild %s', guild.guild_id, exc_info=1)
         pass
@@ -249,9 +223,21 @@ async def guildLeave(guild: hikari.GuildLeaveEvent):
         with open('authors.json','w') as a:
             json.dump(authors,a,indent=2)
 
+        with open("messages.json","r") as m:
+            messages=json.load(m)
+
+        if guild.guild_id:
+            if str(guild.guild_id) in messages:
+                del messages[str(guild.guild_id)]
+
+        with open("messages.json","w") as m:
+            json.dump(messages,m,indent=2)
+
         try:
             joinmsg=f'Bot left a server guild Id: {guild.guild_id} and server name: {guild.old_guild.name}'
+            publicLeftMsg=f"Bot left server: {guild.old_guild.name}"
             await bot.rest.create_message(LOGCHANNEL,joinmsg)
+            await bot.rest.create_message(PUBLICLOGCHANNEL,publicLeftMsg)
         except Exception as e:
             logger.fatal('Excpetion occured when sending leave msg to log server for guild: %s and server name: %s',guild.guild_id,guild.old_guild.name)
             pass
