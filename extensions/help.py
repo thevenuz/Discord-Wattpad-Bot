@@ -11,7 +11,7 @@ logger.setLevel(logging.ERROR)
 
 #custom help command start
 @plugin.command
-@lightbulb.option('category','Use channel/story/author/setup/about for detailed help on specific category.', str, choices=('channel','story','author','setup','about'), required=False)
+@lightbulb.option('category','Use channel/story/custom message/author/setup/about for detailed help on specific category.', str, choices=('channel','story','author','custom message','setup','about'), required=False)
 @lightbulb.command('help','Gives you help on commands. Use empty/channel/story/author/setup/about as categories')
 @lightbulb.implements(lightbulb.SlashCommand)
 async def help(ctx):
@@ -51,6 +51,14 @@ async def help(ctx):
                 em.add_field(name='checkauthors',value=f"{text['checkauthors']}{text['checkauthorsex']}", inline=False)
                 await ctx.respond(embed=em)
 
+            elif category.lower()=='custommessage':
+                logger.info("custom message help is triggered")
+                em=hikari.Embed(title="CUSTOM MESSAGE COMMANDS",color=0Xff500a)
+                em.add_field(name="setcustommessage", value=f"{text['setcustommsg']}{text['setcustommsgex']}",inline=False)
+                em.add_field(name="unsetcustommessage",value=f"{text['removecustommsg']}{text['removecustommsgex']}",inline=False)
+                em.add_field(name="checkcustommsg",value=f"{text['checkcustommsg']}{text['checkcustommsgex']}")
+                await ctx.respond(embed=em)
+
             elif category.lower()=='setup':
                 logger.info('setup help is trigered')
                 em=hikari.Embed(title='How to setup?', color=0Xff500a)
@@ -63,25 +71,29 @@ async def help(ctx):
                 em.add_field(name='About', value=str(text['about']), inline=False)
                 em.add_field(name='Help Server', value=str(text['helpserver']),inline=False)
                 await ctx.respond(embed=em)
+
+            
             
             else:
                 logger.info('Empty help is trigered')
-                em=hikari.Embed(title='GENERAL HELP', description='You can use `/help <category>` to get help about specific category with more details. Use channel/story/author/setup/about as categories.', color=0Xff500a)
+                em=hikari.Embed(title='GENERAL HELP', description='You can use `/help <category>` to get help about specific category with more details. Use channel/story/author/custom message/setup/about as categories.', color=0Xff500a)
                 em.add_field(name='NOTE:', value=str(text['Note']), inline=False)
                 em.add_field(name='SETUP',value=str(text['setup']), inline=False)
                 em.add_field(name='CHANNEL RELATED COMMANDS:',value=f"**setchannel:**\n{text['setchannel']}**unsetchannel:**\n{text['unsetchannel']}**checkchannels:**\n{text['checkchannels']}", inline=False)
                 em.add_field(name='STORY RELATED COMMANDS:',value=f"**followstory:**\n{text['followstory']}**unfollowstory:**\n{text['unfollowstory']}**checkstories:**\n{text['checkstories']}", inline=False)
                 em.add_field(name='AUTHOR RELATED COMMANDS:',value=f"**followauthor:**\n{text['followauthor']}**unfollowauthor:**\n{text['unfollowauthor']}**checkauthors:**\n{text['checkauthors']}", inline=False)
+                em.add_field(name="CUSTOM MESSAGE RELATED COMMANDS:",value=f"**setcustommessage:**\n{text['setcustommsg']}**unsetcustommessage:**\n{text['removecustommsg']}**checkcustommsg:**\n{text['checkcustommsg']}")
                 em.add_field(name='Help Server', value=str(text['helpserver']), inline=False)
                 await ctx.respond(embed=em)
         else:
             logger.info('Empty help is trigered')
-            em=hikari.Embed(title='GENERAL HELP', description='You can use `/help <category>` to get help about specific category with more details. Use channel/story/author/setup/about as categories.', color=0Xff500a)
+            em=hikari.Embed(title='GENERAL HELP', description='You can use `/help <category>` to get help about specific category with more details. Use channel/story/author/custom message/setup/about as categories.', color=0Xff500a)
             em.add_field(name='NOTE:', value=str(text['Note']), inline=False)
             em.add_field(name='SETUP',value=str(text['setup']), inline=False)
             em.add_field(name='CHANNEL RELATED COMMANDS:',value=f"**setchannel:**\n{text['setchannel']}**unsetchannel:**\n{text['unsetchannel']}**checkchannels:**\n{text['checkchannels']}", inline=False)
             em.add_field(name='STORY RELATED COMMANDS:',value=f"**followstory:**\n{text['followstory']}**unfollowstory:**\n{text['unfollowstory']}**checkstories:**\n{text['checkstories']}", inline=False)
             em.add_field(name='AUTHOR RELATED COMMANDS:',value=f"**followauthor:**\n{text['followauthor']}**unfollowauthor:**\n{text['unfollowauthor']}**checkauthors:**\n{text['checkauthors']}", inline=False)
+            em.add_field(name="CUSTOM MESSAGE RELATED COMMANDS:",value=f"**setcustommessage:**\n{text['setcustommsg']}**unsetcustommessage:**\n{text['removecustommsg']}**checkcustommsg:**\n{text['checkcustommsg']}")
             em.add_field(name='Help Server', value=str(text['helpserver']), inline=False)
             await ctx.respond(embed=em)
 
