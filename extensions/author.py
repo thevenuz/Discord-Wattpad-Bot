@@ -4,6 +4,7 @@ import json
 import logging
 import wattpad as ws
 from datetime import datetime
+from helpers.wattpad_helper import get_actual_author_url
 
 plugin=lightbulb.Plugin('AuthorPlugin')
 
@@ -20,8 +21,23 @@ logger.setLevel(logging.ERROR)
 @lightbulb.implements(lightbulb.SlashCommand)
 async def followauthor(ctx:lightbulb.SlashContext):
     try:
-        profileUrl=ctx.options.authorprofileurl
+        enteredURL=ctx.options.authorprofileurl
         logger.info('Follow author command has been triggered for guild %s and channel %s',ctx.guild_id,ctx.options.authorprofileurl)
+
+        #check if the profile URL contains any UTM tags and if yes, get a normal url withput utm tags
+        profileUrl=""
+        try:
+            if "utm" in enteredURL:
+                profileUrl=await get_actual_author_url(enteredURL)
+
+        except Exception as e:
+            logger.fatal("Exception occured in author.followauthor method while fetching actual author url for entered author url: %s, guild: %s",enteredURL,ctx.guild_id,exc_info=1)
+            pass
+
+        if not profileUrl:
+            profileUrl=enteredURL
+
+
         with open('authors.json','r') as s:
             authors=json.load(s)
 

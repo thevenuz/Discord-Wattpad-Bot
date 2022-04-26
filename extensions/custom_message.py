@@ -51,7 +51,7 @@ async def setCustomMessage(ctx:lightbulb.SlashContext):
                     if guild==guildId:
                         msg["announcement"]=f"{customMsg}"
 
-            responsMsg=responsMsg+" The bot will use this message while sharing story updates from now on."
+            responsMsg=responsMsg+" The bot will use this message while sharing announcement updates from now on."
 
 
 

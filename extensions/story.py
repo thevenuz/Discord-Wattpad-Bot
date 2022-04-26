@@ -1,12 +1,12 @@
 from datetime import datetime
 
-
 try:
     import lightbulb
     import json
     import hikari
     import logging
     import wattpad as ws
+    from helpers.wattpad_helper import get_storyurl_from_chapter,get_storyurl_without_utm
     
 except Exception as e:
     print(str(e))
@@ -25,38 +25,63 @@ logger.setLevel(logging.ERROR)
 @lightbulb.option('storyurl', 'Url of the story you want to follow')
 @lightbulb.command('followstory','Follow a story to receive new chapter noifications')
 @lightbulb.implements(lightbulb.SlashCommand)
-async def addstory(ctx):
+async def addstory(ctx:lightbulb.SlashContext):
     try:
         logger.info('Follow story command has been triggered for guild %s and channel %s',ctx.guild_id,ctx.options.storyurl)
+
+        enteredStoryURL=ctx.options.storyurl
+
+        #check if the entered URL belongs to a individual chapter, if yes try to fetch story URL from that
+        storyURL=""
+        if "story" not in enteredStoryURL:
+            try:
+                storyURL=await get_storyurl_from_chapter(enteredStoryURL)
+
+            except Exception as e:
+                logger.fatal("Exception occured in story.followstory method while fetching story url for chapter URL: %s and guild: %s",enteredStoryURL,ctx.guild_id,exc_info=1)
+                pass
+        
+        elif "utm" in enteredStoryURL:
+            try:
+                storyURL=await get_storyurl_without_utm(enteredStoryURL)
+
+            except Exception as e:
+                logger.fatal("Exception occured in story.followstory method while fetching story url without utm tags: %s and guild: %s",enteredStoryURL,ctx.guild_id,exc_info=1)
+                pass
+
+        if not storyURL:
+            storyURL=enteredStoryURL
+
+
         with open('stories.json','r') as s:
             stories=json.load(s)
 
         domain='www.wattpad.com'
-        if domain not in ctx.options.storyurl:
-            logger.error('The provided URL is not wattpad URL %s', ctx.options.storyurl)
+        if domain not in storyURL:
+            logger.error('The provided URL is not wattpad URL %s', storyURL)
             msgstr=hikari.Embed(title=f'🛑 An error occurred with the `addstory` command.', color=0xFF0000)
             msgstr.add_field(name='Error:', value='The URL you used is not a valid wattpad URL. Try with a valid one.', inline=False)
             await ctx.respond(embed=msgstr)
 
         else:
-            if ctx.options.storyurl!=None and (await ws.checkStory(ctx.options.storyurl)):
+            if storyURL!=None and (await ws.checkStory(storyURL)):
                 embContent='New chapter links from this story will be shared in this server.'
                 em=hikari.Embed(title='You have succesfully followed this story.',description=embContent, color=0Xff500a)
                 if not stories:
                     #stories[str(ctx.guild_id)]=[str(ctx.options.storyurl)]
-                    stories[str(ctx.guild_id)]=[{"url":f'{str(ctx.options.storyurl)}',"lastupdated":f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}'}]
+                    stories[str(ctx.guild_id)]=[{"url":f'{str(storyURL)}',"lastupdated":f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}'}]
                 else:
                     if str(ctx.guild_id) not in stories:
                         #stories[str(ctx.guild_id)]=[str(ctx.options.storyurl)]
-                        stories[str(ctx.guild_id)]=[{"url":f'{str(ctx.options.storyurl)}',"lastupdated":f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}'}]
+                        stories[str(ctx.guild_id)]=[{"url":f'{str(storyURL)}',"lastupdated":f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}'}]
                     else:
                         for guild, story in stories.items():
                             if guild==str(ctx.guild_id):
-                                if any(str(ctx.options.storyurl)==sty['url'] for  sty in story):
+                                if any(str(storyURL)==sty['url'] for  sty in story):
                                     embContent='No need to follow the same story twice.'
                                     em=hikari.Embed(title='You\'re already following this story.',description=embContent, color=0Xff500a)
                                 else:
-                                    story.append({"url": f'{ctx.options.storyurl}',"lastupdated": f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}' })
+                                    story.append({"url": f'{storyURL}',"lastupdated": f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}' })
                         
 
                 with open('stories.json','w') as s:

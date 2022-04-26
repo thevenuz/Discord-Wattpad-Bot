@@ -239,7 +239,7 @@ async def guildLeave(guild: hikari.GuildLeaveEvent):
             await bot.rest.create_message(LOGCHANNEL,joinmsg)
             await bot.rest.create_message(PUBLICLOGCHANNEL,publicLeftMsg)
         except Exception as e:
-            logger.fatal('Excpetion occured when sending leave msg to log server for guild: %s and server name: %s',guild.guild_id,guild.old_guild.name)
+            logger.fatal('Excpetion occured when sending leave msg to log server for guild: %s and server name: %s',guild.guild_id,guild.old_guild.name,exc_info=1)
             pass
 
     except Exception as e:
