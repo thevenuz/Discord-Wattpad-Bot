@@ -5,6 +5,8 @@ import logging
 import wattpad as ws
 from datetime import datetime
 from helpers.wattpad_helper import get_actual_author_url
+import aiofiles
+import helpers.json_helper as jhelper
 
 plugin=lightbulb.Plugin('AuthorPlugin')
 
@@ -38,8 +40,13 @@ async def followauthor(ctx:lightbulb.SlashContext):
             profileUrl=enteredURL
 
 
-        with open('authors.json','r') as s:
-            authors=json.load(s)
+        # with open('authors.json','r') as s:
+        #     authors=json.load(s)
+
+
+        #async impl of reading from json file:
+        authors=jhelper.read_from_json("authors.json")
+
 
         domain='www.wattpad.com'
         if domain not in profileUrl:
@@ -72,8 +79,11 @@ async def followauthor(ctx:lightbulb.SlashContext):
                                     author.append({"url": f'{profileUrl}',"lastupdated": f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}' })
        
 
-                with open('authors.json','w') as s:
-                    json.dump(authors,s,indent=2)
+                # with open('authors.json','w') as s:
+                #     json.dump(authors,s,indent=2)
+
+                #async impl of writing to json files:
+                result=await jhelper.write_to_json("authors.json",authors)
 
                 em=hikari.Embed(title=msg,description=embContent, color=0Xff500a)
 
@@ -105,8 +115,13 @@ async def unfollowauthor(ctx:lightbulb.SlashContext):
         author_name=authorprofile.split('/user/')[1].replace('-',' ')
         emContent=f'New announcements from {author_name} will not be shared in this server'
         emTitle=f'You have succesfully unfollowed {author_name}'
-        with open('authors.json','r') as f:
-            authors=json.load(f)
+
+        # with open('authors.json','r') as f:
+        #     authors=json.load(f)
+
+       #async impl of reading from json file:
+        authors=jhelper.read_from_json("authors.json")
+        
         if ctx.channel_id is not None:
             for guild,author in authors.items():
                 if guild==str(ctx.guild_id):
@@ -120,10 +135,13 @@ async def unfollowauthor(ctx:lightbulb.SlashContext):
                         
                         
                     
-        with open('authors.json','w') as f:
-            json.dump(authors,f,indent=2)
+        # with open('authors.json','w') as f:
+        #     json.dump(authors,f,indent=2)
 
-        
+
+        #async impl of writing to json files:
+        result=await jhelper.write_to_json("authors.json",authors)
+
         
         em=hikari.Embed(title=emTitle, description=emContent,color=0Xff500a)
 
@@ -142,8 +160,13 @@ async def unfollowauthor(ctx:lightbulb.SlashContext):
 async def getauthors(ctx:lightbulb.SlashContext):
     try:
         logger.info('getauthors command triggered for guild: %s',ctx.guild_id)
-        with open('authors.json') as f:
-            authors=json.load(f)
+
+        # with open('authors.json') as f:
+        #     authors=json.load(f)
+
+        #async impl of reading from json file:
+        authors=jhelper.read_from_json("authors.json")
+        
         msg=''
         if ctx.guild_id is not None:
             for guild, author in authors.items():

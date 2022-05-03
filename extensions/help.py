@@ -2,6 +2,7 @@ import hikari
 import lightbulb
 import json
 import logging
+import helpers.json_helper as jhelper
 
 plugin=lightbulb.Plugin('HelpPlugin')
 
@@ -17,8 +18,12 @@ logger.setLevel(logging.ERROR)
 async def help(ctx):
     try:
         logger.info('help command has been triggered in guild %s', ctx.guild_id)
-        with open('text.json','r') as f:
-                text=json.load(f)
+
+        # with open('text.json','r') as f:
+        #         text=json.load(f)
+
+         #async impl of reading from json file:
+        text=jhelper.read_from_json("text.json")
 
         if ctx.options.category is not None:
             logger.info('Non empty help is triggered')

@@ -7,7 +7,7 @@ try:
     import logging
     import wattpad as ws
     from helpers.wattpad_helper import get_storyurl_from_chapter,get_storyurl_without_utm
-    
+    import helpers.json_helper as jhelper
 except Exception as e:
     print(str(e))
 
@@ -53,8 +53,11 @@ async def addstory(ctx:lightbulb.SlashContext):
             storyURL=enteredStoryURL
 
 
-        with open('stories.json','r') as s:
-            stories=json.load(s)
+        # with open('stories.json','r') as s:
+        #     stories=json.load(s)
+
+        #async impl of reading from json file:
+        stories=jhelper.read_from_json("stories.json")
 
         domain='www.wattpad.com'
         if domain not in storyURL:
@@ -84,8 +87,11 @@ async def addstory(ctx:lightbulb.SlashContext):
                                     story.append({"url": f'{storyURL}',"lastupdated": f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}' })
                         
 
-                with open('stories.json','w') as s:
-                    json.dump(stories,s,indent=2)
+                # with open('stories.json','w') as s:
+                #     json.dump(stories,s,indent=2)
+
+                #async impl of writing to json files:
+                result=await jhelper.write_to_json("stories.json",stories)
 
                 await ctx.respond(embed=em)
 
@@ -117,8 +123,13 @@ async def removestory(ctx):
         emContent='New chapter links from this story will no longer be posted in this  server.'
         em=hikari.Embed(title='You have succesfully unfollowed this story.', description=emContent,color=0Xff500a)
 
-        with open('stories.json','r') as f:
-            stories=json.load(f)
+        # with open('stories.json','r') as f:
+        #     stories=json.load(f)
+
+        #async impl of reading from json file:
+        stories=jhelper.read_from_json("stories.json")
+
+
         if ctx.channel_id is not None:
             for guild,story in stories.items():
                 if guild==str(ctx.guild_id):
@@ -131,8 +142,11 @@ async def removestory(ctx):
                         em=hikari.Embed(title='You\'re not following this story from the beginning.',color=0Xff500a)
                         
                     
-        with open('stories.json','w') as f:
-            json.dump(stories,f,indent=2)
+        # with open('stories.json','w') as f:
+        #     json.dump(stories,f,indent=2)
+
+        #async impl of writing to json files:
+        result=await jhelper.write_to_json("stories.json",stories)
 
         await ctx.respond(embed=em)
 
@@ -151,8 +165,14 @@ async def removestory(ctx):
 async def getstories(ctx):
     try:
         logger.info('get stories has been triggered for guild %s and channel %s',ctx.guild_id, ctx.channel_id)
-        with open('stories.json') as f:
-            stories=json.load(f)
+
+        # with open('stories.json') as f:
+        #     stories=json.load(f)
+
+        #async impl of reading from json file:
+        stories=jhelper.read_from_json("stories.json")
+
+
         msg=''
         if ctx.guild_id is not None:
             for guild, story in stories.items():

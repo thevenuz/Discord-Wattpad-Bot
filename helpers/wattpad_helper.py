@@ -91,3 +91,25 @@ async def get_storyurl_without_utm(storyURL:str)->str:
         logger.fatal("Exception occured in wattpad_helper.get_storyurl_without_utm for story url: %s",storyURL,exc_info=1)
         pass
 
+
+
+#methods not related to scraping
+
+async def get_story_title(storyURL:str)->str:
+    """
+    Takes story link and returns that story title
+    """
+    try:
+        logger.info("get_story_title invoked for story url:%s",storyURL)
+
+        
+        storytitle=str(storyURL).split('/')
+        title=storytitle[-1].split('-',1)
+        title=title[-1].replace('-',' ')
+        return title
+
+
+    except Exception as e:
+        logger.fatal("Exception occured in helpers.wattpad_helper.get_story_title for story url: %s",storyURL,exc_info=1)
+        pass
+

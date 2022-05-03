@@ -2,6 +2,7 @@ import hikari
 import lightbulb
 import logging
 import json
+import helpers.json_helper as jhelper
 
 plugin=lightbulb.Plugin("CustomMessagrPlugin")
 
@@ -26,8 +27,11 @@ async def setCustomMessage(ctx:lightbulb.SlashContext):
         guildId=str(ctx.guild_id)
         responsMsg="Your custom message has been set succesfully."
 
-        with open('messages.json','r') as m:
-            messages=json.load(m)
+        # with open('messages.json','r') as m:
+        #     messages=json.load(m)
+
+        #async impl of reading from json file:
+        messages=jhelper.read_from_json("messages.json")
 
         if category=="story":
             if guildId not in messages:
@@ -55,8 +59,11 @@ async def setCustomMessage(ctx:lightbulb.SlashContext):
 
 
 
-        with open("messages.json","w") as m:
-                json.dump(messages,m,indent=2)
+        # with open("messages.json","w") as m:
+        #         json.dump(messages,m,indent=2)
+
+        #async impl of writing to json files:
+        result=await jhelper.write_to_json("messages.json",messages)
 
         await ctx.respond(responsMsg)
 
@@ -79,8 +86,11 @@ async def removeCustomMessage(ctx:lightbulb.SlashContext):
         category=ctx.options.category
         isEmpty=False
 
-        with open("messages.json","r") as m:
-            messages=json.load(m)
+        # with open("messages.json","r") as m:
+        #     messages=json.load(m)
+
+         #async impl of reading from json file:
+        messages=jhelper.read_from_json("messages.json")
 
         if messages and guildId in messages:
             if category=="story":
@@ -97,8 +107,11 @@ async def removeCustomMessage(ctx:lightbulb.SlashContext):
                             isEmpty=True
                         msg["announcement"]=""
             
-            with open("messages.json","w") as m:
-                json.dump(messages,m,indent=2)
+            # with open("messages.json","w") as m:
+            #     json.dump(messages,m,indent=2)
+
+            #async impl of writing to json files:
+            result=await jhelper.write_to_json("messages.json",messages)
 
             responseMsg=f"Your {category} custom message has been removed succesfully."
             if isEmpty:
@@ -123,8 +136,11 @@ async def checkCustomMessage(ctx:lightbulb.SlashContext):
         responseMsg="Your custom messages:\n"
         emptyMsg="Empty!! Looks like you didn\'t set up any custom messages.\n Try `/setcustommessage` command to set a custom message."
 
-        with open("messages.json","r") as m:
-            messages=json.load(m)
+        # with open("messages.json","r") as m:
+        #     messages=json.load(m)
+
+         #async impl of reading from json file:
+        messages=jhelper.read_from_json("messages.json")
 
         if messages and guiidId in messages:
             for guild,msg in messages.items():

@@ -1,5 +1,6 @@
 import json
 import logging
+import helpers.json_helper as jhelper
 
 logging.basicConfig(filename='logs.txt',format='%(asctime)s %(name)s %(levelname)s %(message)s', filemode='a')
 logger=logging.getLogger(name="msghelper")
@@ -10,8 +11,11 @@ async def get_story_custommessage(guildId:str):
     try:
         logger.info("get_story_custommessage has been invoked for server:%s",guildId)
 
-        with open("messages.json","r") as m:
-            messages=json.load(m)
+        # with open("messages.json","r") as m:
+        #     messages=json.load(m)
+
+        #async impl of reading from json file:
+        messages=jhelper.read_from_json("messages.json")
 
         if messages and guildId in messages:
             for guild, msg in messages.items():
@@ -29,8 +33,12 @@ async def get_announcement_custommessage(guildId:str):
     try:
         logger.info("get_announcement_custommessage has been invoked for server:%s",guildId)
 
-        with open("messages.json","r") as m:
-            messages=json.load(m)
+        # with open("messages.json","r") as m:
+        #     messages=json.load(m)
+
+        #async impl of reading from json file:
+        messages=jhelper.read_from_json("messages.json")
+
 
         if messages and guildId in messages:
             for guild, msg in messages.items():
