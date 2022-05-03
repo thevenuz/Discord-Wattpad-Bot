@@ -8,7 +8,7 @@ import logging
 
 logging.basicConfig(filename='logs.txt',format='%(asctime)s %(name)s %(levelname)s %(message)s', filemode='a')
 
-logger=logging.getLogger()
+logger=logging.getLogger(name="wattpad")
 logger.setLevel(logging.ERROR)
 
 headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36'}   
@@ -75,6 +75,7 @@ async def get_chapter(url,lastchecked):
             #check if last updated has minutes or seconds in it
             comparetextmin='min'
             comparetextsec='sec'
+            comparetexthour="hour"
             lastupdate=None
             updated=None
             try:
@@ -86,7 +87,7 @@ async def get_chapter(url,lastchecked):
                 logger.fatal('Exception while fetching last upadated',exc_info=1)
                 pass
 
-            if (not lastupdate) or (not updated) or (comparetextmin in updated) or (comparetextsec in updated):
+            if (not lastupdate) or (not updated) or (comparetextmin in updated) or (comparetextsec in updated) or (comparetexthour in updated):
                 divs=soup.find('div', class_='story-parts')
                 if divs:
                     for item in divs:

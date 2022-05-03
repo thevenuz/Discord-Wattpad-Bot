@@ -10,7 +10,7 @@ plugin=lightbulb.Plugin('AuthorPlugin')
 
 
 logging.basicConfig(filename='logs.txt',format='%(asctime)s %(name)s %(levelname)s %(message)s', filemode='a')
-logger=logging.getLogger()
+logger=logging.getLogger(name="author")
 logger.setLevel(logging.ERROR)
 
 #region follow author
@@ -164,7 +164,7 @@ async def getauthors(ctx:lightbulb.SlashContext):
         await ctx.respond(embed=em)
     
     except Exception as e:
-        logger.critical('Exception occured in author.py getauthors commands for guild: %s',ctx.guild_id)
+        logger.critical('Exception occured in author.py getauthors commands for guild: %s',ctx.guild_id,exc_info=1)
 
 #endregion get authors
 

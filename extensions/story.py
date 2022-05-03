@@ -15,7 +15,7 @@ plugin=lightbulb.Plugin('StoryPlugin')
 
 
 logging.basicConfig(filename='logs.txt',format='%(asctime)s %(name)s %(levelname)s %(message)s', filemode='a')
-logger=logging.getLogger()
+logger=logging.getLogger(name="story")
 logger.setLevel(logging.ERROR)
 
 #region follow story

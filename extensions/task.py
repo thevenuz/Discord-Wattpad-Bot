@@ -13,7 +13,7 @@ dotenv.load_dotenv()
 PUBLICLOGCHANNEL=os.getenv('PUBLICLOGCHANNEL')
 
 logging.basicConfig(filename='logs.txt',format='%(asctime)s %(name)s %(levelname)s %(message)s', filemode='a')
-logger=logging.getLogger()
+logger=logging.getLogger(name="task")
 logger.setLevel(logging.INFO)
 
 @tasks.task(d=7,auto_start=True)

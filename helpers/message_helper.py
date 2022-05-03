@@ -2,7 +2,7 @@ import json
 import logging
 
 logging.basicConfig(filename='logs.txt',format='%(asctime)s %(name)s %(levelname)s %(message)s', filemode='a')
-logger=logging.getLogger()
+logger=logging.getLogger(name="msghelper")
 logger.setLevel(logging.ERROR)
 
 async def get_story_custommessage(guildId:str):

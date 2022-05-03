@@ -3,7 +3,7 @@ import lightbulb
 import logging
 
 logging.basicConfig(filename='logs.txt',format='%(asctime)s %(name)s %(levelname)s %(message)s', filemode='a')
-logger=logging.getLogger()
+logger=logging.getLogger(name="error")
 logger.setLevel(logging.ERROR)
 
 errors = {

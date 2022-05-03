@@ -15,7 +15,7 @@ LOGCHANNEL=os.getenv('LOGCHANNEL')
 PUBLICLOGCHANNEL=os.getenv('PUBLICLOGCHANNEL')
 
 logging.basicConfig(filename='logs.txt',format='%(asctime)s %(name)s %(levelname)s %(message)s', filemode='a')
-logger=logging.getLogger()
+logger=logging.getLogger(name="bot")
 logger.setLevel(logging.ERROR)
 
 bot=lightbulb.BotApp(token=TOKEN)
@@ -36,6 +36,7 @@ async def msg(event):
 @tasks.task(m=2, auto_start=True)
 async def getnewchapter():
     try:
+        logger.info("getnewchapter task started")
         logger.info('task triggered')
         with open('stories.json', 'r') as s, open('channels.json','r') as f:
             stories=json.load(s)
@@ -80,7 +81,9 @@ async def getnewchapter():
                     except Exception as e:
                         logger.fatal('Error occured in wattpad get_chapter method', exc_info=1)
                         raise e
-          
+
+        logger.info("getnewchapter task ended")
+     
     except Exception as e:
         logger.critical('Error in getnewchapter task:',exc_info=1)
         pass
@@ -93,6 +96,7 @@ async def getnewchapter():
 @tasks.task(m=3,auto_start=True)
 async def get_announcement():
     try:
+        logger.info("get_announcement task started")
         logger.info('get announcement task triggered')
         with open('authors.json','r') as a, open('channels.json','r') as c:
             authors=json.load(a)
@@ -126,11 +130,13 @@ async def get_announcement():
                                 with open('authors.json','w') as a:
                                     json.dump(authors,a,indent=2)
 
+                    
+
                     except Exception as e:
                         logger.fatal('Exception occured in task get_announcement method for author: %s',profile,exc_info=1)
                         pass
 
-                
+        logger.info("get_announcement task ended")
 
     except Exception as e:
         logger.critical('Exception occured in get announcement task:', exc_info=1)

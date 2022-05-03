@@ -5,7 +5,7 @@ import logging
 
 logging.basicConfig(filename='logs.txt',format='%(asctime)s %(name)s %(levelname)s %(message)s', filemode='a')
 
-logger=logging.getLogger()
+logger=logging.getLogger(name="wpadhelper")
 logger.setLevel(logging.ERROR)
 
 headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36'}   
@@ -73,7 +73,7 @@ async def get_storyurl_without_utm(storyURL:str)->str:
         try:
             r=requests.get(storyURL,headers=headers)
         except:
-            logger.error("Exception occured in wattpad_helper.get_storyurl_without_utm while sending request to the chapter URL: %s", chapterURL,exc_info=1)
+            logger.error("Exception occured in wattpad_helper.get_storyurl_without_utm while sending request to the chapter URL: %s", storyURL,exc_info=1)
             return storyURL
 
         if r.status_code==200:
