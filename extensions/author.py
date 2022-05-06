@@ -45,7 +45,7 @@ async def followauthor(ctx:lightbulb.SlashContext):
 
 
         #async impl of reading from json file:
-        authors=jhelper.read_from_json("authors.json")
+        authors=await jhelper.read_from_json("authors.json")
 
 
         domain='www.wattpad.com'
@@ -120,7 +120,7 @@ async def unfollowauthor(ctx:lightbulb.SlashContext):
         #     authors=json.load(f)
 
        #async impl of reading from json file:
-        authors=jhelper.read_from_json("authors.json")
+        authors=await jhelper.read_from_json("authors.json")
         
         if ctx.channel_id is not None:
             for guild,author in authors.items():
@@ -165,7 +165,7 @@ async def getauthors(ctx:lightbulb.SlashContext):
         #     authors=json.load(f)
 
         #async impl of reading from json file:
-        authors=jhelper.read_from_json("authors.json")
+        authors=await jhelper.read_from_json("authors.json")
         
         msg=''
         if ctx.guild_id is not None:

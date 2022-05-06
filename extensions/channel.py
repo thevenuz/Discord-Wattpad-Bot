@@ -36,7 +36,7 @@ async def setchannel(ctx:lightbulb.SlashContext):
         #     channels=json.load(f)
 
         #async impl of reading from json file:
-        channels=jhelper.read_from_json("channels.json")
+        channels=await jhelper.read_from_json("channels.json")
 
         msgs={
             "exists":"This channel has been already added.",
@@ -48,7 +48,21 @@ async def setchannel(ctx:lightbulb.SlashContext):
         channel=ctx.options.channel
         if channel:
             channel_id=channel.id
-            msgs['success']=f'Channel setup is done. New chapter and new announcement updates will be shared in <#{channel_id}>.\nUse `/followstory` and `/followauthor` commands to follow stories and authors if you\'re not following any.'
+            msgs['success']=f'Channel setup is done. New chapter and new announcement updates will be shared in <#{channel_id}>.\n**Please make sure that the bot has SEND MESSAGES permission in <#{channel_id}> or bot won\'t be able to share updates.**\nUse `/followstory` and `/followauthor` commands to follow stories and authors if you\'re not following any.'
+
+
+            ##TODO: send a warning that bot doesn't have permission to send messages
+            # ##check if the bot has send messages perms to the specified channel
+            # guild=ctx.get_guild()
+            # # requestedChannel=ctx.fe
+            # requestedChannel=guild.get_channel(channel_id)
+            # member=guild.get_my_member()
+            # perms=lightbulb.utils.permissions_in(requestedChannel,member,True)
+
+            # if not any(perm in (hikari.Permissions.SEND_MESSAGES,hikari.Permissions.MANAGE_MESSAGES) for perm in perms):
+            #     #TODO: 
+
+
 
         else:
             try:
@@ -121,7 +135,7 @@ async def removechannel(ctx:lightbulb.SlashContext):
         #     channels=json.load(f)
 
         #async impl of reading from json file:
-        channels=jhelper.read_from_json("channels.json")
+        channels=await jhelper.read_from_json("channels.json")
 
         if ctx.channel_id is not None:
             for channel in channels:
@@ -161,7 +175,7 @@ async def getchannels(ctx):
         #     channels=json.load(f)
 
         #async impl of reading from json file:
-        channels=jhelper.read_from_json("channels.json")
+        channels=await jhelper.read_from_json("channels.json")
 
         msg=''
         if ctx.guild_id is not None:

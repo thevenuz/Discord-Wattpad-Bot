@@ -38,8 +38,7 @@ async def msg(event):
 @tasks.task(m=2, auto_start=True)
 async def getnewchapter():
     try:
-        logger.info("getnewchapter task started")
-        logger.info('task triggered')
+        logger.error("getnewchapter task started")
         # with open('stories.json', 'r') as s, open('channels.json','r') as f:
         #     stories=json.load(s)
         #     channels=json.load(f)
@@ -51,13 +50,6 @@ async def getnewchapter():
             channels=json.loads(await c.read())
 
 
-
-            
-
-        # async with aiofiles.open("channels.json",mode="r") as c:
-        #     channelsContent=await c.read()
-        #     channels=json.loads(channelsContent)
-
         for guild,story in stories.items():
             for sty in story:
                 if sty:
@@ -67,45 +59,48 @@ async def getnewchapter():
                    
 
                     try:
-                        if channels[guild]:
-                            newchapter= await ws.get_chapter(str(storyURL),lastchecked)
-                            if newchapter:
-                                for ch in channels[guild]:
-                                    for nc in newchapter[0]:
+                        if guild in channels:
+                            if channels[guild]:
+                                newchapter= await ws.get_chapter(str(storyURL),lastchecked)
+                                if newchapter:
+                                    for ch in channels[guild]:
+                                        for nc in newchapter[0]:
 
-                                        #check if there is a custom msg setup. else generate a default msg
-                                        customMsg=await customMsghelper.get_story_custommessage(guild)
-                                        if customMsg!="" and customMsg is not None:
-                                            msg=f"{customMsg}\n{str(nc)}"
+                                            #check if there is a custom msg setup. else generate a default msg
+                                            customMsg=await customMsghelper.get_story_custommessage(guild)
+                                            if customMsg!="" and customMsg is not None:
+                                                msg=f"{customMsg}\n{str(nc)}"
 
-                                        else:
-                                            #get story title from story link to send in msg description
-                                            storyTitle=""
-                                            if "utm" not in storyURL:
-                                                try:
-                                                    storyTitle=await wpad.get_story_title(storyURL)
-                                                except:
-                                                    pass
+                                            else:
+                                                #get story title from story link to send in msg description
+                                                storyTitle=""
+                                                if "utm" not in storyURL:
+                                                    try:
+                                                        storyTitle=await wpad.get_story_title(storyURL)
+                                                    except:
+                                                        pass
 
-                                            if storyTitle:
-                                                storyTitle=f"from {storyTitle}"
+                                                if storyTitle:
+                                                    storyTitle=f"from {storyTitle}"
 
-                                            msg=f'**New chapter {storyTitle}**\n {str(nc)}'
+                                                msg=f'**New chapter {storyTitle}**\n {str(nc)}'
 
-                                        # #check if a custom message has been setup for this server
-                                        # customMsg=await customMsghelper.get_story_custommessage(guild)
-                                        # if customMsg!="" and customMsg is not None:
-                                        #     msg=f"{customMsg}\n{str(nc)}"
-                                        
-                                    await bot.rest.create_message(ch, msg)
+                                            # #check if a custom message has been setup for this server
+                                            # customMsg=await customMsghelper.get_story_custommessage(guild)
+                                            # if customMsg!="" and customMsg is not None:
+                                            #     msg=f"{customMsg}\n{str(nc)}"
+                                            
+                                        await bot.rest.create_message(ch, msg)
 
-                                    sty['lastupdated']=f'{newchapter[1]}'
-                                    # with open('stories.json','w') as s:
-                                    #     json.dump(stories,s,indent=2)
+                                        sty['lastupdated']=f'{newchapter[1]}'
+                                        # with open('stories.json','w') as s:
+                                        #     json.dump(stories,s,indent=2)
 
-                                    #async implementation of writing into json file
-                                    async with aiofiles.open("stories.json",mode="w") as s:
-                                        await s.write(json.dumps(stories,indent=2))
+                                        #async implementation of writing into json file
+                                        async with aiofiles.open("stories.json",mode="w") as s:
+                                            await s.write(json.dumps(stories,indent=2))
+
+        
 
                         
 
@@ -113,7 +108,7 @@ async def getnewchapter():
                         logger.fatal('Error occured in wattpad get_chapter method', exc_info=1)
                         raise e
 
-        logger.info("getnewchapter task ended")
+        logger.error("getnewchapter task ended")
      
     except Exception as e:
         logger.critical('Error in getnewchapter task:',exc_info=1)
@@ -128,12 +123,11 @@ async def getnewchapter():
 async def get_announcement():
     try:
         logger.info("get_announcement task started")
-        logger.info('get announcement task triggered')
 
 
-        with open('authors.json','r') as a, open('channels.json','r') as c:
-            authors=json.load(a)
-            channels=json.load(c)
+        # with open('authors.json','r') as a, open('channels.json','r') as c:
+        #     authors=json.load(a)
+        #     channels=json.load(c)
 
         #async implementation of reading from json file
         async with aiofiles.open("authors.json",mode="r") as a, aiofiles.open("channels.json",mode="r") as c:
@@ -141,44 +135,45 @@ async def get_announcement():
             channels=json.loads(await c.read())
 
         for guild, author in authors.items():
-            if channels[guild]:
-                for auth in author:
-                    if auth:
-                        profile=auth['url']
-                        lastchecked=auth['lastupdated']
-                        author_name=auth['url'].split('/user/')[1].replace('-',' ')
+            if guild in channels:
+                if channels[guild]:
+                    for auth in author:
+                        if auth:
+                            profile=auth['url']
+                            lastchecked=auth['lastupdated']
+                            author_name=auth['url'].split('/user/')[1].replace('-',' ')
 
 
-                        try:
-                            new_announcement=await ws.get_new_announcement(profile,lastchecked)
-                            if new_announcement:
-                                for ch in channels[guild]:
-                                    if new_announcement[0]:
-                                        msg=f'New Announcement from **{author_name}**'
+                            try:
+                                new_announcement=await ws.get_new_announcement(profile,lastchecked)
+                                if new_announcement:
+                                    for ch in channels[guild]:
+                                        if new_announcement[0]:
+                                            msg=f'New Announcement from **{author_name}**'
 
-                                        #check if a custom announcement msg has been setup for this server
-                                        customMsg=await customMsghelper.get_announcement_custommessage(guild)
-                                        if customMsg!="" and customMsg is not None:
-                                            msg=customMsg
+                                            #check if a custom announcement msg has been setup for this server
+                                            customMsg=await customMsghelper.get_announcement_custommessage(guild)
+                                            if customMsg!="" and customMsg is not None:
+                                                msg=customMsg
 
-                                        em=hikari.Embed(title='Announcement:',description=f'{new_announcement[0]}',color=0Xff500a)
-                                        await bot.rest.create_message(ch,embed=em,content=msg)
+                                            em=hikari.Embed(title='Announcement:',description=f'{new_announcement[0]}',color=0Xff500a)
+                                            await bot.rest.create_message(ch,embed=em,content=msg)
 
-                                auth['lastupdated']=str(new_announcement[1])
-                                with open('authors.json','w') as a:
-                                    json.dump(authors,a,indent=2)
+                                    auth['lastupdated']=str(new_announcement[1])
 
-                                #async implementation of writing to json files
-                                async with aiofiles.open("authors.json",mode="w") as a:
-                                    await a.write(json.dumps(authors,indent=2))
+                                    # with open('authors.json','w') as a:
+                                    #     json.dump(authors,a,indent=2)
+
+                                    #async implementation of writing to json files
+                                    async with aiofiles.open("authors.json",mode="w") as a:
+                                        await a.write(json.dumps(authors,indent=2))
 
 
                         
 
-                        except Exception as e:
-                            logger.fatal('Exception occured in task get_announcement method for author: %s',profile,exc_info=1)
-                            pass
-
+                            except Exception as e:
+                                logger.fatal('Exception occured in task get_announcement method for author: %s',profile,exc_info=1)
+                                pass
         logger.info("get_announcement task ended")
 
     except Exception as e:

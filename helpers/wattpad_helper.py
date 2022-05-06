@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
 import logging
-
+import aiohttp
 
 logging.basicConfig(filename='logs.txt',format='%(asctime)s %(name)s %(levelname)s %(message)s', filemode='a')
 
@@ -38,13 +38,20 @@ async def get_storyurl_from_chapter(chapterURL:str)->str:
         logger.info("wattpad_helper.get_storyurl_from_chapter invoked for URL: %s",chapterURL)
         domain="https://www.wattpad.com"
         try:
-            r=requests.get(chapterURL,headers=headers)
+            #r=requests.get(chapterURL,headers=headers)
+
+            #async impl of requests
+            async with aiohttp.ClientSession() as session:
+                async with session.get(chapterURL,headers=headers) as response:
+                    r=await response.text()
         except:
             logger.error("Exception occured in wattpad_helper.get_storyurl_from_chapter while sending request to the chapter URL: %s", chapterURL,exc_info=1)
             return chapterURL
 
-        if r.status_code==200:
-            soup=BeautifulSoup(r.content,'html.parser')
+        #if r.status_code==200:
+        if response.status==200:
+            # soup=BeautifulSoup(r.content,'html.parser')
+            soup=BeautifulSoup(r,'html.parser')
             item=soup.find("div",class_="dropdown-menu pull-left")
             title=item.find("div",class_="toc-header text-center")
             anchor=title.find("a",class_="on-navigate")
@@ -71,13 +78,20 @@ async def get_storyurl_without_utm(storyURL:str)->str:
     try:
         logger.info("wattpad_helper.get_storyurl_without_utm invoked for URL: %s",storyURL)
         try:
-            r=requests.get(storyURL,headers=headers)
+            #r=requests.get(storyURL,headers=headers)
+
+            #async impl of requests
+            async with aiohttp.ClientSession() as session:
+                async with session.get(storyURL,headers=headers) as response:
+                    r=await response.text()
         except:
             logger.error("Exception occured in wattpad_helper.get_storyurl_without_utm while sending request to the chapter URL: %s", storyURL,exc_info=1)
             return storyURL
 
-        if r.status_code==200:
-            soup=BeautifulSoup(r.content,'html.parser')
+        # if r.status_code==200:
+        if response.status==200:
+            # soup=BeautifulSoup(r.content,'html.parser')
+            soup=BeautifulSoup(r,'html.parser')
             item=soup.find('link', {'href': True, 'rel': "canonical"})
             actualStoryURL=item["href"]
 

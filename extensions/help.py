@@ -23,7 +23,7 @@ async def help(ctx):
         #         text=json.load(f)
 
          #async impl of reading from json file:
-        text=jhelper.read_from_json("text.json")
+        text=await jhelper.read_from_json("text.json")
 
         if ctx.options.category is not None:
             logger.info('Non empty help is triggered')

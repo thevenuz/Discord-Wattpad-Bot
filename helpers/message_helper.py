@@ -15,7 +15,7 @@ async def get_story_custommessage(guildId:str):
         #     messages=json.load(m)
 
         #async impl of reading from json file:
-        messages=jhelper.read_from_json("messages.json")
+        messages=await jhelper.read_from_json("messages.json")
 
         if messages and guildId in messages:
             for guild, msg in messages.items():
@@ -37,7 +37,7 @@ async def get_announcement_custommessage(guildId:str):
         #     messages=json.load(m)
 
         #async impl of reading from json file:
-        messages=jhelper.read_from_json("messages.json")
+        messages=await jhelper.read_from_json("messages.json")
 
 
         if messages and guildId in messages:

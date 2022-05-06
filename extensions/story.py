@@ -57,7 +57,7 @@ async def addstory(ctx:lightbulb.SlashContext):
         #     stories=json.load(s)
 
         #async impl of reading from json file:
-        stories=jhelper.read_from_json("stories.json")
+        stories=await jhelper.read_from_json("stories.json")
 
         domain='www.wattpad.com'
         if domain not in storyURL:
@@ -127,7 +127,7 @@ async def removestory(ctx):
         #     stories=json.load(f)
 
         #async impl of reading from json file:
-        stories=jhelper.read_from_json("stories.json")
+        stories=await jhelper.read_from_json("stories.json")
 
 
         if ctx.channel_id is not None:
@@ -170,7 +170,7 @@ async def getstories(ctx):
         #     stories=json.load(f)
 
         #async impl of reading from json file:
-        stories=jhelper.read_from_json("stories.json")
+        stories=await jhelper.read_from_json("stories.json")
 
 
         msg=''

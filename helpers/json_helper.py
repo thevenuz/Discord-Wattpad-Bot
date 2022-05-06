@@ -43,7 +43,7 @@ async def write_to_json(file:str,data:dict)->bool:
         filePath=await get_file_path(file)
 
         #async impl of writing to json files
-        async with aiofiles.open("authors.json",mode="w") as f:
+        async with aiofiles.open(filePath,mode="w") as f:
             await f.write(json.dumps(data,indent=2))
 
         return True

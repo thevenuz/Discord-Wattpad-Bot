@@ -31,7 +31,7 @@ async def setCustomMessage(ctx:lightbulb.SlashContext):
         #     messages=json.load(m)
 
         #async impl of reading from json file:
-        messages=jhelper.read_from_json("messages.json")
+        messages=await jhelper.read_from_json("messages.json")
 
         if category=="story":
             if guildId not in messages:
@@ -90,7 +90,7 @@ async def removeCustomMessage(ctx:lightbulb.SlashContext):
         #     messages=json.load(m)
 
          #async impl of reading from json file:
-        messages=jhelper.read_from_json("messages.json")
+        messages=await jhelper.read_from_json("messages.json")
 
         if messages and guildId in messages:
             if category=="story":
@@ -140,7 +140,7 @@ async def checkCustomMessage(ctx:lightbulb.SlashContext):
         #     messages=json.load(m)
 
          #async impl of reading from json file:
-        messages=jhelper.read_from_json("messages.json")
+        messages=await jhelper.read_from_json("messages.json")
 
         if messages and guiidId in messages:
             for guild,msg in messages.items():
