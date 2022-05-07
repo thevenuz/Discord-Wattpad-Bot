@@ -180,19 +180,25 @@ async def getchannels(ctx):
         msg=''
         if ctx.guild_id is not None:
             if channels:
-                for channel in channels:
-                    if channel==str(ctx.guild_id):
-                        if not channels[channel]:
-                            emContent='No channel is setup to receive updates from the bot. Use `/setchannel` command to setup a channel.'
-                            em=hikari.Embed(title='Empty:',description=emContent,color=0Xff500a)
-                            
-                            await ctx.respond(embed=em)
-                        else:
-                            for key in channels[channel]:
-                                msg=f'{msg}\n <#{key}>'
-                            msgstr=f'Currently the new chapter and announcements are being posted in: {msg}'
-                            em=hikari.Embed(title='Your channels:', description=msgstr,color=0Xff500a)
-                            await ctx.respond(embed=em)
+                if str(ctx.guild_id) in channels:
+                    for channel in channels:
+                        if channel==str(ctx.guild_id):
+                            if not channels[channel]:
+                                emContent='No channel is setup to receive updates from the bot. Use `/setchannel` command to setup a channel.'
+                                em=hikari.Embed(title='Empty:',description=emContent,color=0Xff500a)
+                                
+                                await ctx.respond(embed=em)
+                            else:
+                                for key in channels[channel]:
+                                    msg=f'{msg}\n <#{key}>'
+                                msgstr=f'Currently the new chapter and announcements are being posted in: {msg}'
+                                em=hikari.Embed(title='Your channels:', description=msgstr,color=0Xff500a)
+                                await ctx.respond(embed=em)
+                else:
+                    emContent='No channel is setup to receive updates from the bot. Use `/setchannel` command to setup a channel.'
+                    em=hikari.Embed(title='Empty:',description=emContent,color=0Xff500a)
+                                
+                    await ctx.respond(embed=em)
 
             else:
                 emContent='No channel is setup to receive updates from the bot. Use `/setchannel` command to setup a channel.'
