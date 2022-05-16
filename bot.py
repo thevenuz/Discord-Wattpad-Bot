@@ -38,7 +38,7 @@ async def msg(event):
 @tasks.task(m=2, auto_start=True)
 async def getnewchapter():
     try:
-        logger.error("getnewchapter task started")
+        logger.info("getnewchapter task started")
         # with open('stories.json', 'r') as s, open('channels.json','r') as f:
         #     stories=json.load(s)
         #     channels=json.load(f)
@@ -108,7 +108,7 @@ async def getnewchapter():
                         logger.fatal('Error occured in wattpad get_chapter method', exc_info=1)
                         raise e
 
-        logger.error("getnewchapter task ended")
+        logger.info("getnewchapter task ended")
      
     except Exception as e:
         logger.critical('Error in getnewchapter task:',exc_info=1)

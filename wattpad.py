@@ -1,6 +1,6 @@
 import aiohttp
 from bs4 import BeautifulSoup
-import requests
+#import requests
 import json
 from datetime import datetime,timedelta
 import logging
@@ -20,12 +20,17 @@ async def checkStory(url):
         domain='www.wattpad.com'
         
         try:   
-            r=requests.get(url,headers=headers)
+            #r=requests.get(url,headers=headers)
+            #async impl of get request
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url,headers=headers) as response:
+                    r=await response.text()
         except:
             logger.error('Something went wrong while sending a request to the URL %s', url,exc_info=1)
             return False
 
-        if r.status_code==200 and domain in url:
+        #if r.status_code==200 and domain in url:
+        if response.status==200 and domain in url:
             return True
         return False
     except Exception as e:
@@ -37,12 +42,17 @@ async def checkProfile(url):
     try:
         domain='www.wattpad.com'
         try:   
-            r=requests.get(url,headers=headers)
+            #r=requests.get(url,headers=headers)
+            #async impl of get request
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url,headers=headers) as response:
+                    r=await response.text()
         except:
             logger.error('Something went wrong while sending a request to the URL %s', url,exc_info=1)
             return False
 
-        if r.status_code==200 and domain in url:
+        # if r.status_code==200 and domain in url:
+        if response.status==200 and domain in url:
             return True
         return False
         
