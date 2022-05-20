@@ -19,7 +19,8 @@ msgs={
     "NotsetChannelAuthor":"channel has not been set as a custom channel for the updates from this author. Try `/check-custom-channels` to see which channles have been set for which stories/Announcements.",
     "NotsetChannelStory":"channel has not been set as a custom channel for the updates from this story. Try `/check-custom-channels` to see which channles have been set for which stories/Announcements.",
     "NoStoryFound":"No story with the title {url} has been matched with the stories you're already following. Try using the full URL of the story instead of the title",
-    "NoAuthorFound":"No Author with the name {url} has been matched with the Authrors you're already following. Try using the full URL of the Author's profile."
+    "NoAuthorFound":"No Author with the name {url} has been matched with the Authrors you're already following. Try using the full URL of the Author's profile.",
+    "domain":"wattpad.com"
 }
 
 @plugin.command()
@@ -69,11 +70,18 @@ async def set_custom_channel(ctx:lightbulb.SlashContext):
             await ctx.respond(embed=hikari.Embed(title=f"🛑Error:",description="Uh-oh!! The developer has messed up somewhere. Try again or contact the dev." ))
 
         ##get the full URL if input is just title
-        found, full_url=await get_full_url(url,guild_id, records)
+        if msgs["domain"] not in url:
+            found, count, full_url=await get_full_url(url,guild,channel_id, records)
+            if found and count==1:
+                url=full_url
+            else:
+                await ctx.respond(embed=hikari.Embed(title=f"🛑 Error:", description=f"You're following multiple {'Stories' if isStory else 'Authors'} that has {url} in it. Please use the full url of the {'Story' if isStory else 'Author Profile'}."))
+                found=False
+        else:
+            found=True
 
 
         if records and found:
-            url=full_url
             if guild not in records:
                 await ctx.respond(embed=hikari.Embed(title=f"🛑 Error:",description=f"{not_follow_any}"))
             else:
@@ -81,9 +89,10 @@ async def set_custom_channel(ctx:lightbulb.SlashContext):
                     if guild_id==guild:
                         if not any(str(url)==itm['url'] for  itm in items):
                             await ctx.respond(embed=hikari.Embed(title=f"🛑 Error:",description=f"{not_follow_msg}"))
+
                         else:
                             for item in items:
-                                if url in item["url"]:
+                                if url==item["url"]:
                                     
                                     item["CustomChannel"]=str(channel_id)
 
@@ -105,6 +114,10 @@ async def set_custom_channel(ctx:lightbulb.SlashContext):
                                         await ctx.respond(embed=emErr) 
                                                                     
         elif not found:
+            if isAuthor:
+                no_record_found=f"No story with the title {url} has been matched with the stories you're already following. Try using the full URL of the story instead of the title"
+            else:
+                no_record_found=f"No Author with the name {url} has been matched with the Authrors you're already following. Try using the full URL of the Author's profile."
             await ctx.respond(embed=hikari.Embed(title=f"🛑 Error:", description=f"{no_record_found}"))
 
 
@@ -126,6 +139,7 @@ type=hikari.TextableGuildChannel,
 channel_types=[hikari.ChannelType.GUILD_TEXT,hikari.ChannelType.GUILD_NEWS]
 )
 @lightbulb.command("unset-custom-channel","unset the custom channel you've already setup for stories/announcements")
+@lightbulb.implements(lightbulb.SlashCommand)
 async def unset_custom_channel(ctx:lightbulb.SlashContext):
     try:
         logger.info("custom_channel.unset_custom_channel triggered for server: %s,category: %s, url: %s",ctx.guild_id,ctx.options.category,ctx.options.url)
@@ -148,6 +162,7 @@ async def unset_custom_channel(ctx:lightbulb.SlashContext):
             not_follow_msg=msgs["NotFollowingAnyAuthors"]
             not_follow_any=msgs["NotFollowingAnyAuthors"]
             no_record_found=msgs["NoAuthorFound"]
+            not_set_channel=msgs["NotsetChannelAuthor"]
             
 
         elif category.lower()=="story":
@@ -156,16 +171,24 @@ async def unset_custom_channel(ctx:lightbulb.SlashContext):
             not_follow_msg=msgs["NotFollowingAnyStories"]
             not_follow_any=msgs["NotFollowingAnyStories"]
             no_record_found=msgs["NoStoryFound"]
+            not_set_channel=msgs["NotsetChannelStory"]
 
         else:
             logger.fatal("category is not story or announcement for guild: %s, category:%s, url: %s",guild,category,url)
             await ctx.respond(embed=hikari.Embed(title=f"🛑Error:",description="Uh-oh!! The developer has messed up somewhere. Try again or contact the dev." ))
         
         ##get the full URL if input is just title
-        found, full_url=await get_full_url(url,guild_id, records)
+        if msgs["domain"] not in url:
+            found, count, full_url=await get_full_url(url,guild,channel_id, records, True)
+            if found and count==1:
+                url=full_url
+            elif count>1:
+                await ctx.respond(embed=hikari.Embed(title=f"🛑 Error:", description=f"You're following multiple {'Stories' if isStory else 'Authors'} that has {url} in it. Please use the full url of the {'Story' if isStory else 'Author Profile'}."))
+                found=False
+        else:
+            found=True
 
         if records and found:
-            url=full_url
             if guild not in records:
                 await ctx.respond(embed=hikari.Embed(title=f"🛑 Error:",description=f"{not_follow_any}"))
             else:
@@ -200,7 +223,11 @@ async def unset_custom_channel(ctx:lightbulb.SlashContext):
                                         await ctx.respond(embed=emErr) 
 
 
-        elif not found:
+        elif not found and count<1:
+            if isAuthor:
+                no_record_found=f"No story with the title {url} has been matched with the stories you're already following. Try using the full URL of the story instead of the title"
+            else:
+                no_record_found=f"No Author with the name {url} has been matched with the Authrors you're already following. Try using the full URL of the Author's profile."
             await ctx.respond(embed=hikari.Embed(title=f"🛑 Error:", description=f"{no_record_found}"))
 
 
@@ -214,6 +241,7 @@ async def unset_custom_channel(ctx:lightbulb.SlashContext):
 @plugin.command()
 @lightbulb.option("category","whether your custom channel is for story or announcement updates",str,choices=("story","announcement"),required=True)
 @lightbulb.command("check-custom-channels","unset the custom channel you've already setup for stories/announcements")
+@lightbulb.implements(lightbulb.SlashCommand)
 async def check_custom_channels(ctx:lightbulb.SlashContext):
     try:
         logger.info("custom_channel.check_custom_channels triggered for server: %s, category:%s",ctx.guild_id,ctx.options.category)
@@ -246,18 +274,22 @@ async def check_custom_channels(ctx:lightbulb.SlashContext):
                 await ctx.respond(embed=hikari.Embed(title=f"🛑 Error:",description=f"{not_follow_any}"))
             else:
                 for guild_id, items in records.items():
+                    items=sorted(items,key=lambda i: i["CustomChannel"])
                     if guild_id==guild:
                         for item in items:
                             if item["CustomChannel"]:
                                 list_url=item["url"]
                                 list_channel=item["CustomChannel"]
-                                result_list=f"{str(result_list)}{list_channel} : {list_url}\n"
+                                if list_channel in result_list:
+                                    result_list=f"{str(result_list)} {list_url}\n"
+                                else:
+                                    result_list=f"{str(result_list)}<#{list_channel}> :\n {list_url}\n"
         
-        if result_list:
-            await ctx.respond(embed=hikari.Embed(title="Your Custom Channels:",description=f"{result_list}"))
+                if result_list:
+                    await ctx.respond(embed=hikari.Embed(title=f"Your Custom Channels for {'Announcements' if isAuthor else 'Stories'}:",description=f"{result_list}"))
 
-        else:
-            await ctx.respond(embed=hikari.Embed(title=f"So Empty!!", description="Looks like you haven't setup any custom channels yet."))
+                else:
+                    await ctx.respond(embed=hikari.Embed(title=f"So Empty!!", description="Looks like you haven't setup any custom channels yet."))
 
 
 
@@ -270,21 +302,32 @@ async def check_custom_channels(ctx:lightbulb.SlashContext):
 
 
 
-async def get_full_url(title:str,guild:str,data:dict):
+async def get_full_url(title:str,guild:str,channel:str,data:dict,unset=False):
     try:
         logger.info("custom_channel.get_full_url triggered for title:%s",title)
 
         if guild in data:
             for guild_id, items in data.items():
                 if guild==guild_id:
-                    if not any(title==itm['url'] for  itm in items):
-                        return False,None
-                    for item in items():
-                        if title in item["url"]:
-                            return True,item["url"]
-        
+                    if not any(title in itm['url'] for  itm in items):
+                        return False,0,None
+                    if unset:
+                        if sum(channel in itm["CustomChannel"] for itm in items)==1:
+                            for item in items:
+                                if title in item["url"]:
+                                    return True,1,item["url"]
+                    else:
+                        count=sum(title in itm["url"] for itm in items)
+                        if count>1:
+                            return False,count,None
+                        for item in items:
+                            if title in item["url"]:
+                                return True,1,item["url"]
+
+                    return False,0,None
+            
         else:
-            return False, None
+            return False,0, None
 
     except Exception as e:
         logger.fatal("Exception occured in custom_channel.get_full_url for title:%s",title,exc_info=1)
