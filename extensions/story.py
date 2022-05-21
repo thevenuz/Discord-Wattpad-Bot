@@ -72,11 +72,11 @@ async def addstory(ctx:lightbulb.SlashContext):
                 em=hikari.Embed(title='You have succesfully followed this story.',description=embContent, color=0Xff500a)
                 if not stories:
                     #stories[str(ctx.guild_id)]=[str(ctx.options.storyurl)]
-                    stories[str(ctx.guild_id)]=[{"url":f'{str(storyURL)}',"lastupdated":f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}'}]
+                    stories[str(ctx.guild_id)]=[{"url":f'{str(storyURL)}',"lastupdated":f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}', "CustomChannel":""}]
                 else:
                     if str(ctx.guild_id) not in stories:
                         #stories[str(ctx.guild_id)]=[str(ctx.options.storyurl)]
-                        stories[str(ctx.guild_id)]=[{"url":f'{str(storyURL)}',"lastupdated":f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}'}]
+                        stories[str(ctx.guild_id)]=[{"url":f'{str(storyURL)}',"lastupdated":f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}', "CustomChannel":""}]
                     else:
                         for guild, story in stories.items():
                             if guild==str(ctx.guild_id):
@@ -84,7 +84,7 @@ async def addstory(ctx:lightbulb.SlashContext):
                                     embContent='No need to follow the same story twice.'
                                     em=hikari.Embed(title='You\'re already following this story.',description=embContent, color=0Xff500a)
                                 else:
-                                    story.append({"url": f'{storyURL}',"lastupdated": f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}' })
+                                    story.append({"url": f'{storyURL}',"lastupdated": f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}', "CustomChannel":"" })
                         
 
                 # with open('stories.json','w') as s:

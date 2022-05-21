@@ -9,6 +9,7 @@ import dotenv
 import logging
 import helpers.message_helper as customMsghelper
 import helpers.wattpad_helper as wpad
+import helpers.custom_channel_helper as customchnlhelper
 import aiofiles
 
 dotenv.load_dotenv()
@@ -18,9 +19,12 @@ PUBLICLOGCHANNEL=os.getenv('PUBLICLOGCHANNEL')
 
 logging.basicConfig(filename='logs.txt',format='%(asctime)s %(name)s %(levelname)s %(message)s', filemode='a')
 logger=logging.getLogger(name="bot")
-logger.setLevel(logging.ERROR)
+logger.setLevel(logging.DEBUG)
 
 bot=lightbulb.BotApp(token=TOKEN)
+
+
+
 tasks.load(bot)
 
 bot.load_extensions_from('./extensions',must_exist=True)
@@ -59,12 +63,18 @@ async def getnewchapter():
                    
 
                     try:
+                        #check if the guild Id is in channels.json or if any custom channel is setup for this story
+                        custom_channel=await customchnlhelper.get_custom_channel(guild,storyURL,"story")
+
                         if guild in channels:
-                            if channels[guild]:
+                            if channels[guild] or custom_channel:
                                 newchapter= await ws.get_chapter(str(storyURL),lastchecked)
                                 if newchapter:
                                     for ch in channels[guild]:
                                         for nc in newchapter[0]:
+
+                                            if custom_channel:
+                                                ch=custom_channel
 
                                             #check if there is a custom msg setup. else generate a default msg
                                             customMsg=await customMsghelper.get_story_custommessage(guild)
@@ -135,45 +145,48 @@ async def get_announcement():
             channels=json.loads(await c.read())
 
         for guild, author in authors.items():
-            if guild in channels:
-                if channels[guild]:
-                    for auth in author:
-                        if auth:
-                            profile=auth['url']
-                            lastchecked=auth['lastupdated']
-                            author_name=auth['url'].split('/user/')[1].replace('-',' ')
+            for auth in author:
+                if auth:
+                    profile=auth['url']
+                    lastchecked=auth['lastupdated']
+                    author_name=auth['url'].split('/user/')[1].replace('-',' ')
+                #check if the guild Id is in channels.json or if any custom channel is setup for this story
+                custom_channel=await customchnlhelper.get_custom_channel(guild,profile,"author")
+                if guild in channels:
+                    if channels[guild] or custom_channel:
+                        try:
+                            new_announcement=await ws.get_new_announcement(profile,lastchecked)
+                            if new_announcement:
+                                for ch in channels[guild]:
+                                    if new_announcement[0]:
+                                        if custom_channel:
+                                            ch=custom_channel
+
+                                        msg=f'New Announcement from **{author_name}**'
+
+                                        #check if a custom announcement msg has been setup for this server
+                                        customMsg=await customMsghelper.get_announcement_custommessage(guild)
+                                        if customMsg!="" and customMsg is not None:
+                                            msg=customMsg
+
+                                        em=hikari.Embed(title='Announcement:',description=f'{new_announcement[0]}',color=0Xff500a)
+                                        await bot.rest.create_message(ch,embed=em,content=msg)
+
+                                auth['lastupdated']=str(new_announcement[1])
+
+                                # with open('authors.json','w') as a:
+                                #     json.dump(authors,a,indent=2)
+
+                                #async implementation of writing to json files
+                                async with aiofiles.open("authors.json",mode="w") as a:
+                                    await a.write(json.dumps(authors,indent=2))
 
 
-                            try:
-                                new_announcement=await ws.get_new_announcement(profile,lastchecked)
-                                if new_announcement:
-                                    for ch in channels[guild]:
-                                        if new_announcement[0]:
-                                            msg=f'New Announcement from **{author_name}**'
+                    
 
-                                            #check if a custom announcement msg has been setup for this server
-                                            customMsg=await customMsghelper.get_announcement_custommessage(guild)
-                                            if customMsg!="" and customMsg is not None:
-                                                msg=customMsg
-
-                                            em=hikari.Embed(title='Announcement:',description=f'{new_announcement[0]}',color=0Xff500a)
-                                            await bot.rest.create_message(ch,embed=em,content=msg)
-
-                                    auth['lastupdated']=str(new_announcement[1])
-
-                                    # with open('authors.json','w') as a:
-                                    #     json.dump(authors,a,indent=2)
-
-                                    #async implementation of writing to json files
-                                    async with aiofiles.open("authors.json",mode="w") as a:
-                                        await a.write(json.dumps(authors,indent=2))
-
-
-                        
-
-                            except Exception as e:
-                                logger.fatal('Exception occured in task get_announcement method for author: %s',profile,exc_info=1)
-                                pass
+                        except Exception as e:
+                            logger.fatal('Exception occured in task get_announcement method for author: %s',profile,exc_info=1)
+                            pass
         logger.info("get_announcement task ended")
 
     except Exception as e:

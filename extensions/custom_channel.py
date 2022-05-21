@@ -53,7 +53,7 @@ async def set_custom_channel(ctx:lightbulb.SlashContext):
             ##load authors.json
             records=await jhelper.read_from_json("authors.json")
             isAuthor=True
-            not_follow_msg=msgs["NotFollowingAnyAuthors"]
+            not_follow_msg=msgs["NotFollowingAuthor"]
             not_follow_any=msgs["NotFollowingAnyAuthors"]
             no_record_found=msgs["NoAuthorFound"]
             
@@ -61,7 +61,7 @@ async def set_custom_channel(ctx:lightbulb.SlashContext):
         elif category.lower()=="story":
             records=await jhelper.read_from_json("stories.json")
             isStory=True
-            not_follow_msg=msgs["NotFollowingAnyStories"]
+            not_follow_msg=msgs["NotFollowingStory"]
             not_follow_any=msgs["NotFollowingAnyStories"]
             no_record_found=msgs["NoStoryFound"]
 
@@ -74,7 +74,7 @@ async def set_custom_channel(ctx:lightbulb.SlashContext):
             found, count, full_url=await get_full_url(url,guild,channel_id, records)
             if found and count==1:
                 url=full_url
-            else:
+            elif count>1:
                 await ctx.respond(embed=hikari.Embed(title=f"🛑 Error:", description=f"You're following multiple {'Stories' if isStory else 'Authors'} that has {url} in it. Please use the full url of the {'Story' if isStory else 'Author Profile'}."))
                 found=False
         else:
@@ -113,8 +113,8 @@ async def set_custom_channel(ctx:lightbulb.SlashContext):
                                         emErr=hikari.Embed(title=f'🛑 Error:',description=f'{emContent}',color=0xFF0000)
                                         await ctx.respond(embed=emErr) 
                                                                     
-        elif not found:
-            if isAuthor:
+        elif not found and count<1:
+            if isStory:
                 no_record_found=f"No story with the title {url} has been matched with the stories you're already following. Try using the full URL of the story instead of the title"
             else:
                 no_record_found=f"No Author with the name {url} has been matched with the Authrors you're already following. Try using the full URL of the Author's profile."
@@ -207,10 +207,10 @@ async def unset_custom_channel(ctx:lightbulb.SlashContext):
 
                                     if isAuthor:
                                         update_authors=await jhelper.write_to_json("authors.json",records)
-                                        response_msg=f"<#{channel_id}> has been succesfully unset as custom channel for updates from Author: {url}. Updates from this Author will still be shared in common channel that's been setup for updates."
+                                        response_msg=f"<#{channel_id}> has been succesfully unset as custom channel for updates from Author: {url}. Updates from this Author will still be shared in common channel if that's been setup for updates."
                                     elif isStory:
                                         update_authors=await jhelper.write_to_json("stories.json",records)
-                                        response_msg=f"<#{channel_id}> has been succesfully unset as custom channel for updates from Story: {url}. Updates from this Story will still be shared in common channel that's been setup for updates."
+                                        response_msg=f"<#{channel_id}> has been succesfully unset as custom channel for updates from Story: {url}. Updates from this Story will still be shared in common channel if that's been setup for updates."
 
                                     if update_authors:
                                         em=hikari.Embed(title="Success!!",description=response_msg,color=0Xff500a)
@@ -248,6 +248,8 @@ async def check_custom_channels(ctx:lightbulb.SlashContext):
 
         category=ctx.options.category
         guild=str(ctx.guild_id)
+        isAuthor=False
+        isStory=False
 
         result_list=""
 
@@ -286,10 +288,11 @@ async def check_custom_channels(ctx:lightbulb.SlashContext):
                                     result_list=f"{str(result_list)}<#{list_channel}> :\n {list_url}\n"
         
                 if result_list:
-                    await ctx.respond(embed=hikari.Embed(title=f"Your Custom Channels for {'Announcements' if isAuthor else 'Stories'}:",description=f"{result_list}"))
+                    logger.error("triggered %s",result_list)
+                    await ctx.respond(embed=hikari.Embed(title=f"Your Custom Channels for {'Stories' if isStory else 'Announcements'}: ",description=f"{result_list}"))
 
                 else:
-                    await ctx.respond(embed=hikari.Embed(title=f"So Empty!!", description="Looks like you haven't setup any custom channels yet."))
+                    await ctx.respond(embed=hikari.Embed(title=f"So Empty!!", description="Looks like you haven't setup any custom channels yet. Try `/set-custom-channel` command to set up a custom channel for stories and announcements."))
 
 
 
@@ -314,15 +317,16 @@ async def get_full_url(title:str,guild:str,channel:str,data:dict,unset=False):
                     if unset:
                         if sum(channel in itm["CustomChannel"] for itm in items)==1:
                             for item in items:
-                                if title in item["url"]:
+                                if title in item["url"] and channel==item["CustomChannel"]:
                                     return True,1,item["url"]
-                    else:
-                        count=sum(title in itm["url"] for itm in items)
-                        if count>1:
-                            return False,count,None
-                        for item in items:
-                            if title in item["url"]:
-                                return True,1,item["url"]
+
+                    
+                    count=sum(title in itm["url"] for itm in items)
+                    if count>1:
+                        return False,count,None
+                    for item in items:
+                        if title in item["url"]:
+                            return True,1,item["url"]
 
                     return False,0,None
             
