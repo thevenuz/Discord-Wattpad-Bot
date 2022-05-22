@@ -19,7 +19,7 @@ async def get_custom_channel(guild:str, story_url:str, category:str):
             for guild_id, items in records.items():
                 if guild==guild_id:
                     for item in items:
-                        if any(itm["CustomChannel"] for itm in items):
+                        if "CustomChannel" in item:
                             if item["url"]==story_url and item["CustomChannel"]:
                                 return item["CustomChannel"]
 

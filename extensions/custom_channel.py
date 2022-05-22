@@ -91,27 +91,28 @@ async def set_custom_channel(ctx:lightbulb.SlashContext):
                             await ctx.respond(embed=hikari.Embed(title=f"🛑 Error:",description=f"{not_follow_msg}"))
 
                         else:
-                            for item in items:
-                                if url==item["url"]:
-                                    
-                                    item["CustomChannel"]=str(channel_id)
-
-                                    if isAuthor:
-                                        update_authors=await jhelper.write_to_json("authors.json",records)
-                                        response_msg=f"All the updates from the author: {url} will be sent in channel <#{channel_id}>"
-                                    elif isStory:
-                                        update_authors=await jhelper.write_to_json("stories.json",records)
-                                        response_msg=f"All the updates from the story: {url} will be sent in channel <#{channel_id}>"
-
-                                    if update_authors:
-                                        em=hikari.Embed(title="Success!!",description=response_msg,color=0Xff500a)
+                            if "CustomChannel" in item:
+                                for item in items:
+                                    if url==item["url"]:
                                         
-                                        await ctx.respond(embed=em)
+                                        item["CustomChannel"]=str(channel_id)
 
-                                    else:
-                                        emContent='Uh-oh, something is not right. Please check `/check-custom-channels` to see if the custom channel has been setup properly.'
-                                        emErr=hikari.Embed(title=f'🛑 Error:',description=f'{emContent}',color=0xFF0000)
-                                        await ctx.respond(embed=emErr) 
+                                        if isAuthor:
+                                            update_authors=await jhelper.write_to_json("authors.json",records)
+                                            response_msg=f"All the updates from the author: {url} will be sent in channel <#{channel_id}>"
+                                        elif isStory:
+                                            update_authors=await jhelper.write_to_json("stories.json",records)
+                                            response_msg=f"All the updates from the story: {url} will be sent in channel <#{channel_id}>"
+
+                                        if update_authors:
+                                            em=hikari.Embed(title="Success!!",description=response_msg,color=0Xff500a)
+                                            
+                                            await ctx.respond(embed=em)
+
+                                        else:
+                                            emContent='Uh-oh, something is not right. Please check `/check-custom-channels` to see if the custom channel has been setup properly.'
+                                            emErr=hikari.Embed(title=f'🛑 Error:',description=f'{emContent}',color=0xFF0000)
+                                            await ctx.respond(embed=emErr) 
                                                                     
         elif not found and count<1:
             if isStory:
@@ -197,30 +198,31 @@ async def unset_custom_channel(ctx:lightbulb.SlashContext):
                         if not any(str(url)==itm['url'] for  itm in items):
                             await ctx.respond(embed=hikari.Embed(title=f"🛑 Error:",description=f"{not_follow_msg}"))
 
-                        elif not any(str(channel_id)==itm["CustomChannel"] for itm in items):
+                        elif not any("CustomChannel" in itm and str(channel_id)==itm["CustomChannel"] for itm in items):
                             await ctx.respond(embed=hikari.Embed(title=f"🛑 Error:",description=f"<#{channel_id}> {not_set_channel}"))
 
                         else:
                             for item in items:
-                                if item["url"]==url and item["CustomChannel"]==channel_id:
-                                    item["CustomChannel"]=""
+                                if "CustomChannel"  in item:
+                                    if item["url"]==url and item["CustomChannel"]==channel_id:
+                                        item["CustomChannel"]=""
 
-                                    if isAuthor:
-                                        update_authors=await jhelper.write_to_json("authors.json",records)
-                                        response_msg=f"<#{channel_id}> has been succesfully unset as custom channel for updates from Author: {url}. Updates from this Author will still be shared in common channel if that's been setup for updates."
-                                    elif isStory:
-                                        update_authors=await jhelper.write_to_json("stories.json",records)
-                                        response_msg=f"<#{channel_id}> has been succesfully unset as custom channel for updates from Story: {url}. Updates from this Story will still be shared in common channel if that's been setup for updates."
+                                        if isAuthor:
+                                            update_authors=await jhelper.write_to_json("authors.json",records)
+                                            response_msg=f"<#{channel_id}> has been succesfully unset as custom channel for updates from Author: {url}. Updates from this Author will still be shared in common channel if that's been setup for updates."
+                                        elif isStory:
+                                            update_authors=await jhelper.write_to_json("stories.json",records)
+                                            response_msg=f"<#{channel_id}> has been succesfully unset as custom channel for updates from Story: {url}. Updates from this Story will still be shared in common channel if that's been setup for updates."
 
-                                    if update_authors:
-                                        em=hikari.Embed(title="Success!!",description=response_msg,color=0Xff500a)
-                                        
-                                        await ctx.respond(embed=em)
+                                        if update_authors:
+                                            em=hikari.Embed(title="Success!!",description=response_msg,color=0Xff500a)
+                                            
+                                            await ctx.respond(embed=em)
 
-                                    else:
-                                        emContent='Uh-oh, something is not right. Please check `/check-custom-channels` to see if the custom channel has been unset properly.'
-                                        emErr=hikari.Embed(title=f'🛑 Error:',description=f'{emContent}',color=0xFF0000)
-                                        await ctx.respond(embed=emErr) 
+                                        else:
+                                            emContent='Uh-oh, something is not right. Please check `/check-custom-channels` to see if the custom channel has been unset properly.'
+                                            emErr=hikari.Embed(title=f'🛑 Error:',description=f'{emContent}',color=0xFF0000)
+                                            await ctx.respond(embed=emErr) 
 
 
         elif not found and count<1:
@@ -276,16 +278,17 @@ async def check_custom_channels(ctx:lightbulb.SlashContext):
                 await ctx.respond(embed=hikari.Embed(title=f"🛑 Error:",description=f"{not_follow_any}"))
             else:
                 for guild_id, items in records.items():
-                    items=sorted(items,key=lambda i: i["CustomChannel"])
+                    items=sorted(items,key=lambda i: ("CustomChannel" not in i,i.get("CustomChannel",None)))# i["CustomChannel"])
                     if guild_id==guild:
                         for item in items:
-                            if item["CustomChannel"]:
-                                list_url=item["url"]
-                                list_channel=item["CustomChannel"]
-                                if list_channel in result_list:
-                                    result_list=f"{str(result_list)} {list_url}\n"
-                                else:
-                                    result_list=f"{str(result_list)}<#{list_channel}> :\n {list_url}\n"
+                            if "CustomChannel" in item:
+                                if item["CustomChannel"]:
+                                    list_url=item["url"]
+                                    list_channel=item["CustomChannel"]
+                                    if list_channel in result_list:
+                                        result_list=f"{str(result_list)} {list_url}\n"
+                                    else:
+                                        result_list=f"{str(result_list)}<#{list_channel}> :\n {list_url}\n"
         
                 if result_list:
                     logger.error("triggered %s",result_list)
@@ -314,12 +317,12 @@ async def get_full_url(title:str,guild:str,channel:str,data:dict,unset=False):
                 if guild==guild_id:
                     if not any(title in itm['url'] for  itm in items):
                         return False,0,None
+
                     if unset:
-                        if sum(channel in itm["CustomChannel"] for itm in items)==1:
+                        if sum("CustomChannel" in itm and channel in itm["CustomChannel"] for itm in items)==1:
                             for item in items:
                                 if title in item["url"] and channel==item["CustomChannel"]:
                                     return True,1,item["url"]
-
                     
                     count=sum(title in itm["url"] for itm in items)
                     if count>1:

@@ -61,10 +61,10 @@ async def followauthor(ctx:lightbulb.SlashContext):
                 embContent=f'New announcements from {author_name} will be shared in this server.'
                 msg=f'You have succesfully followed {author_name}'
                 if not authors:
-                    authors[str(ctx.guild_id)]=[{"url":f'{str(profileUrl)}',"lastupdated":f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}', "CustomChannel":""}]
+                    authors[str(ctx.guild_id)]=[{"url":f'{str(profileUrl)}',"lastupdated":f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}', "CustomChannel":"","CustomMsg":""}]
                 else:
                     if str(ctx.guild_id) not in authors:
-                        authors[str(ctx.guild_id)]=[{"url":f'{str(profileUrl)}',"lastupdated":f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}', "CustomChannel":""}]
+                        authors[str(ctx.guild_id)]=[{"url":f'{str(profileUrl)}',"lastupdated":f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}', "CustomChannel":"","CustomMsg":""}]
                     else:
                         for guild, author in authors.items():
                             if guild==str(ctx.guild_id):
@@ -73,10 +73,10 @@ async def followauthor(ctx:lightbulb.SlashContext):
                                         msg=f'You\'re already following {author_name}'
                                         embContent=f'No need to follow the same author twice!!'
                                     else:
-                                        author.append({"url": f'{profileUrl}',"lastupdated": f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}', "CustomChannel":"" })
+                                        author.append({"url": f'{profileUrl}',"lastupdated": f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}', "CustomChannel":"","CustomMsg":"" })
                                     
                                 else:
-                                    author.append({"url": f'{profileUrl}',"lastupdated": f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}', "CustomChannel":"" })
+                                    author.append({"url": f'{profileUrl}',"lastupdated": f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}', "CustomChannel":"","CustomMsg":"" })
        
 
                 # with open('authors.json','w') as s:
