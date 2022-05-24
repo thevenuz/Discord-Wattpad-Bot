@@ -91,8 +91,8 @@ async def set_custom_channel(ctx:lightbulb.SlashContext):
                             await ctx.respond(embed=hikari.Embed(title=f"🛑 Error:",description=f"{not_follow_msg}"))
 
                         else:
-                            if "CustomChannel" in item:
-                                for item in items:
+                            for item in items:
+                                if "CustomChannel" in item:
                                     if url==item["url"]:
                                         
                                         item["CustomChannel"]=str(channel_id)
@@ -291,7 +291,6 @@ async def check_custom_channels(ctx:lightbulb.SlashContext):
                                         result_list=f"{str(result_list)}<#{list_channel}> :\n {list_url}\n"
         
                 if result_list:
-                    logger.error("triggered %s",result_list)
                     await ctx.respond(embed=hikari.Embed(title=f"Your Custom Channels for {'Stories' if isStory else 'Announcements'}: ",description=f"{result_list}"))
 
                 else:

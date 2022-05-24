@@ -143,7 +143,7 @@ async def removeCustomMessage(ctx:lightbulb.SlashContext):
 
         guildId=str(ctx.guild_id)
         category=ctx.options.category
-        isEmpty=True
+        isEmpty=False
         url=ctx.options.url
         domain="wattpad.com"
         responseMsg=""
@@ -152,6 +152,7 @@ async def removeCustomMessage(ctx:lightbulb.SlashContext):
         isAuthor=False
         found=False
         count=0
+        result=""
 
         if category.lower()=="story":
             isStory=True
@@ -178,11 +179,14 @@ async def removeCustomMessage(ctx:lightbulb.SlashContext):
             elif count>1:
                 await ctx.respond(embed=hikari.Embed(title=f"🛑 Error:", description=f"You're following multiple {'Stories' if isStory else 'Authors'} that has {url} in it. Please use the full url of the {'Story' if isStory else 'Author Profile'}."))
                 found=False
+            else:
+                await ctx.respond(embed=hikari.Embed(title=f"🛑 Error:", description=f"You're not following any {'stories' if isStory else 'author'} that has title {url} in it. Try using the full url."))
+
         else:
             messages=await jhelper.read_from_json("messages.json")
 
-        if found:
-            if url:
+        if url:
+            if found:
                 if guildId not in messages:
                     await ctx.respond(embed=hikari.Embed(title=f"🛑Error:",description=f"You're not following any {'stories' if isStory else 'Authors'} in this server. Try {'`/followstory`' if isStory else '`/followauthor`'} command to follow."))
                 else:
@@ -199,7 +203,8 @@ async def removeCustomMessage(ctx:lightbulb.SlashContext):
                                         else:
                                             result=await jhelper.write_to_json("authors.json",messages)
 
-                                        responseMsg=responseMsg+f" The bot will use this message while sharing updates from {'story' if isStory else 'Author'} {url}."
+                                        responseMsg=responseMsg+f" Your custom message for the {'story' if isStory else 'Announcement'} from {url} has been removed succesfully."
+
         else:
             if messages and guildId in messages:
                 if category=="story":
@@ -225,15 +230,18 @@ async def removeCustomMessage(ctx:lightbulb.SlashContext):
                 responseMsg=f"Your {category} custom message has been removed succesfully."
                 if isEmpty:
                     responseMsg=f"You don\'t have any custom messages set up for {category} category."
-                await ctx.respond(responseMsg)
+                
 
             else:
                 responseMsg=f"Empty!! No custom messages has been set before.\n Use `/setcustommessage` command to set a custom message."
                 await ctx.respond(responseMsg)
 
-        if result and not isEmpty:
+        if isEmpty:
+            await ctx.respond(embed=hikari.Embed(title="Empty!!", description=f"You don't have any custom messages setup for {category} category."))
+
+        if (result or found) and not isEmpty:
             await ctx.respond(embed=hikari.Embed(title=f"Success!!",description=f"{responseMsg}"))
-        elif not isEmpty:
+        elif found and not isEmpty:
             await ctx.respond(embed=hikari.Embed(title=f"🛑Error:",description="Uh-oh!! Something went wrong. Try `/checkcustommsg` to check if the custom message has been unset.") )
 
     except Exception as e:

@@ -77,7 +77,7 @@ async def getnewchapter():
                                                 ch=custom_channel
 
                                             #check if there is a custom msg setup. else generate a default msg
-                                            customMsg=await customMsghelper.get_story_custommessage(guild)
+                                            customMsg=await customMsghelper.get_story_custommessage(guild, storyURL)
                                             if customMsg!="" and customMsg is not None:
                                                 msg=f"{customMsg}\n{str(nc)}"
 
@@ -165,7 +165,7 @@ async def get_announcement():
                                         msg=f'New Announcement from **{author_name}**'
 
                                         #check if a custom announcement msg has been setup for this server
-                                        customMsg=await customMsghelper.get_announcement_custommessage(guild)
+                                        customMsg=await customMsghelper.get_announcement_custommessage(guild,profile)
                                         if customMsg!="" and customMsg is not None:
                                             msg=customMsg
 
