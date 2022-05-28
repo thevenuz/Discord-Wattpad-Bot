@@ -3,7 +3,7 @@ import logging
 
 logging.basicConfig(filename='logs.txt',format='%(asctime)s %(name)s %(levelname)s %(message)s', filemode='a')
 logger=logging.getLogger(name="bot")
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.ERROR)
 
 
 async def get_custom_channel(guild:str, story_url:str, category:str):

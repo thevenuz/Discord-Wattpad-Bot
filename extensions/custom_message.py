@@ -9,12 +9,12 @@ plugin=lightbulb.Plugin("CustomMessagrPlugin")
 
 logging.basicConfig(filename='logs.txt',format='%(asctime)s %(name)s %(levelname)s %(message)s', filemode='a')
 logger=logging.getLogger(name="cmessage")
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.ERROR)
 
 
 @plugin.command()
 @lightbulb.add_checks(lightbulb.checks.has_role_permissions(hikari.Permissions.ADMINISTRATOR)|lightbulb.checks.has_role_permissions(hikari.Permissions.MODERATE_MEMBERS)|lightbulb.checks.has_role_permissions(hikari.Permissions.MANAGE_CHANNELS)|lightbulb.owner_only)
-@lightbulb.option("url","Optional: URL/title of the story/announcement for which this message needs to be applied",required=False)
+@lightbulb.option("url","URL/title of the story/announcement for which this message needs to be applied",required=False)
 @lightbulb.option("custommessage","Your custom message",required=True)
 @lightbulb.option("category","whether your custom message is for story or announcement updates",str,choices=("story","announcement"),required=True)
 @lightbulb.command("setcustommessage","set a custom message that bot can use when sharing updates")
@@ -133,7 +133,7 @@ async def setCustomMessage(ctx:lightbulb.SlashContext):
 
 @plugin.command()
 @lightbulb.add_checks(lightbulb.checks.has_role_permissions(hikari.Permissions.ADMINISTRATOR)|lightbulb.checks.has_role_permissions(hikari.Permissions.MODERATE_MEMBERS)|lightbulb.checks.has_role_permissions(hikari.Permissions.MANAGE_CHANNELS)|lightbulb.owner_only)
-@lightbulb.option("url","Optional: URL/title of the story or announcement for which the custom message needs to be removed.",required=False)
+@lightbulb.option("url","URL/title of the story or announcement for which the custom message needs to be removed.",required=False)
 @lightbulb.option("category","whether you want to remove story or announcement custom message",str,choices=("story","announcement"),required=True)
 @lightbulb.command("unsetcustommessage","remove the custom message for updates. After removing default messages will be used")
 @lightbulb.implements(lightbulb.SlashCommand)

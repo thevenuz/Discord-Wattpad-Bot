@@ -301,7 +301,7 @@ async def check_custom_channels(ctx:lightbulb.SlashContext):
 
 
     except Exception as e:
-        logger.fatal("Exception occured in custom_channel.check_custom_channels for server: %s, category:%s",ctx.guild_id,ctx.options.category)
+        logger.fatal("Exception occured in custom_channel.check_custom_channels for server: %s, category:%s",ctx.guild_id,ctx.options.category,exc_info=1)
         raise e
 
 

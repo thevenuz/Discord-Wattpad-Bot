@@ -19,7 +19,7 @@ PUBLICLOGCHANNEL=os.getenv('PUBLICLOGCHANNEL')
 
 logging.basicConfig(filename='logs.txt',format='%(asctime)s %(name)s %(levelname)s %(message)s', filemode='a')
 logger=logging.getLogger(name="bot")
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.ERROR)
 
 bot=lightbulb.BotApp(token=TOKEN)
 
@@ -39,7 +39,7 @@ async def msg(event):
 
 #region get new chapter task
 #task for fetching new chapters, checks every 2 mins
-@tasks.task(m=2, auto_start=True)
+@tasks.task(m=4, auto_start=True)
 async def getnewchapter():
     try:
         logger.info("getnewchapter task started")
@@ -53,6 +53,7 @@ async def getnewchapter():
             stories=json.loads(await s.read())
             channels=json.loads(await c.read())
 
+        
 
         for guild,story in stories.items():
             for sty in story:
@@ -66,7 +67,7 @@ async def getnewchapter():
                         #check if the guild Id is in channels.json or if any custom channel is setup for this story
                         custom_channel=await customchnlhelper.get_custom_channel(guild,storyURL,"story")
 
-                        if guild in channels:
+                        if guild in channels or custom_channel:
                             if channels[guild] or custom_channel:
                                 newchapter= await ws.get_chapter(str(storyURL),lastchecked)
                                 if newchapter:
@@ -152,7 +153,7 @@ async def get_announcement():
                     author_name=auth['url'].split('/user/')[1].replace('-',' ')
                 #check if the guild Id is in channels.json or if any custom channel is setup for this story
                 custom_channel=await customchnlhelper.get_custom_channel(guild,profile,"author")
-                if guild in channels:
+                if guild in channels or custom_channel:
                     if channels[guild] or custom_channel:
                         try:
                             new_announcement=await ws.get_new_announcement(profile,lastchecked)

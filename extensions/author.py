@@ -13,7 +13,7 @@ plugin=lightbulb.Plugin('AuthorPlugin')
 
 logging.basicConfig(filename='logs.txt',format='%(asctime)s %(name)s %(levelname)s %(message)s', filemode='a')
 logger=logging.getLogger(name="author")
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.ERROR)
 
 #region follow author
 @plugin.command

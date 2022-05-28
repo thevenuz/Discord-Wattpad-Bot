@@ -12,7 +12,7 @@ logger.setLevel(logging.ERROR)
 
 #custom help command start
 @plugin.command
-@lightbulb.option('category','Use channel/story/custom message/author/custom channel/setup/about for detailed help on specific category.', str, choices=('channel','story','author','custom message','custom channel','setup','about'), required=False)
+@lightbulb.option('category','Use channel/story/custom message/author/custom channel/setup/about for detailed help on categories', str, choices=('channel','story','author','custom message','custom channel','setup','about'), required=False)
 @lightbulb.command('help','Gives you help on commands. Use empty/channel/story/author/setup/about as categories')
 @lightbulb.implements(lightbulb.SlashCommand)
 async def help(ctx):
