@@ -4,12 +4,15 @@ import json
 import logging
 import wattpad as ws
 from datetime import datetime
+from helpers.wattpad_helper import get_actual_author_url
+import aiofiles
+import helpers.json_helper as jhelper
 
 plugin=lightbulb.Plugin('AuthorPlugin')
 
 
 logging.basicConfig(filename='logs.txt',format='%(asctime)s %(name)s %(levelname)s %(message)s', filemode='a')
-logger=logging.getLogger()
+logger=logging.getLogger(name="author")
 logger.setLevel(logging.ERROR)
 
 #region follow author
@@ -20,10 +23,30 @@ logger.setLevel(logging.ERROR)
 @lightbulb.implements(lightbulb.SlashCommand)
 async def followauthor(ctx:lightbulb.SlashContext):
     try:
-        profileUrl=ctx.options.authorprofileurl
+        enteredURL=ctx.options.authorprofileurl
         logger.info('Follow author command has been triggered for guild %s and channel %s',ctx.guild_id,ctx.options.authorprofileurl)
-        with open('authors.json','r') as s:
-            authors=json.load(s)
+
+        #check if the profile URL contains any UTM tags and if yes, get a normal url withput utm tags
+        profileUrl=""
+        try:
+            if "utm" in enteredURL:
+                profileUrl=await get_actual_author_url(enteredURL)
+
+        except Exception as e:
+            logger.fatal("Exception occured in author.followauthor method while fetching actual author url for entered author url: %s, guild: %s",enteredURL,ctx.guild_id,exc_info=1)
+            pass
+
+        if not profileUrl:
+            profileUrl=enteredURL
+
+
+        # with open('authors.json','r') as s:
+        #     authors=json.load(s)
+
+
+        #async impl of reading from json file:
+        authors=await jhelper.read_from_json("authors.json")
+
 
         domain='www.wattpad.com'
         if domain not in profileUrl:
@@ -38,10 +61,10 @@ async def followauthor(ctx:lightbulb.SlashContext):
                 embContent=f'New announcements from {author_name} will be shared in this server.'
                 msg=f'You have succesfully followed {author_name}'
                 if not authors:
-                    authors[str(ctx.guild_id)]=[{"url":f'{str(profileUrl)}',"lastupdated":f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}'}]
+                    authors[str(ctx.guild_id)]=[{"url":f'{str(profileUrl)}',"lastupdated":f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}', "CustomChannel":"","CustomMsg":""}]
                 else:
                     if str(ctx.guild_id) not in authors:
-                        authors[str(ctx.guild_id)]=[{"url":f'{str(profileUrl)}',"lastupdated":f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}'}]
+                        authors[str(ctx.guild_id)]=[{"url":f'{str(profileUrl)}',"lastupdated":f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}', "CustomChannel":"","CustomMsg":""}]
                     else:
                         for guild, author in authors.items():
                             if guild==str(ctx.guild_id):
@@ -50,14 +73,17 @@ async def followauthor(ctx:lightbulb.SlashContext):
                                         msg=f'You\'re already following {author_name}'
                                         embContent=f'No need to follow the same author twice!!'
                                     else:
-                                        author.append({"url": f'{profileUrl}',"lastupdated": f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}' })
+                                        author.append({"url": f'{profileUrl}',"lastupdated": f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}', "CustomChannel":"","CustomMsg":"" })
                                     
                                 else:
-                                    author.append({"url": f'{profileUrl}',"lastupdated": f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}' })
+                                    author.append({"url": f'{profileUrl}',"lastupdated": f'{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}', "CustomChannel":"","CustomMsg":"" })
        
 
-                with open('authors.json','w') as s:
-                    json.dump(authors,s,indent=2)
+                # with open('authors.json','w') as s:
+                #     json.dump(authors,s,indent=2)
+
+                #async impl of writing to json files:
+                result=await jhelper.write_to_json("authors.json",authors)
 
                 em=hikari.Embed(title=msg,description=embContent, color=0Xff500a)
 
@@ -89,8 +115,13 @@ async def unfollowauthor(ctx:lightbulb.SlashContext):
         author_name=authorprofile.split('/user/')[1].replace('-',' ')
         emContent=f'New announcements from {author_name} will not be shared in this server'
         emTitle=f'You have succesfully unfollowed {author_name}'
-        with open('authors.json','r') as f:
-            authors=json.load(f)
+
+        # with open('authors.json','r') as f:
+        #     authors=json.load(f)
+
+       #async impl of reading from json file:
+        authors=await jhelper.read_from_json("authors.json")
+        
         if ctx.channel_id is not None:
             for guild,author in authors.items():
                 if guild==str(ctx.guild_id):
@@ -104,10 +135,13 @@ async def unfollowauthor(ctx:lightbulb.SlashContext):
                         
                         
                     
-        with open('authors.json','w') as f:
-            json.dump(authors,f,indent=2)
+        # with open('authors.json','w') as f:
+        #     json.dump(authors,f,indent=2)
 
-        
+
+        #async impl of writing to json files:
+        result=await jhelper.write_to_json("authors.json",authors)
+
         
         em=hikari.Embed(title=emTitle, description=emContent,color=0Xff500a)
 
@@ -126,8 +160,13 @@ async def unfollowauthor(ctx:lightbulb.SlashContext):
 async def getauthors(ctx:lightbulb.SlashContext):
     try:
         logger.info('getauthors command triggered for guild: %s',ctx.guild_id)
-        with open('authors.json') as f:
-            authors=json.load(f)
+
+        # with open('authors.json') as f:
+        #     authors=json.load(f)
+
+        #async impl of reading from json file:
+        authors=await jhelper.read_from_json("authors.json")
+        
         msg=''
         if ctx.guild_id is not None:
             for guild, author in authors.items():
@@ -148,7 +187,7 @@ async def getauthors(ctx:lightbulb.SlashContext):
         await ctx.respond(embed=em)
     
     except Exception as e:
-        logger.critical('Exception occured in author.py getauthors commands for guild: %s',ctx.guild_id)
+        logger.critical('Exception occured in author.py getauthors commands for guild: %s',ctx.guild_id,exc_info=1)
 
 #endregion get authors
 

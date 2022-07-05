@@ -7,16 +7,24 @@ from lightbulb.ext import tasks
 import wattpad as ws
 import dotenv
 import logging
+import helpers.message_helper as customMsghelper
+import helpers.wattpad_helper as wpad
+import helpers.custom_channel_helper as customchnlhelper
+import aiofiles
 
 dotenv.load_dotenv()
 TOKEN=os.getenv('BOTTOKEN')
 LOGCHANNEL=os.getenv('LOGCHANNEL')
+PUBLICLOGCHANNEL=os.getenv('PUBLICLOGCHANNEL')
 
 logging.basicConfig(filename='logs.txt',format='%(asctime)s %(name)s %(levelname)s %(message)s', filemode='a')
-logger=logging.getLogger()
+logger=logging.getLogger(name="bot")
 logger.setLevel(logging.ERROR)
 
 bot=lightbulb.BotApp(token=TOKEN)
+
+
+
 tasks.load(bot)
 
 bot.load_extensions_from('./extensions',must_exist=True)
@@ -31,49 +39,88 @@ async def msg(event):
 
 #region get new chapter task
 #task for fetching new chapters, checks every 2 mins
-@tasks.task(m=2, auto_start=True)
+@tasks.task(m=4, auto_start=True)
 async def getnewchapter():
     try:
-        logger.info('task triggered')
-        with open('stories.json', 'r') as s, open('channels.json','r') as f:
-            stories=json.load(s)
-            channels=json.load(f)
+        logger.info("getnewchapter task started")
+        # with open('stories.json', 'r') as s, open('channels.json','r') as f:
+        #     stories=json.load(s)
+        #     channels=json.load(f)
+
         
+        #async implementation of reading from files
+        async with aiofiles.open("stories.json",mode="r") as s,aiofiles.open("channels.json",mode="r") as c:
+            stories=json.loads(await s.read())
+            channels=json.loads(await c.read())
+
+        
+
         for guild,story in stories.items():
             for sty in story:
                 if sty:
-                    key=sty['url']
+                    storyURL=sty["url"]
                     lastchecked=sty['lastupdated']
-                    logger.info('Cheking for a new story of %s',key)
-                    title=''
-                    try:
-                        if 'utm' not in key:
-                            storytitle=str(key).split('/')
-                            title=storytitle[-1].split('-',1)
-                            title=title[-1].replace('-',' ')
-                            title=f'from {title}'
-                    except:
-                        pass
+                    logger.info('Cheking for a new story of %s',storyURL)
+                   
 
                     try:
-                        newchapter= await ws.get_chapter(str(key),lastchecked)
-                        if newchapter:
-                            if channels[guild]:
-                                for ch in channels[guild]:
-                                    for nc in newchapter[0]:
-                                        msg=f'**New chapter {title}**\n {str(nc)}'
-                                    await bot.rest.create_message(ch, msg)
+                        #check if the guild Id is in channels.json or if any custom channel is setup for this story
+                        custom_channel=await customchnlhelper.get_custom_channel(guild,storyURL,"story")
 
-                                sty['lastupdated']=f'{newchapter[1]}'
-                                with open('stories.json','w') as s:
-                                    json.dump(stories,s,indent=2)
+                        if guild in channels or custom_channel:
+                            if channels[guild] or custom_channel:
+                                newchapter= await ws.get_chapter(str(storyURL),lastchecked)
+                                if newchapter:
+                                    for ch in channels[guild]:
+                                        for nc in newchapter[0]:
+
+                                            if custom_channel:
+                                                ch=custom_channel
+
+                                            #check if there is a custom msg setup. else generate a default msg
+                                            customMsg=await customMsghelper.get_story_custommessage(guild, storyURL)
+                                            if customMsg!="" and customMsg is not None:
+                                                msg=f"{customMsg}\n{str(nc)}"
+
+                                            else:
+                                                #get story title from story link to send in msg description
+                                                storyTitle=""
+                                                if "utm" not in storyURL:
+                                                    try:
+                                                        storyTitle=await wpad.get_story_title(storyURL)
+                                                    except:
+                                                        pass
+
+                                                if storyTitle:
+                                                    storyTitle=f"from {storyTitle}"
+
+                                                msg=f'**New chapter {storyTitle}**\n {str(nc)}'
+
+                                            # #check if a custom message has been setup for this server
+                                            # customMsg=await customMsghelper.get_story_custommessage(guild)
+                                            # if customMsg!="" and customMsg is not None:
+                                            #     msg=f"{customMsg}\n{str(nc)}"
+                                            
+                                        await bot.rest.create_message(ch, msg)
+
+                                        sty['lastupdated']=f'{newchapter[1]}'
+                                        # with open('stories.json','w') as s:
+                                        #     json.dump(stories,s,indent=2)
+
+                                        #async implementation of writing into json file
+                                        async with aiofiles.open("stories.json",mode="w") as s:
+                                            await s.write(json.dumps(stories,indent=2))
+
+        
 
                         
 
                     except Exception as e:
                         logger.fatal('Error occured in wattpad get_chapter method', exc_info=1)
                         raise e
-          
+
+        logger.info("getnewchapter task ended")
+     
     except Exception as e:
         logger.critical('Error in getnewchapter task:',exc_info=1)
         pass
@@ -86,10 +133,17 @@ async def getnewchapter():
 @tasks.task(m=3,auto_start=True)
 async def get_announcement():
     try:
-        logger.info('get announcement task triggered')
-        with open('authors.json','r') as a, open('channels.json','r') as c:
-            authors=json.load(a)
-            channels=json.load(c)
+        logger.info("get_announcement task started")
+
+
+        # with open('authors.json','r') as a, open('channels.json','r') as c:
+        #     authors=json.load(a)
+        #     channels=json.load(c)
+
+        #async implementation of reading from json file
+        async with aiofiles.open("authors.json",mode="r") as a, aiofiles.open("channels.json",mode="r") as c:
+            authors=json.loads(await a.read())
+            channels=json.loads(await c.read())
 
         for guild, author in authors.items():
             for auth in author:
@@ -97,29 +151,44 @@ async def get_announcement():
                     profile=auth['url']
                     lastchecked=auth['lastupdated']
                     author_name=auth['url'].split('/user/')[1].replace('-',' ')
-
-
-                    try:
-                        new_announcement=await ws.get_new_announcement(profile,lastchecked)
-                        # new_announcement_text=new_announcement
-                        # new_updated_time=datetime.utcnow()
-                        if new_announcement:
-                            if channels[guild]:
+                #check if the guild Id is in channels.json or if any custom channel is setup for this story
+                custom_channel=await customchnlhelper.get_custom_channel(guild,profile,"author")
+                if guild in channels or custom_channel:
+                    if channels[guild] or custom_channel:
+                        try:
+                            new_announcement=await ws.get_new_announcement(profile,lastchecked)
+                            if new_announcement:
                                 for ch in channels[guild]:
                                     if new_announcement[0]:
+                                        if custom_channel:
+                                            ch=custom_channel
+
                                         msg=f'New Announcement from **{author_name}**'
+
+                                        #check if a custom announcement msg has been setup for this server
+                                        customMsg=await customMsghelper.get_announcement_custommessage(guild,profile)
+                                        if customMsg!="" and customMsg is not None:
+                                            msg=customMsg
+
                                         em=hikari.Embed(title='Announcement:',description=f'{new_announcement[0]}',color=0Xff500a)
                                         await bot.rest.create_message(ch,embed=em,content=msg)
 
                                 auth['lastupdated']=str(new_announcement[1])
-                                with open('authors.json','w') as a:
-                                    json.dump(authors,a,indent=2)
 
-                    except Exception as e:
-                        logger.fatal('Exception occured in task get_announcement method for author: %s',profile,exc_info=1)
-                        pass
+                                # with open('authors.json','w') as a:
+                                #     json.dump(authors,a,indent=2)
 
-                
+                                #async implementation of writing to json files
+                                async with aiofiles.open("authors.json",mode="w") as a:
+                                    await a.write(json.dumps(authors,indent=2))
+
+
+                    
+
+                        except Exception as e:
+                            logger.fatal('Exception occured in task get_announcement method for author: %s',profile,exc_info=1)
+                            pass
+        logger.info("get_announcement task ended")
 
     except Exception as e:
         logger.critical('Exception occured in get announcement task:', exc_info=1)
@@ -136,82 +205,60 @@ async def get_announcement():
 async def guildjoin(guild: hikari.GuildJoinEvent):
     try:
         logger.info('Guild Join event has been triggered for %s', guild.guild_id)
-        with open('channels.json','r') as f:
-            channels=json.load(f)
+
+        #async impl of reading from json files
+        async with aiofiles.open("stories.json",mode="r") as s, aiofiles.open("authors.json",mode="r") as a, aiofiles.open("channels.json",mode="r") as c:
+            stories=json.loads(await s.read())
+            authors=json.loads(await a.read())
+            channels=json.loads(await c.read())
+
+
+        # with open('channels.json','r') as f:
+        #     channels=json.load(f)
         
 
         if str(guild.guild_id) not in channels:
             channels[str(guild.guild_id)]=[]
 
-        with open('channels.json','w') as s:
-            json.dump(channels,s,indent=2)
+        # with open('channels.json','w') as s:
+        #     json.dump(channels,s,indent=2)
 
-        with open('stories.json','r') as s:
-            stories=json.load(s)
+        # with open('stories.json','r') as s:
+        #     stories=json.load(s)
 
         if str(guild.guild_id) not in stories:
             stories[str(guild.guild_id)]=[]
 
-        with open('stories.json','w') as f:
-            json.dump(stories,f,indent=2)
+        # with open('stories.json','w') as f:
+        #     json.dump(stories,f,indent=2)
 
-        with open('authors.json','r') as a:
-            authors=json.load(a)
+        # with open('authors.json','r') as a:
+        #     authors=json.load(a)
 
         if str(guild.guild_id) not in authors:
             authors[str(guild.guild_id)]=[]
 
-        with open('authors.json','w') as a:
-            json.dump(authors,a,indent=2)
+        # with open('authors.json','w') as a:
+        #     json.dump(authors,a,indent=2)
 
+
+        #async impl of writing to json files
+        async with aiofiles.open("stories.json",mode="w") as s, aiofiles.open("authors.json",mode="w") as a, aiofiles.open("channels.json",mode="w") as c:
+            await s.write(json.dumps(stories,indent=2))
+            await a.write(json.dumps(authors,indent=2))
+            await c.write(json.dumps(channels,indent=2))
+            
 
         try:
             joinmsg=f'Bot joined a new server guild Id: {guild.guild_id} and server name: {guild.guild.name}'
+            publicJoinMsg=f"Bot joined a new server: {guild.guild.name}"
             await bot.rest.create_message(LOGCHANNEL,joinmsg)
+            await bot.rest.create_message(PUBLICLOGCHANNEL,publicJoinMsg)
         except:
             logger.fatal('Excpetion occured when sending join msg to log server for guild Id: %s and server name: %s',guild.guild_id,guild.old_guild.name)
             pass
         
-
-       
-        #region not using
-        # try:
-        #     descwhat='Whenever you write a new chapter in your story and publish it, this bot will automatically share the new chapter\'s link in your server.'
-        #     deschow1=''
-        #     deschow='Specify the channel/channels, story/stories that you wish to receive the new chapter updates.\nOnly members with ADMIN or MODMEMBERS permission can use the commands. That\'s it. New chapter links of the stories will be posted in the added channels whenever a new chapter is published.'
-        #     desccmd='This bot supports the new slash commands, so the prefix for all the commands is `/`. All the commands are self explanatory. Please use `/help` for more details about commands.'
-        #     descother1='Bot works pretty well already but consider this as a beta and it will be improved over time.'
-        #     descother2='Sometimes the slash commands take some time to register and appear in the server. So please be patient for an hour or so if the commands do not appear.'
-        #     descother3='Bot supports multiple servers.'
-        #     descother=f'{descother1}\n{descother2}\n{descother3}\n'
-
-        #     em=hikari.Embed(title='Thanks for adding the bot to your server! Here\'s a rundown of this bot.',  color=0Xff500a)
-        #     em.add_field(name='What does this bot do?',value=descwhat)
-        #     em.add_field(name='How to use the bot?', value=deschow)
-        #     em.add_field(name='How to use the commands?', value=desccmd)
-        #     #em.add_field(name='Other stuff:', value=descother)
-
-        #     if created_channel:
-        #         await guild.app.rest.create_message(created_channel.id,embed=em)
-            
-        #     else:
-        #         for k,v in guild.channels.items():
-        #             if v.parent_id:
-        #                 defaultchannel=k
-        #                 await guild.app.rest.create_message(defaultchannel, embed=em)
-        #                 break
-
-        # except Exception as e:
-        #     logger.critical('Error in sending welcome msg for guild %s', guild.guild_id, exc_info=1)
-        #     pass
-
-        # try:
-        #     joinmsg=f'Bot joined a new server guild Id: {guild.guild_id} and server name: {guild.guild.name}'
-        #     await bot.rest.create_message(LOGCHANNEL,joinmsg)
-        # except Exception as e:
-        #     logger.fatal('Excpetion occured when sending join msg to log server for guild Id: %s and server name: %s',guild.guild_id,guild.old_guild.name)
-        #     pass
-        #endregion not using
+        
     except Exception as e:
         logger.critical('Error in guild join event for guild %s', guild.guild_id, exc_info=1)
         pass
@@ -225,35 +272,73 @@ async def guildjoin(guild: hikari.GuildJoinEvent):
 async def guildLeave(guild: hikari.GuildLeaveEvent):
     try:
         logger.error('Guild leave event triggered for the guild: %s, guild name: %s', guild.guild_id, guild.old_guild.name)
-        with open('stories.json', 'r') as s, open('channels.json','r') as f:
-            stories=json.load(s)
-            channels=json.load(f)
+
+        # with open('stories.json', 'r') as s, open('channels.json','r') as f:
+        #     stories=json.load(s)
+        #     channels=json.load(f)
+
+
+        #async impl of reading from json files
+        async with aiofiles.open("stories.json",mode="r") as s, aiofiles.open("channels.json",mode="r") as c, aiofiles.open("authors.json",mode="r") as a, aiofiles.open("messages.json", mode="r") as m:
+            stories=await s.read()
+            authors=await a.read()
+            channels=await c.read()
+            messages=await m.read()
 
         if guild.guild_id:
             if str(guild.guild_id) in channels:
                 del channels[str(guild.guild_id)]
+
             if str(guild.guild_id) in stories:
                 del stories[str(guild.guild_id)]
-
-        with open('stories.json', 'w') as s, open('channels.json','w') as f:
-            json.dump(channels,f,indent=2)
-            json.dump(stories,s,indent=2)
-
-        with open ('authors.json','r') as a:
-            authors=json.load(a)
-
-        if guild.guild_id:
+            
             if str(guild.guild_id) in authors:
                 del authors[str(guild.guild_id)]
 
-        with open('authors.json','w') as a:
-            json.dump(authors,a,indent=2)
+            if str(guild.guild_id) in messages:
+                del messages[str(guild.guild_id)]
+
+
+        #async impl of reading in to json files:
+        async with aiofiles.open("stories.json",mode="w") as s, aiofiles.open("channels.json",mode="w") as c, aiofiles.open("authors.json",mode="w") as a, aiofiles.open("messages.json", mode="w") as m:
+            await s.write(json.dumps(stories,indent=2))
+            await a.write(json.dumps(authors,indent=2))
+            await c.write(json.dumps(channels,indent=2))
+            await m.write(json.dumps(messages,indent=2))
+
+                
+
+        # with open('stories.json', 'w') as s, open('channels.json','w') as f:
+        #     json.dump(channels,f,indent=2)
+        #     json.dump(stories,s,indent=2)
+
+        # with open ('authors.json','r') as a:
+        #     authors=json.load(a)
+
+        # if guild.guild_id:
+        #     if str(guild.guild_id) in authors:
+        #         del authors[str(guild.guild_id)]
+
+        # with open('authors.json','w') as a:
+        #     json.dump(authors,a,indent=2)
+
+        # with open("messages.json","r") as m:
+        #     messages=json.load(m)
+
+        # if guild.guild_id:
+        #     if str(guild.guild_id) in messages:
+        #         del messages[str(guild.guild_id)]
+
+        # with open("messages.json","w") as m:
+        #     json.dump(messages,m,indent=2)
 
         try:
             joinmsg=f'Bot left a server guild Id: {guild.guild_id} and server name: {guild.old_guild.name}'
+            publicLeftMsg=f"Bot left server: {guild.old_guild.name}"
             await bot.rest.create_message(LOGCHANNEL,joinmsg)
+            await bot.rest.create_message(PUBLICLOGCHANNEL,publicLeftMsg)
         except Exception as e:
-            logger.fatal('Excpetion occured when sending leave msg to log server for guild: %s and server name: %s',guild.guild_id,guild.old_guild.name)
+            logger.fatal('Excpetion occured when sending leave msg to log server for guild: %s and server name: %s',guild.guild_id,guild.old_guild.name,exc_info=1)
             pass
 
     except Exception as e:
