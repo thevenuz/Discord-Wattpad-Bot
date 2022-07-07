@@ -7,4 +7,5 @@ class Server:
     ServerId:int=0
     GuildId:str=""
     IsActive:int=0
+    Language:str="en"
     RegisteredOn:datetime=datetime.utcnow()

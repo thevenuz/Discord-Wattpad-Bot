@@ -18,6 +18,7 @@ async def follow_story(ctx: lightbulb.SlashContext) -> None:
         logger.info("%s.follow_story method invoked for story: %s", file_prefix, ctx.options.storyurl)
 
         storyURL=ctx.options.storyurl
+        guildId= ctx.guild_id
 
         #call the execution
     
