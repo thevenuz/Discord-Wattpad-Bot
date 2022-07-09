@@ -14,6 +14,9 @@
     "unfollow:story:not:following" : "You are not following this tsory in this server. Please use `/check-stories` command to see the stories you're following in this server",
 
     "check:stories:following" : "The stories you're following in this server:",
-    "check:stories:empty" : "You're not following any stories in this server currently. Use `/follow-story` command to follow a new story."
+    "check:stories:empty" : "You're not following any stories in this server currently. Use `/follow-story` command to follow a new story.",
+
+    "follow:author:success" : "You have succesfully followed this author. The bot will post the new announcment updates from this author.",
+    "invalid:author:url" : "There is something wrong with the author profile URL you entered. Please check if this is the correct URL and try again."
 
 }

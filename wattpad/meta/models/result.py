@@ -22,3 +22,8 @@ class ResultUnfollowStory(Result):
 class ResultCheckStories(Result):
     StoryData:List[Story]= None
     IsEmpty:bool= False
+
+@dataclass
+class ResultAuthor(Result):
+    IsInvalidUrl:bool=False
+    HasPattern:bool=True
