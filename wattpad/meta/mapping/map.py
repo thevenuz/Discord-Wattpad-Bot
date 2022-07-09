@@ -1,5 +1,5 @@
 from typing import Dict, List
-from unittest import result
+from wattpad.db.models.author import Author
 from wattpad.logger.baselogger import BaseLogger
 from wattpad.db.models.story import Story
 from copy import deepcopy
@@ -60,3 +60,53 @@ class Map:
             self.logger.fatal("Exception occured in %s.__map_story_record method invoked", self.file_prefix,exc_info=1)
             raise e
         
+    async def map_author_records_list(self, data, columns) -> List[Story]:
+        """
+            This method maps data from DB to class object
+        """
+        try:
+            self.logger.info("%s.map_author_records_list method invoked", self.file_prefix)
+
+            result=[]
+
+            maps = [dict(zip(columns, row)) for row in data]
+
+            if maps:
+                for map in maps:
+                    map_result = await self.__map_author_record(map = map)
+
+                    if map_result:
+                        result.append(deepcopy(map_result))
+
+            if result:
+                return result
+            
+            return None
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.map_author_records_list invoked", self.file_prefix,exc_info=1)
+            raise e
+
+    async def __map_author_record(self, map:Dict) -> Story:
+        try:
+            self.logger.info("%s.__map_author_record method invoked", self.file_prefix)
+
+            result= Author()
+
+            if map:
+                result.AuthorId= map["uuthorid"]
+                result.Url= map["url"]
+                result.ServerId= map["serverid"]
+                result.ChannelId= map["channelid"]
+                result.IsActive= map["isactive"]
+                result.LastUpdatedOn= map["lastupdatedon"]
+                result.LastcheckedOn= map["lastcheckedon"]
+                result.RegisteredOn= map["registeredon"]
+
+                return result
+
+            return None
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.__map_author_record method invoked", self.file_prefix,exc_info=1)
+            raise e

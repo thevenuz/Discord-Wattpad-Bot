@@ -1,6 +1,6 @@
 from wattpad.db.repository.serverrepo import ServerRepo
 from wattpad.logger.baselogger import BaseLogger
-from wattpad.meta.models.result import Result, ResultAuthor, ResultUnfollow
+from wattpad.meta.models.result import Result, ResultAuthor, ResultUnfollow, ResultCheck
 from wattpad.utils.authorutil import AuthorUtil
 from wattpad.db.models.server import Server
 from wattpad.db.models.author import Author
@@ -101,7 +101,34 @@ class AuthorExec:
             self.logger.fatal("Exception occured in %s.unfollow_author method invoked for server: %s, author: %s", self.file_prefix, guildid, url,exc_info=1)
             raise e
 
+    async def check_authors(self, guildid:str) -> ResultCheck:
+        try:
+            self.logger.info("%s.check_authors method invoked for server: %s", self.file_prefix, guildid)
 
+            #get server id from servers table
+            serverid= await self.serverRepo.get_serverid_from_server(guildid)
+
+            if not serverid:
+                return ResultCheck(False, "Error while getting server id")
+
+            else:
+                #get authors from the server id
+                authors= await self.authorRepo.get_authors_from_server_id(serverid, 1)
+
+                if authors:
+                    return ResultCheck(True, "success", Data=authors)
+
+                else:
+                    return ResultCheck(False, "No authors found", IsEmpty=True)
+            
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.check_authors method invoked for server: %s", self.file_prefix, guildid, exc_info=1)
+            raise e
+        
+
+
+    #region misc methods
     async def __get_author_url_from_title(self, title:str, server:str) -> str:
         try:
             self.logger.info("%s.__get_author_url_from_title method invoked for title: %s, server: %s", self.file_prefix, title, server)
@@ -125,4 +152,4 @@ class AuthorExec:
             self.logger.fatal("Exception occured in %s.__get_author_url_from_title method invoked for title: %s, server: %s", self.file_prefix, title, server,exc_info=1)
             raise e
         
-        
+    #endregion 

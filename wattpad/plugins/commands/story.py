@@ -101,7 +101,7 @@ async def check_stories(ctx: lightbulb.SlashContext) -> None:
 
         if result.IsSuccess:
             #build the description of the msg
-            story_data= await StoryUtil().build_story_data_msg(result.StoryData)
+            story_data= await StoryUtil().build_story_data_msg(result.Data)
 
             await ctx.respond(embed=hikari.Embed(title=f"{msgs['check:stories:following']}", description=f"{story_data}", color=0xFF0000))
 

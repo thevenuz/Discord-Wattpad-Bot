@@ -1,6 +1,7 @@
 import lightbulb
 import hikari
 from wattpad.logger.baselogger import BaseLogger
+from wattpad.utils.authorutil import AuthorUtil
 from wattpad.utils.config import Config
 from wattpad.pluginsexecution.commandsexec.authorexec import AuthorExec
 
@@ -79,5 +80,38 @@ async def unfollow_author(ctx: lightbulb.SlashContext) -> None:
     
     except Exception as e:
         logger.fatal("Exception occured in %s.unfollow_author method invoked for server: %s, author: %s", file_prefix, ctx.guild_id, ctx.options.authorprofileurl,exc_info=1)
+        raise e
+    
+
+@plugin.command
+@lightbulb.command("check-authors","Check the author's you're following in this server", auto_defer=True)
+@lightbulb.implements(lightbulb.SlashCommand)
+async def check_authors(ctx: lightbulb.SlashContext) -> None:
+    try:
+        logger.info("%s.check_authors method invoked for server: %s", file_prefix, ctx.guild_id)
+
+        guildId= str(ctx.guild_id)
+
+        msgs= await Config().get_messages("en")
+
+        #call the exec
+        result = await AuthorExec().check_authors(guildId)
+
+        if result.IsSuccess:
+            #build the description of the msg
+            author_data= await AuthorUtil().build_author_data_msg(result.Data)
+
+            await ctx.respond(embed=hikari.Embed(title=f"{msgs['check:authors:following']}", description=f"{author_data}", color=0xFF0000))
+
+        else:
+            logger.error("Error occured in %s.check_authors method for server: %s, Error: %s", file_prefix, guildId, result.ResultInfo)
+            if result.IsEmpty:
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['empty']}", description=f"{msgs['check:authors:empty']}", color=0xFF0000))
+
+            else:
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['unknown:error']}", description=f"{msgs['unknown:error:msg']}", color=0xFF0000))
+    
+    except Exception as e:
+        logger.fatal("Exception occured in %s.check_authors method invoked for server: %s", file_prefix, ctx.guild_id, exc_info=1)
         raise e
     

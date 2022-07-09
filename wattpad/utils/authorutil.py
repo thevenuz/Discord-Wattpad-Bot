@@ -1,3 +1,5 @@
+from typing import List
+from wattpad.db.models.author import Author
 from wattpad.logger.baselogger import BaseLogger
 import aiohttp
 
@@ -53,6 +55,23 @@ class AuthorUtil:
         except Exception as e:
             self.logger.fatal("Exception occured in %s.get_actual_author_url method invoked for author: %s", self.file_prefix, authorurl,exc_info=1)
             raise e
+
+    async def build_author_data_msg(self, authors:List[Author]) -> str:
+        try:
+            self.logger.info("%s.build_author_data_msg method invoked", self.file_prefix)
+
+            return_msg=""
+
+            for index, author in enumerate(authors):
+                return_msg= f"{return_msg}{index}. {author.Url}\n"
+
+            
+            return return_msg
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.build_author_data_msg method invoked", self.file_prefix,exc_info=1)
+            raise e
+        
 
     async def __get_author_url_from_utm(self, authorurl:str) -> str:
         try:

@@ -1,7 +1,7 @@
 from unittest import result
 from wattpad.db.repository.storyrepo import StoryRepo
 from wattpad.logger.baselogger import BaseLogger
-from wattpad.meta.models.result import Result, ResultCheckStories, ResultStory, ResultUnfollow
+from wattpad.meta.models.result import Result, ResultCheck, ResultStory, ResultUnfollow
 from wattpad.utils.storyutil import StoryUtil
 from wattpad.db.models.story import Story
 from wattpad.db.models.server import Server
@@ -102,7 +102,7 @@ class StoryExec:
             self.logger.fatal("Exception occured in %s.unfollow_story method invoked for url: %s, server: %s", self.file_prefix, url, guildid,exc_info=1)
             raise e
 
-    async def check_stories(self, guildid:str) -> ResultCheckStories:
+    async def check_stories(self, guildid:str) -> ResultCheck:
         try:
             self.logger.info("%s.check_stories method invoked for server: %s", self.file_prefix, guildid)
 
@@ -110,17 +110,17 @@ class StoryExec:
             serverid= await self.serverRepo.get_serverid_from_server(guildid)
 
             if not serverid:
-                return ResultCheckStories(False, "Error while getting server id")
+                return ResultCheck(False, "Error while getting server id")
 
             else:
                 #get stories from the server id
                 stories= await self.storyRepo.get_stories_from_server_id(serverid, 1)
 
                 if stories:
-                    return ResultCheckStories(True, "success", StoryData=stories)
+                    return ResultCheck(True, "success", Data=stories)
 
                 else:
-                    return ResultCheckStories(False, "No stories found", IsEmpty=True)
+                    return ResultCheck(False, "No stories found", IsEmpty=True)
             
 
             

@@ -20,6 +20,9 @@
     "invalid:author:url" : "There is something wrong with the author profile URL you entered. Please check if this is the correct URL and try again.",
 
     "unfollow:author:success" : "You have succesfully unfollowed this author. The bot will not post new announcment updates for this author from now on.",
-    "unfollow:author:not:following" : "You are not following this author in this server. Please use `/check-authors` command to see the authors you're following in this server"
+    "unfollow:author:not:following" : "You are not following this author in this server. Please use `/check-authors` command to see the authors you're following in this server",
+
+    "check:authors:following" : "The authors you're following in this server:",
+    "check:authors:empty" : "You're not following any authors in this server currently. Use `/follow-author` command to follow a new author."
 
 }

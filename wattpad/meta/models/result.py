@@ -19,8 +19,8 @@ class ResultUnfollow(Result):
     NotFollowing:bool=False
 
 @dataclass
-class ResultCheckStories(Result):
-    StoryData:List[Story]= None
+class ResultCheck(Result):
+    Data:List[Story]= None
     IsEmpty:bool= False
 
 @dataclass
