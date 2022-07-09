@@ -1,6 +1,6 @@
 from wattpad.db.repository.serverrepo import ServerRepo
 from wattpad.logger.baselogger import BaseLogger
-from wattpad.meta.models.result import Result, ResultAuthor
+from wattpad.meta.models.result import Result, ResultAuthor, ResultUnfollow
 from wattpad.utils.authorutil import AuthorUtil
 from wattpad.db.models.server import Server
 from wattpad.db.models.author import Author
@@ -13,6 +13,7 @@ class AuthorExec:
         self.authorUtil= AuthorUtil()
         self.serverRepo= ServerRepo()
         self.authorRepo= AuthorRepo()
+        self.prefix= "wattpad.com"
 
     async def follow_author(self, url:str, guildid:str) -> ResultAuthor:
         try:
@@ -58,4 +59,70 @@ class AuthorExec:
         except Exception as e:
             self.logger.fatal("Exception occured in %s.follow_author method invoked for author: %s, server: %s", self.file_prefix, url, guildid,exc_info=1)
             raise e
+        
+    async def unfollow_author(self, url:str, guildid:str) -> Result:
+        try:
+            self.logger.info("%s.unfollow_author method invoked for server: %s, author: %s", self.file_prefix, guildid, url)
+
+            author_url= ""
+
+            if self.prefix not in url:
+                #try to get the full author url from title
+                author_url= await self.__get_author_url_from_title(url, guildid)
+
+            if not author_url:
+                #invalid title
+                return Result(False, "Invalid Title", IsInvalidTitle=True)
+                
+            else:
+                #for unfollowing just make inactive as true but we need to delete the records completely
+
+                #get server id from guildid
+                serverid= await self.serverRepo.get_serverid_from_server(guildid)
+
+                if not serverid:
+                    return ResultUnfollow(False, "Error while getting server id", UnknownError=True)
+                
+                #get author id from server and author url
+                storyid= await self.authorRepo.get_author_id_from_server_and_url(url=author_url, serverid=serverid)
+
+                if not storyid:
+                    return ResultUnfollow(False, "Not following the author", NotFollowing=True)
+
+                #inactivate author by id
+                inactivate_result= await self.authorRepo.inactivate_author_by_id(storyid)
+
+                if inactivate_result:
+                    return ResultUnfollow(True, "Success")
+
+            return ResultUnfollow(False, "Unknown Error", UnknownError=True)
+
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.unfollow_author method invoked for server: %s, author: %s", self.file_prefix, guildid, url,exc_info=1)
+            raise e
+
+
+    async def __get_author_url_from_title(self, title:str, server:str) -> str:
+        try:
+            self.logger.info("%s.__get_author_url_from_title method invoked for title: %s, server: %s", self.file_prefix, title, server)
+
+            #first get server id
+            serverid= await self.serverRepo.get_serverid_from_server(server)
+
+            if serverid:
+                format_title=f"%{title}%"
+                author_url= await self.authorRepo.get_author_url_from_title(format_title, serverid=serverid)
+
+                if author_url:
+                    return author_url
+
+                else:
+                    return ""
+
+            return title
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.__get_author_url_from_title method invoked for title: %s, server: %s", self.file_prefix, title, server,exc_info=1)
+            raise e
+        
         

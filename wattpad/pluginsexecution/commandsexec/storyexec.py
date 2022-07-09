@@ -1,7 +1,7 @@
 from unittest import result
 from wattpad.db.repository.storyrepo import StoryRepo
 from wattpad.logger.baselogger import BaseLogger
-from wattpad.meta.models.result import Result, ResultCheckStories, ResultStory, ResultUnfollowStory
+from wattpad.meta.models.result import Result, ResultCheckStories, ResultStory, ResultUnfollow
 from wattpad.utils.storyutil import StoryUtil
 from wattpad.db.models.story import Story
 from wattpad.db.models.server import Server
@@ -61,7 +61,7 @@ class StoryExec:
             self.logger.fatal("Exception occured in %s.follow_story method invoked for story: %s", self.file_prefix, url,exc_info=1)
             raise e
 
-    async def unfollow_story(self, url:str, guildid:str) -> ResultUnfollowStory:
+    async def unfollow_story(self, url:str, guildid:str) -> ResultUnfollow:
         try:
             self.logger.info("%s.unfollow_story method invoked for url: %s, server: %s", self.file_prefix, url, guildid)
 
@@ -73,7 +73,7 @@ class StoryExec:
 
             if not story_url:
                 #invalid title
-                return ResultUnfollowStory(False, "Invalid Title", IsInvalidTitle=True)
+                return ResultUnfollow(False, "Invalid Title", IsInvalidTitle=True)
                 
             else:
                 #for unfollowing just make inactive as true but we need to delete the records completely
@@ -82,21 +82,21 @@ class StoryExec:
                 serverid= await self.serverRepo.get_serverid_from_server(guildid)
 
                 if not serverid:
-                    return ResultUnfollowStory(False, "Error while getting server id", UnknownError=True)
+                    return ResultUnfollow(False, "Error while getting server id", UnknownError=True)
                 
                 #get story id from server and story url
                 storyid= await self.storyRepo.get_story_id_from_server_and_url(url=story_url, serverid=serverid)
 
                 if not storyid:
-                    return ResultUnfollowStory(False, "Not following the story", NotFollowing=True)
+                    return ResultUnfollow(False, "Not following the story", NotFollowing=True)
 
                 #inactivate story by id
                 inactivate_result= await self.storyRepo.inactivate_story_by_id(storyid)
 
                 if inactivate_result:
-                    return ResultUnfollowStory(True, "Success")
+                    return ResultUnfollow(True, "Success")
 
-            return ResultUnfollowStory(False, "Unknown Error", UnknownError=True)
+            return ResultUnfollow(False, "Unknown Error", UnknownError=True)
 
         except Exception as e:
             self.logger.fatal("Exception occured in %s.unfollow_story method invoked for url: %s, server: %s", self.file_prefix, url, guildid,exc_info=1)

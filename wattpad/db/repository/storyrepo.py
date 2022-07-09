@@ -57,6 +57,7 @@ class StoryRepo:
                     STORIES
                     WHERE
                     ServerId=:ServerId AND
+                    IsActive=:IsActive AND
                     Url LIKE :Url
                 """
 
@@ -65,7 +66,7 @@ class StoryRepo:
                     curs.prefetchrows = 6
                     curs.arraysize = 5
 
-                    curs.execute(sql,[serverid, title])
+                    curs.execute(sql,[serverid, 1, title])
                     conn.commit()
 
                     result=curs.fetchmany()
@@ -88,7 +89,8 @@ class StoryRepo:
             sql="""SELECT StoryId FROM
                     STORIES
                     WHERE
-                    ServerId=:ServerId
+                    ServerId=:ServerId AND
+                    IsActive=:IsActive
                     AND
                     Url=:Url
                 """
@@ -98,7 +100,7 @@ class StoryRepo:
                     curs.prefetchrows = 2
                     curs.arraysize = 1
 
-                    curs.execute(sql,[serverid, url])
+                    curs.execute(sql,[serverid, 1, url])
                     conn.commit()
 
                     result=curs.fetchone()

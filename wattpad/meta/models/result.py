@@ -13,7 +13,7 @@ class ResultStory(Result):
     HasPattern:bool=True
 
 @dataclass
-class ResultUnfollowStory(Result):
+class ResultUnfollow(Result):
     IsInvalidTitle:bool=False
     UnknownError:bool=False
     NotFollowing:bool=False

@@ -11,12 +11,15 @@
 
     "unfollow:story:success" : "You have succesfully unfollowed this story. The bot will not post new chapter updates for this story from now on.",
     "invalid:title" : "There is something wrong with the title you've entered. Please try using the command again with full url.",
-    "unfollow:story:not:following" : "You are not following this tsory in this server. Please use `/check-stories` command to see the stories you're following in this server",
+    "unfollow:story:not:following" : "You are not following this story in this server. Please use `/check-stories` command to see the stories you're following in this server.",
 
     "check:stories:following" : "The stories you're following in this server:",
     "check:stories:empty" : "You're not following any stories in this server currently. Use `/follow-story` command to follow a new story.",
 
     "follow:author:success" : "You have succesfully followed this author. The bot will post the new announcment updates from this author.",
-    "invalid:author:url" : "There is something wrong with the author profile URL you entered. Please check if this is the correct URL and try again."
+    "invalid:author:url" : "There is something wrong with the author profile URL you entered. Please check if this is the correct URL and try again.",
+
+    "unfollow:author:success" : "You have succesfully unfollowed this author. The bot will not post new announcment updates for this author from now on.",
+    "unfollow:author:not:following" : "You are not following this author in this server. Please use `/check-authors` command to see the authors you're following in this server"
 
 }
