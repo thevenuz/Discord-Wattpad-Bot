@@ -1,3 +1,5 @@
+from typing import List
+from wattpad.db.models.story import Story
 from wattpad.logger.baselogger import BaseLogger
 from bs4 import BeautifulSoup
 import aiohttp
@@ -58,6 +60,22 @@ class StoryUtil:
         
         except Exception as e:
             self.logger.fatal("Exception occured in %s.get_actual_story_url method invoked for story: %s", self.file_prefix, storyUrl,exc_info=1)
+            raise e
+
+    async def build_story_data_msg(self, stories:List[Story]) -> str:
+        try:
+            self.logger.info("%s.build_story_data_msg method invoked", self.file_prefix)
+
+            return_msg=""
+
+            for index, story in enumerate(stories):
+                return_msg= f"{return_msg}{index}. {story.Url}\n"
+
+            
+            return return_msg
+
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.build_story_data_msg method invoked", self.file_prefix,exc_info=1)
             raise e
         
 

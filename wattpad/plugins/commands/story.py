@@ -1,10 +1,9 @@
-from unittest import result
 import hikari
 import lightbulb
-from soupsieve import select
 from wattpad.logger.baselogger import BaseLogger
 from wattpad.pluginsexecution.commandsexec.storyexec import StoryExec
 from wattpad.utils.config import Config
+from wattpad.utils.storyutil import StoryUtil
 
 plugin=lightbulb.Plugin("StoryPlugin")
 
@@ -85,6 +84,41 @@ async def unfollow_story(ctx: lightbulb.SlashContext) -> None:
         logger.fatal("Exception occured in %s.unfollow_story method invoked for story: %s, server: %s", file_prefix, ctx.options.storyurl, ctx.guild_id, exc_info=1)
         raise e
     
+
+@plugin.command
+@lightbulb.command('check-stories','check the stories that you are already following in this server')
+@lightbulb.implements(lightbulb.SlashCommand)
+async def check_stories(ctx: lightbulb.SlashContext) -> None:
+    try:
+        logger.info("%s.check_stories method invoked for server: %s", file_prefix, ctx.guild_id)
+
+        guildId= str(ctx.guild_id)
+
+        msgs= await Config().get_messages("en")
+
+        #call the exec
+        result = await StoryExec().check_stories(guildId)
+
+        if result.IsSuccess:
+            #build the description of the msg
+            story_data= await StoryUtil().build_story_data_msg(result.StoryData)
+
+            await ctx.respond(embed=hikari.Embed(title=f"{msgs['check:stories:following']}", description=f"{story_data}", color=0xFF0000))
+
+        else:
+            logger.error("Error occured in %s.check_stories method for server: %s, Error: %s", file_prefix, guildId, result.ResultInfo)
+            if result.IsEmpty:
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['empty']}", description=f"{msgs['check:stories:empty']}", color=0xFF0000))
+
+            else:
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['unknown:error']}", description=f"{msgs['unknown:error:msg']}", color=0xFF0000))
+
+
+    except Exception as e:
+        logger.fatal("Exception occured in %s.check_stories method invoked for server: %s", file_prefix, ctx.guild_id,exc_info=1)
+        raise e
+    
+
 
 def load(bot):
     bot.add_plugin(plugin)

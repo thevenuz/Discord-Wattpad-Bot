@@ -1,6 +1,8 @@
+from typing import List
 from wattpad.logger.baselogger import BaseLogger
 from wattpad.db.models.story import Story
 from wattpad.utils.db import DBConfig
+from wattpad.meta.mapping.map import Map
 import cx_Oracle
 
 class StoryRepo:
@@ -8,6 +10,7 @@ class StoryRepo:
         self.file_prefix= "wattpad.db.repository.storyrepo"
         self.logger= BaseLogger().loggger_init()
         self.connection_string=DBConfig().load_db_config()
+        self.map= Map()
 
     #region insert
     async def insert_stories(self, story:Story) -> str:
@@ -107,7 +110,39 @@ class StoryRepo:
             self.logger.fatal("Exception occured in %s.get_story_id_from_server_and_url method invoked for url: %s, server: %s", self.file_prefix, url, serverid,exc_info=1)
             raise e
         
+    async def get_stories_from_server_id(self, serverid:str, isactive:bool=1) -> List[Story]:
+        try:
+            self.logger.info("%s.get_stories_from_server_id method invoked for server id: %s", self.file_prefix, serverid)
 
+            sql="""SELECT * FROM
+                    STORIES
+                    WHERE
+                    ServerId=:ServerId
+                    AND
+                    IsActive=:IsActive
+                """
+
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.execute(sql,[serverid, isactive])
+                    conn.commit()
+
+                    db_result=curs.fetchall()
+
+                    if db_result:
+                        story_data=list(db_result)
+                        column_names=list(map(lambda x: x.lower(), [d[0] for d in curs.description]))
+            
+            if db_result and story_data:
+                result= await self.map.map_story_records_list(story_data, column_names)
+
+                return result
+
+            return None
+
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.get_stories_from_server_id method invoked for server id: %s", self.file_prefix, serverid,exc_info=1)
+            raise e
     #endregion
 
 
