@@ -1,5 +1,5 @@
 from wattpad.db.repository.channelrepo import ChannelRepo
-from wattpad.meta.models.result import Result, ResultUnset
+from wattpad.meta.models.result import Result, ResultCheck, ResultUnset
 from wattpad.db.models.channel import Channel
 from wattpad.db.models.server import Server
 from wattpad.db.repository.serverrepo import ServerRepo
@@ -72,5 +72,30 @@ class ChannelExec:
         
         except Exception as e:
             self.logger.fatal("Exception occured in %s.unset_channel method invoked for server: %s", self.file_prefix, guildId,exc_info=1)
+            raise e
+        
+    async def check_channels(self, guildId: str) -> ResultCheck:
+        try:
+            self.logger.info("%s.check_channels method invoked for server: %s", self.file_prefix, guildId)
+
+            #get serverid
+            serverid= await self.serverRepo.get_serverid_from_server(guildId)
+
+            if serverid:
+                #get channels with this server id
+                channel_result= await self.channelRepo.get_channels_from_server_id(serverid, 1, 0)
+
+                if channel_result:
+                    return ResultCheck(True, "success", Data=channel_result)
+
+                else:
+                    return ResultCheck(False, "No Channels found", IsEmpty=True)
+
+            else:
+                return ResultCheck(False, "Error occured while getting server id")
+
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.check_channels method invoked for server: %s", self.file_prefix, guildId,exc_info=1)
             raise e
         

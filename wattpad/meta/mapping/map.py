@@ -1,5 +1,6 @@
 from typing import Dict, List
 from wattpad.db.models.author import Author
+from wattpad.db.models.channel import Channel
 from wattpad.logger.baselogger import BaseLogger
 from wattpad.db.models.story import Story
 from copy import deepcopy
@@ -94,7 +95,7 @@ class Map:
             result= Author()
 
             if map:
-                result.AuthorId= map["uuthorid"]
+                result.AuthorId= map["authorid"]
                 result.Url= map["url"]
                 result.ServerId= map["serverid"]
                 result.ChannelId= map["channelid"]
@@ -110,3 +111,50 @@ class Map:
         except Exception as e:
             self.logger.fatal("Exception occured in %s.__map_author_record method invoked", self.file_prefix,exc_info=1)
             raise e
+
+    async def map_channel_records_list(self, data, columns) -> List[Channel]:
+        try:
+            self.logger.info("%s.map_channel_records_list method invoked", self.file_prefix)
+
+            result=[]
+
+            maps = [dict(zip(columns, row)) for row in data]
+
+            if maps:
+                for map in maps:
+                    map_result = await self.__map_channel_record(map = map)
+
+                    if map_result:
+                        result.append(deepcopy(map_result))
+
+            if result:
+                return result
+            
+            return None
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.map_channel_records_list method invoked", self.file_prefix,exc_info=1)
+            raise e
+        
+    async def __map_channel_record(self, map:Dict) -> Channel:
+        try:
+            self.logger.info("%s.__map_channel_record method invoked", self.file_prefix)
+
+            result= Channel()
+
+            if map:
+                result.ChannelId= map["channelid"]
+                result.Channel= map["channel"]
+                result.ServerId= map["serverid"]
+                result.IsActive= map["isactive"]
+                result.IsCustomChannel= map["iscustomchannel"]
+                result.RegisteredOn= map["registeredon"]
+
+                return result
+
+            return None
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.__map_channel_record method invoked", self.file_prefix,exc_info=1)
+            raise e
+        

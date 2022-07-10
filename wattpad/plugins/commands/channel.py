@@ -2,6 +2,7 @@ import hikari
 import lightbulb
 from wattpad.logger.baselogger import BaseLogger
 from wattpad.pluginsexecution.commandsexec.channelexec import ChannelExec
+from wattpad.utils.channelutil import Channelutil
 from wattpad.utils.config import Config
 from wattpad.utils.hikariutil import HikariUtil
 
@@ -96,7 +97,37 @@ async def unset_channel(ctx: lightbulb.SlashContext) -> None:
         logger.fatal("Exception occured in %s.unset_channel method invoked for server: %s", file_prefix, ctx.guild_id,exc_info=1)
         raise e
     
+@plugin.command
+@lightbulb.command("check-channels", "Check in which channel the new chapter and announcement updates are being shared currently", auto_defer=True)
+@lightbulb.implements(lightbulb.SlashCommand)
+async def check_channels(ctx: lightbulb.SlashContext) -> None:
+    try:
+        logger.info("%s.check_channels method invoked for server: %s", file_prefix, ctx.guild_id)
 
+        guildId= str(ctx.guild_id)
+        msgs= await Config().get_messages("en")
+
+        #call the exec
+        result= await ChannelExec().check_channels(guildId)
+
+        if result.IsSuccess:
+            channel_data= await Channelutil().build_channel_data_msg(result.Data)
+            await ctx.respond(embed=hikari.Embed(title=f"{msgs['check:channels:title']}", description=f"{channel_data}", color=0xFF0000))
+
+        else:
+            logger.error("Error occured in %s.check_channels for server: %s, error: %s", file_prefix, guildId, result.ResultInfo)
+
+            if result.IsEmpty:
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['empty']}", description=f"{msgs['check:channels:empty']}", color=0xFF0000))
+
+            else:
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['unknown:error']}", description=f"{msgs['unknown:error:msg']}", color=0xFF0000))
+
+    
+    except Exception as e:
+        logger.fatal("Exception occured in %s.check_channels method invoked for server: %s", file_prefix, ctx.guild_id,exc_info=1)
+        raise e
+    
 
 def load(bot):
     bot.add_plugin(plugin)

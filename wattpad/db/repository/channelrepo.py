@@ -1,3 +1,4 @@
+from typing import List
 from wattpad.db.models.channel import Channel
 from wattpad.logger.baselogger import BaseLogger
 import cx_Oracle
@@ -62,6 +63,42 @@ class ChannelRepo:
 
         except Exception as e:
             self.logger.fatal("Exception occured in %s.get_channel_id_from_server_id method invoked for server id: %s", self.file_prefix, serverid,exc_info=1)
+            raise e
+
+    async def get_channels_from_server_id(self, serverid: str, isactive: bool=1, iscustomchannel:bool=0) -> List[Channel]:
+        try:
+            self.logger.info("%s.get_channels_from_server_id method invoked for server id: %s", self.file_prefix, serverid)
+
+            sql="""SELECT * FROM 
+                    CHANNELS
+                    WHERE
+                    ServerId=:ServerId
+                    AND 
+                    IsActive=:IsActive
+                    AND
+                    IsCustomChannel=:IsCustomChannel
+                """
+
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.execute(sql,[serverid, isactive, iscustomchannel])
+                    conn.commit()
+
+                    db_result=curs.fetchall()
+
+                    if db_result:
+                        channel_data=list(db_result)
+                        column_names=list(map(lambda x: x.lower(), [d[0] for d in curs.description]))
+            
+            if db_result and channel_data:
+                result= await self.map.map_story_records_list(channel_data, column_names)
+
+                return result
+
+            return None
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.get_channels_from_server_id method invoked for server id: %s", self.file_prefix, serverid,exc_info=1)
             raise e
         
 

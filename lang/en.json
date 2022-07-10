@@ -33,7 +33,10 @@
     "check:authors:empty" : "You're not following any authors in this server currently. Use `/follow-author` command to follow a new author.",
 
     "channel:unset:success" : "Your channel has been succesfully unset. The bot will not send any updates in this channel from now on.",
-    "channel:not:set:msg" : "No channel has been setup for receiving updates in this channel. Use `/set-channel` to configure a channel to receive updates."
+    "channel:not:set:msg" : "No channel has been setup for receiving updates in this channel. Use `/set-channel` to configure a channel to receive updates.",
+
+    "check:channels:title" : "The channels that are setup to receive updates from the bot:",
+    "check:channels:empty" : "You haven't set up any channels in this server to receive updates from the bot. Use `/set-channel` to set one."
 
 
 }

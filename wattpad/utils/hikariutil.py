@@ -41,4 +41,4 @@ class HikariUtil:
         except Exception as e:
             self.logger.fatal("Exception occured in %s.check_channel_read_perms method invoked for server: %s, channel: %s", self.file_prefix, ctx.guild_id, channelid,exc_info=1)
             raise e
-        
+    
