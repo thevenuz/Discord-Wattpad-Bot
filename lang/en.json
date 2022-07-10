@@ -4,6 +4,12 @@
     "invalid:url" : "Error. Invalid URL.",
     "unknown:error" : "Unknown error.",
     "empty" : "So Empty!",
+    "perms:error" : "Permissions error!",
+
+    "channel:no:read:perms" : "The bot doesn't have the VIEWCHANNEL permissions for the selected channel. Please give the bot VIEWCHANNEL permissions for the channel and try the command again.",
+    "channel:no:sendandembed:perms" : "The bot doesn't have the SENDMESSAGES and EMBEDLINKS permissions for the selected channel. Please give the bot SENDMESSAGES and EMBEDLINKS permissions for the channel and try the command again.",
+    "channel:no:send:perms" : "The bot doesn't have the SENDMESSAGES permissions for the selected channel. Please give the bot SENDMESSAGES permissions for the channel and try the command again.",
+    "channel:no:embed:perms" : "The bot doesn't have the EMBEDLINKS permissions for the selected channel. Please give the bot EMBEDLINKS permissions for the channel and try the command again.",
 
     "follow:story:success" : "You have succesfully followed this story. The bot will post new chapter updates for this story.",
     "invalid:story:url" : "There is something wrong with the story URL you entered. Please check if this is the correct URL and try again.",

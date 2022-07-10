@@ -114,4 +114,10 @@ async def check_authors(ctx: lightbulb.SlashContext) -> None:
     except Exception as e:
         logger.fatal("Exception occured in %s.check_authors method invoked for server: %s", file_prefix, ctx.guild_id, exc_info=1)
         raise e
-    
+
+
+def load(bot):
+    bot.add_plugin(plugin)
+
+def unload(bot):
+    bot.remove_plugin(plugin)  

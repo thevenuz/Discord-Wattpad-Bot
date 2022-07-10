@@ -27,3 +27,9 @@ class ResultCheck(Result):
 class ResultAuthor(Result):
     IsInvalidUrl:bool=False
     HasPattern:bool=True
+
+@dataclass
+class ResultPermissionsCheck(Result):
+    HasReadPerms:bool= False
+    HasSendPerms:bool= False
+    HasEmbedPerms:bool= False
