@@ -71,6 +71,9 @@ async def unfollow_story(ctx: lightbulb.SlashContext) -> None:
 
             if result.IsInvalidTitle:
                 await ctx.respond(embed=hikari.Embed(title=f"{msgs['error']}", description=f"{msgs['invalid:title']}", color=0xFF0000))
+
+            elif result.HasMultipleStories:
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['error']}", description=f"{msgs['story:multiple:title']}", color=0xFF0000))
             
             elif result.NotFollowing:
                 await ctx.respond(embed=hikari.Embed(title=f"{msgs['error']}", description=f"{msgs['unfollow:story:not:following']}", color=0xFF0000))

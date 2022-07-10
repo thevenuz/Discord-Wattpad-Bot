@@ -17,6 +17,7 @@ class ResultUnfollow(Result):
     IsInvalidTitle:bool=False
     UnknownError:bool=False
     NotFollowing:bool=False
+    HasMultipleStories:bool= False
 
 @dataclass
 class ResultCheck(Result):
@@ -37,4 +38,10 @@ class ResultPermissionsCheck(Result):
 @dataclass
 class ResultUnset(Result):
     NoChannelFound:bool= False
+
+@dataclass
+class ResultCustomChannelSet(Result):
+    IsInvalidTitle:bool=False
+    UnknownError:bool=False
+    HasMultipleResults:bool= False
     

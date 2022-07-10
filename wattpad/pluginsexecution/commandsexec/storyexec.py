@@ -1,3 +1,4 @@
+from typing import List
 from unittest import result
 from wattpad.db.repository.storyrepo import StoryRepo
 from wattpad.logger.baselogger import BaseLogger
@@ -77,24 +78,28 @@ class StoryExec:
                 
             else:
                 #for unfollowing just make inactive as true but we need to delete the records completely
-
-                #get server id from guildid
-                serverid= await self.serverRepo.get_serverid_from_server(guildid)
-
-                if not serverid:
-                    return ResultUnfollow(False, "Error while getting server id", UnknownError=True)
+                if len(story_url) > 1:
+                    return ResultUnfollow(False, "Multiple stories with the same title", HasMultipleStories=True )
                 
-                #get story id from server and story url
-                storyid= await self.storyRepo.get_story_id_from_server_and_url(url=story_url, serverid=serverid)
+                else:
+                    #get server id from guildid
+                    serverid= await self.serverRepo.get_serverid_from_server(guildid)
 
-                if not storyid:
-                    return ResultUnfollow(False, "Not following the story", NotFollowing=True)
+                    if not serverid:
+                        return ResultUnfollow(False, "Error while getting server id", UnknownError=True)
 
-                #inactivate story by id
-                inactivate_result= await self.storyRepo.inactivate_story_by_id(storyid)
+                
+                    #get story id from server and story url
+                    storyid= await self.storyRepo.get_story_id_from_server_and_url(url=story_url, serverid=serverid)
 
-                if inactivate_result:
-                    return ResultUnfollow(True, "Success")
+                    if not storyid:
+                        return ResultUnfollow(False, "Not following the story", NotFollowing=True)
+
+                    #inactivate story by id
+                    inactivate_result= await self.storyRepo.inactivate_story_by_id(storyid)
+
+                    if inactivate_result:
+                        return ResultUnfollow(True, "Success")
 
             return ResultUnfollow(False, "Unknown Error", UnknownError=True)
 
@@ -130,7 +135,7 @@ class StoryExec:
         
 
     #region misc methods
-    async def __get_story_url_from_title(self, title:str, server:str) -> str:
+    async def __get_story_url_from_title(self, title:str, server:str) -> List[str]:
         try:
             self.logger.info("%s.get_story_url_from_title method invoked for title: %s, server: %s", self.file_prefix, title, server)
 
@@ -139,13 +144,9 @@ class StoryExec:
 
             if serverid:
                 format_title=f"%{title}%"
-                story_url= await self.storyRepo.get_story_url_from_title(format_title, serverid=serverid)
+                story_urls= await self.storyRepo.get_story_url_from_title(format_title, serverid=serverid)
 
-                if story_url:
-                    return story_url
-
-                else:
-                    return ""
+                return story_urls
 
             return title
         

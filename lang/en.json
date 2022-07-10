@@ -19,6 +19,8 @@
     "unfollow:story:success" : "You have succesfully unfollowed this story. The bot will not post new chapter updates for this story from now on.",
     "invalid:title" : "There is something wrong with the title you've entered. Please try using the command again with full url.",
     "unfollow:story:not:following" : "You are not following this story in this server. Please use `/check-stories` command to see the stories you're following in this server.",
+    "story:multiple:title" : "You are following multiple stories that has this title. Please try the command again with full URL.",
+    "author:multiple:title" : "You are following multiple authors that has this title. Please try the command again with full URL.",
 
     "check:stories:following" : "The stories you're following in this server:",
     "check:stories:empty" : "You're not following any stories in this server currently. Use `/follow-story` command to follow a new story.",
@@ -36,7 +38,11 @@
     "channel:not:set:msg" : "No channel has been setup for receiving updates in this channel. Use `/set-channel` to configure a channel to receive updates.",
 
     "check:channels:title" : "The channels that are setup to receive updates from the bot:",
-    "check:channels:empty" : "You haven't set up any channels in this server to receive updates from the bot. Use `/set-channel` to set one."
+    "check:channels:empty" : "You haven't set up any channels in this server to receive updates from the bot. Use `/set-channel` to set one.",
+
+    "custom:channel:success" : "Custom channel is set succesfully",
+    "custom:channel:story:success" : "All the updates from story {0} will be shared in the channel <#{1}> from now on.",
+    "custom:channel:author:success" : "All the announcments from author {0} will be shared in the channel <#{1}> from now on."
 
 
 }

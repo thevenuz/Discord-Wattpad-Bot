@@ -49,7 +49,7 @@ class StoryRepo:
 
 
     #region get
-    async def get_story_url_from_title(self, title:str, serverid:str) -> str:
+    async def get_story_url_from_title(self, title:str, serverid:str) -> List[str]:
         try:
             self.logger.info("%s.get_story_url_from_title method invoked for server: %s, title: %s", self.file_prefix, serverid, title)
 
@@ -71,12 +71,14 @@ class StoryRepo:
 
                     result=curs.fetchmany()
 
-            if len(result) == 1:
-                return result[0]
+            return result
 
-            else:
-                self.logger.error("Multiple stories were found with similar entered title: %s in server: %s", self.file_prefix, title, serverid)
-                return ""
+            # if len(result) == 1:
+            #     return result[0]
+
+            # else:
+            #     self.logger.error("Multiple stories were found with similar entered title: %s in server: %s", self.file_prefix, title, serverid)
+            #     return ""
   
         except Exception as e:
             self.logger.fatal("Exception occured in %s.get_story_url_from_title method invoked for server: %s, title: %s", self.file_prefix, serverid, title,exc_info=1)
@@ -195,5 +197,28 @@ class StoryRepo:
             self.logger.fatal("Exception occured in %s.inactivate_story_by_url_and_serverid method invoked for url: %s, server id: %s", self.file_prefix, url, serverid,exc_info=1)
             raise e
         
+    async def update_channel_id_for_stories(self, storyid: str, channelid:str, isactive:bool=1) -> bool:
+        try:
+            self.logger.info("%s.update_channel_id_for_stories method invoked for storyid: %s, channel id: %s", self.file_prefix, storyid, channelid)
 
+            sql="""UPDATE STORIES SET
+                    ChannelId=:ChannelId
+                    WHERE
+                    StoryId=:StoryId
+                    AND
+                    IsActive=:IsActive
+                """
+
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.execute(sql,[channelid, storyid, isactive])
+                    conn.commit()
+                
+            return True
+            
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.update_channel_id_for_stories method invoked for storyid: %s, channel id: %s", self.file_prefix, storyid, channelid,exc_info=1)
+            raise e
+        
     #endregion
