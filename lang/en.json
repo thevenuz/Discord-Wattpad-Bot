@@ -5,6 +5,7 @@
     "unknown:error" : "Unknown error.",
     "empty" : "So Empty!",
     "perms:error" : "Permissions error!",
+    "channel:not:set" : "No channel set!",
 
     "channel:no:read:perms" : "The bot doesn't have the VIEWCHANNEL permissions for the selected channel. Please give the bot VIEWCHANNEL permissions for the channel and try the command again.",
     "channel:no:sendandembed:perms" : "The bot doesn't have the SENDMESSAGES and EMBEDLINKS permissions for the selected channel. Please give the bot SENDMESSAGES and EMBEDLINKS permissions for the channel and try the command again.",
@@ -29,6 +30,10 @@
     "unfollow:author:not:following" : "You are not following this author in this server. Please use `/check-authors` command to see the authors you're following in this server",
 
     "check:authors:following" : "The authors you're following in this server:",
-    "check:authors:empty" : "You're not following any authors in this server currently. Use `/follow-author` command to follow a new author."
+    "check:authors:empty" : "You're not following any authors in this server currently. Use `/follow-author` command to follow a new author.",
+
+    "channel:unset:success" : "Your channel has been succesfully unset. The bot will not send any updates in this channel from now on.",
+    "channel:not:set:msg" : "No channel has been setup for receiving updates in this channel. Use `/set-channel` to configure a channel to receive updates."
+
 
 }

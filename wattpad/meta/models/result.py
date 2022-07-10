@@ -33,3 +33,8 @@ class ResultPermissionsCheck(Result):
     HasReadPerms:bool= False
     HasSendPerms:bool= False
     HasEmbedPerms:bool= False
+
+@dataclass
+class ResultUnset(Result):
+    NoChannelFound:bool= False
+    

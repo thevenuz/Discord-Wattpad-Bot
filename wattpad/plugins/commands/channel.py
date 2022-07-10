@@ -65,7 +65,37 @@ async def set_channel(ctx: lightbulb.SlashContext) -> None:
         logger.fatal("Exception occured in %s.set_channel method invoked for server: %s", file_prefix, ctx.guild_id,exc_info=1)
         raise e
     
+@plugin.command
+@lightbulb.add_checks(lightbulb.checks.has_role_permissions(hikari.Permissions.ADMINISTRATOR)|lightbulb.checks.has_role_permissions(hikari.Permissions.MODERATE_MEMBERS)|lightbulb.checks.has_role_permissions(hikari.Permissions.MANAGE_CHANNELS)|lightbulb.owner_only)
+@lightbulb.command("unset-channel","New chapter and announcements will not be shared in any channel if you execute this command", auto_defer=True)
+@lightbulb.implements(lightbulb.SlashCommand)
+async def unset_channel(ctx: lightbulb.SlashContext) -> None:
+    try:
+        logger.info("%s.unset_channel method invoked for server: %s", file_prefix, ctx.guild_id)
 
+        guildId= str(ctx.guild_id)
+        msgs= await Config().get_messages("en")
+
+        #call the exec
+        result= await ChannelExec().unset_channel(guildId)
+
+        if result.IsSuccess:
+            await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{msgs['channel:unset:success']}", color=0xFF0000))
+
+        else:
+            logger.error("Error occured in %s.unset_channel for server: %s, Error: %s", file_prefix, guildId, result.ResultInfo)
+
+            if result.NoChannelFound:
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['channel:not:set']}", description=f"{msgs['channel:not:set:msg']}", color=0xFF0000))
+
+            else:
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['unknown:error']}", description=f"{msgs['unknown:error:msg']}", color=0xFF0000))
+
+    
+    except Exception as e:
+        logger.fatal("Exception occured in %s.unset_channel method invoked for server: %s", file_prefix, ctx.guild_id,exc_info=1)
+        raise e
+    
 
 
 def load(bot):
