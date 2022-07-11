@@ -84,14 +84,15 @@ class StoryRepo:
             self.logger.fatal("Exception occured in %s.get_story_url_from_title method invoked for server: %s, title: %s", self.file_prefix, serverid, title,exc_info=1)
             raise e
         
-    async def get_story_id_from_server_and_url(self, url:str, serverid:str) -> str:
+    async def get_story_id_from_server_and_url(self, url:str, serverid:str, isactive: bool=1) -> str:
         try:
             self.logger.info("%s.get_story_id_from_server_and_url method invoked for url: %s, server: %s", self.file_prefix, url, serverid)
 
             sql="""SELECT StoryId FROM
                     STORIES
                     WHERE
-                    ServerId=:ServerId AND
+                    ServerId=:ServerId 
+                    AND
                     IsActive=:IsActive
                     AND
                     Url=:Url
@@ -147,6 +148,78 @@ class StoryRepo:
         except Exception as e:
             self.logger.fatal("Exception occured in %s.get_stories_from_server_id method invoked for server id: %s", self.file_prefix, serverid,exc_info=1)
             raise e
+    
+    async def get_custom_channel_id_from_story_id(self, storyid: str, isactive:bool=1) -> str:
+        try:
+            self.logger.info("%s.get_custom_channel_id_from_story_and_server method invoked for server id: %s,", self.file_prefix, storyid)
+
+            sql="""SELECT c.ChannelId from 
+                    STORIES s JOIN CHANNELS c
+                    ON
+                    s.ChannelId = c.ChannelId
+                    WHERE
+                    StoryId=:StoryId
+                    AND 
+                    s.IsActive=:IsActive
+                    AND
+                    c.IsActive=:CIsActive
+                    AND
+                    c.IsCustomChannel=:IsCustomChannel
+                """
+
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.prefetchrows = 2
+                    curs.arraysize = 1
+
+                    curs.execute(sql,[storyid, isactive, isactive, 1])
+                    conn.commit()
+
+                    result=curs.fetchone()
+
+            return result
+
+            
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.get_custom_channel_id_from_story_and_server method invoked for server id: %s", self.file_prefix, storyid,exc_info=1)
+            raise e
+        
+    async def get_story_id_with_custom_channel_from_server_and_url(self, url:str, serverid:str, isactive: bool=1, iscustomchannel:bool=1) -> str:
+        try:
+            self.logger.info("%s.get_story_id_whith_custom_channel_from_server_and_url method invoked for server id: %s, url: %s", self.file_prefix, serverid, url)
+
+            sql="""SELECT StoryId FROM
+                    STORIES
+                    WHERE
+                    ServerId=:ServerId 
+                    AND
+                    IsActive=:IsActive
+                    AND
+                    Url=:Url
+                    AND
+                    IsCustomChannel=:IsCustomChannel
+                """
+            
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.prefetchrows = 2
+                    curs.arraysize = 1
+
+                    curs.execute(sql,[serverid, 1, url, iscustomchannel])
+                    conn.commit()
+
+                    result=curs.fetchone()
+
+            return result
+
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.get_story_id_whith_custom_channel_from_server_and_url method invoked for server id: %s, url: %s", self.file_prefix, serverid, url,exc_info=1)
+            raise e
+        
+
+
     #endregion
 
 
@@ -197,12 +270,13 @@ class StoryRepo:
             self.logger.fatal("Exception occured in %s.inactivate_story_by_url_and_serverid method invoked for url: %s, server id: %s", self.file_prefix, url, serverid,exc_info=1)
             raise e
         
-    async def update_channel_id_for_stories(self, storyid: str, channelid:str, isactive:bool=1) -> bool:
+    async def update_channel_id_for_stories(self, storyid: str, channelid:str="", isactive:bool=1, iscustomchannel:bool=0) -> bool:
         try:
             self.logger.info("%s.update_channel_id_for_stories method invoked for storyid: %s, channel id: %s", self.file_prefix, storyid, channelid)
 
             sql="""UPDATE STORIES SET
-                    ChannelId=:ChannelId
+                    ChannelId=:ChannelId,
+                    IsCustomChannel=:IsCustomChannel
                     WHERE
                     StoryId=:StoryId
                     AND
@@ -211,7 +285,7 @@ class StoryRepo:
 
             with cx_Oracle.connect(self.connection_string) as conn:
                 with conn.cursor() as curs:
-                    curs.execute(sql,[channelid, storyid, isactive])
+                    curs.execute(sql,[channelid, iscustomchannel, storyid, isactive])
                     conn.commit()
                 
             return True

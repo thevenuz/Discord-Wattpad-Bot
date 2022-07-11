@@ -73,7 +73,7 @@ class AuthorRepo:
             self.logger.fatal("Exception occured in %s.get_author_url_from_title method invoked for author: %s, server id: %s", self.file_prefix, title, serverid,exc_info=1)
             raise e
         
-    async def get_author_id_from_server_and_url(self, url:str, serverid:str) -> str:
+    async def get_author_id_from_server_and_url(self, url:str, serverid:str,) -> str:
         try:
             self.logger.info("%s.get_author_id_from_server_and_url method invoked for url: %s, serverid: %s", self.file_prefix, url, serverid)
 
@@ -135,8 +135,75 @@ class AuthorRepo:
         except Exception as e:
             self.logger.fatal("Exception occured in %s.get_authors_from_server_id method invoked for server id: %s", self.file_prefix, serverid, exc_info=1)
             raise e
-        
 
+    async def get_author_id_with_custom_channel_from_server_and_url(self, url:str, serverid:str, isactive: bool=1, iscustomchannel:bool=1) -> str:
+        try:
+            self.logger.info("%s.get_author_id_with_custom_channel_from_server_and_url method invoked for server id: %s, url: %s", self.file_prefix, serverid, url)
+
+            sql="""SELECT AuthorId FROM
+                    AUTHORS
+                    WHERE
+                    ServerId=:ServerId 
+                    AND
+                    IsActive=:IsActive
+                    AND
+                    Url=:Url
+                    AND
+                    IsCustomChannel=:IsCustomChannel
+                """
+            
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.prefetchrows = 2
+                    curs.arraysize = 1
+
+                    curs.execute(sql,[serverid, 1, url, iscustomchannel])
+                    conn.commit()
+
+                    result=curs.fetchone()
+
+            return result
+
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.get_author_id_with_custom_channel_from_server_and_url method invoked for server id: %s, url: %s", self.file_prefix, serverid, url,exc_info=1)
+            raise e 
+
+    async def get_custom_channel_id_from_author_id(self, authorid: str, isactive:bool=1) -> str:
+        try:
+            self.logger.info("%s.get_custom_channel_id_from_author_id method invoked for server id: %s", self.file_prefix, authorid)
+
+            sql="""SELECT c.ChannelId from 
+                    AUTHORS a JOIN CHANNELS c
+                    ON
+                    a.ChannelId = c.ChannelId
+                    WHERE
+                    StoryId=:StoryId
+                    AND 
+                    a.IsActive=:IsActive
+                    AND
+                    c.IsActive=:CIsActive
+                    AND
+                    c.IsCustomChannel=:IsCustomChannel
+                """
+
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.prefetchrows = 2
+                    curs.arraysize = 1
+
+                    curs.execute(sql,[authorid, isactive, isactive, 1])
+                    conn.commit()
+
+                    result=curs.fetchone()
+
+            return result
+
+            
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.get_custom_channel_id_from_author_id method invoked for server id: %s", self.file_prefix, authorid, exc_info=1)
+            raise e
 
     #endregion
 

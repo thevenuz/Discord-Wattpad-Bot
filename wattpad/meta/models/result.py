@@ -45,3 +45,7 @@ class ResultCustomChannelSet(Result):
     UnknownError:bool=False
     HasMultipleResults:bool= False
     
+
+@dataclass
+class ResultCustomChannelUnset(Result):
+    Notfound:bool= False
