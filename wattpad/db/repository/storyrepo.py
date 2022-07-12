@@ -270,13 +270,12 @@ class StoryRepo:
             self.logger.fatal("Exception occured in %s.inactivate_story_by_url_and_serverid method invoked for url: %s, server id: %s", self.file_prefix, url, serverid,exc_info=1)
             raise e
         
-    async def update_channel_id_for_stories(self, storyid: str, channelid:str="", isactive:bool=1, iscustomchannel:bool=0) -> bool:
+    async def update_channel_id_for_stories(self, storyid: str, channelid:str="", isactive:bool=1) -> bool:
         try:
             self.logger.info("%s.update_channel_id_for_stories method invoked for storyid: %s, channel id: %s", self.file_prefix, storyid, channelid)
 
             sql="""UPDATE STORIES SET
                     ChannelId=:ChannelId,
-                    IsCustomChannel=:IsCustomChannel
                     WHERE
                     StoryId=:StoryId
                     AND
@@ -285,7 +284,7 @@ class StoryRepo:
 
             with cx_Oracle.connect(self.connection_string) as conn:
                 with conn.cursor() as curs:
-                    curs.execute(sql,[channelid, iscustomchannel, storyid, isactive])
+                    curs.execute(sql,[channelid, storyid, isactive])
                     conn.commit()
                 
             return True
@@ -295,4 +294,31 @@ class StoryRepo:
             self.logger.fatal("Exception occured in %s.update_channel_id_for_stories method invoked for storyid: %s, channel id: %s", self.file_prefix, storyid, channelid,exc_info=1)
             raise e
         
+    async def inactivate_custom_channel_for_stories(self, storyid: str, channelid: str="", isactive: bool=1) -> bool:
+        try:
+            self.logger.info("%s.inactivate_custom_channel_for_stories method invoked for story id: %s, channel id: %s", self.file_prefix, storyid, channelid)
+
+            sql="""UPDATE STORIES SET
+                    ChannelId=:ChannelId,
+                    IsActive=:IsActive
+                    WHERE
+                    StoryId=:StoryId
+                    AND
+                    IsActive=:IsActive
+                    AND
+                    IsCustomChannel=:IsCustomChannel
+                """
+
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.execute(sql,[channelid, 0, storyid, 1, 1])
+                    conn.commit()
+            
+            return True
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.inactivate_custom_channel_for_stories method invoked for story id: %s, channel id: %s", self.file_prefix, storyid, channelid,exc_info=1)
+            raise e
+        
+
     #endregion

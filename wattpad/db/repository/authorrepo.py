@@ -255,5 +255,29 @@ class AuthorRepo:
             self.logger.fatal("Exception occured in %s.update_channel_id_for_stories method invoked for author id: %s, channel id: %s", self.file_prefix, authorid, channelid,exc_info=1)
             raise e
         
+    async def inactivate_custom_channel_for_authors(self, authorid: str, channelid: str="", isactive: bool=1) -> bool:
+        try:
+            self.logger.info("%s.inactivate_custom_channel_for_authors method invoked for authors id: %s, channel id: %s", self.file_prefix, authorid, channelid)
 
+            sql="""UPDATE AUTHORS SET
+                    ChannelId=:ChannelId,
+                    IsActive=:IsActive
+                    WHERE
+                    AuthorId=:AuthorId
+                    AND
+                    IsActive=:IsActive
+                    AND
+                    IsCustomChannel=:IsCustomChannel
+                """
+
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.execute(sql,[channelid, 0, authorid, isactive, 1])
+                    conn.commit()
+            
+            return True
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.inactivate_custom_channel_for_authors method invoked for author id: %s, channel id: %s", self.file_prefix, authorid, channelid,exc_info=1)
+            raise e
     #endregion

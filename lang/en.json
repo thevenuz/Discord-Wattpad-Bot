@@ -42,7 +42,12 @@
 
     "custom:channel:success" : "Custom channel is set succesfully",
     "custom:channel:story:success" : "All the updates from story {0} will be shared in the channel <#{1}> from now on.",
-    "custom:channel:author:success" : "All the announcments from author {0} will be shared in the channel <#{1}> from now on."
+    "custom:channel:author:success" : "All the announcments from author {0} will be shared in the channel <#{1}> from now on.",
+
+    "unset:custom:channel:story:success" : "Channel <#{0}> is removed as custom channel for story {1}.",
+    "custom:channel:not:set:story" : "No custom channel has been setup for this story. Use the command `/check-custom-channels` to see the custom channels that are already setup.",
+    "unset:custom:channel:author:success" : "Channel <#{0}> is removed as custom channel for announcements from author {1}.",
+    "custom:channel:not:set:author" : "No custom channel has been setup for this author's announcements. Use the command `/check-custom-channels` to see the custom channels that are already setup.",
 
 
 }

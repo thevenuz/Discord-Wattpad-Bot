@@ -78,7 +78,7 @@ class CustomChannlExec:
             self.logger.fatal("Exception occured in %s.set_custom_channel_for_author method invokedfor server: %s, channel: %s, author url: %s", self.file_prefix, guildid, channelid, authorurl,exc_info=1)
             raise e
 
-    async def unset_custom_channel_for_story(self, guildid:str, channelid:str, storyurl: str) -> ResultCustomChannelSet:
+    async def unset_custom_channel_for_story(self, guildid:str, channelid:str, storyurl: str) -> ResultCustomChannelUnset:
         try:
             self.logger.info("%s.unset_custom_channel_for_story method invoked for server: %s, channel: %s, story: %s", self.file_prefix, guildid, channelid, storyurl)
             
@@ -88,28 +88,67 @@ class CustomChannlExec:
                 story_urls= await self.__get_story_url_from_title(storyurl, guildid)
 
             if not story_urls:
-                return ResultCustomChannelSet(False, "No story found with the title", IsInvalidTitle=True)
+                return ResultCustomChannelUnset(False, "No story found with the title", IsInvalidTitle=True)
             
             else:
                 if len(story_urls) > 1:
-                    return ResultCustomChannelSet(False, "Multiple stories found with this title", HasMultipleResults=True)
+                    return ResultCustomChannelUnset(False, "Multiple stories found with this title", HasMultipleResults=True)
 
                 else:
-                    result= await self.__unset_custome_channel(guildid, channelid, story_urls, isstory=True)
+                    result= await self.__unset_custom_channel(guildid, channelid, story_urls, isstory=True)
 
                     if result.IsSuccess:
-                        return ResultCustomChannelSet(True, "success")
+                        return ResultCustomChannelUnset(True, "success")
 
                     else:
-                        logger.error("Error in %s.unset_custom_channel_for_story for guild id: %s, channelid: %s, ")
+                        logger.error("Error in %s.unset_custom_channel_for_story for guild id: %s, channelid: %s, story url: %s", self.file_prefix, guildid, channelid, storyurl)
+
+                        if result.Notfound:
+                            return ResultCustomChannelUnset(False, "No custom channel found for this story", Notfound=True)
+
 
                     
-            return ResultCustomChannelSet(False, "Unknown error", UnknownError=True)
+            return ResultCustomChannelUnset(False, "Unknown error", UnknownError=True)
 
         except Exception as e:
             self.logger.fatal("Exception occured in %s.unset_custom_channel_for_story method invoked for server: %s, channel: %s, story: %s", self.file_prefix, guildid, channelid, storyurl,exc_info=1)
             raise e
         
+    async def unset_custom_channel_for_author(self, guildid:str, channelid:str, authorurl: str) -> ResultCustomChannelUnset:
+        try:
+            self.logger.info("%s.unset_custom_channel_for_author method invoked for server: %s, channel: %s, author: %s", self.file_prefix, guildid, channelid, authorurl)
+            
+            author_urls=""            
+
+            if self.prefix not in authorurl:
+                author_urls= await self.__get_author_url_from_title(authorurl, guildid)
+
+            if not author_urls:
+                return ResultCustomChannelUnset(False, "No author found with the title", IsInvalidTitle=True)
+            
+            else:
+                if len(author_urls) > 1:
+                    return ResultCustomChannelUnset(False, "Multiple authors found with this title", HasMultipleResults=True)
+
+                else:
+                    result= await self.__unset_custom_channel(guildid, channelid, author_urls, isauthor=True)
+
+                    if result.IsSuccess:
+                        return ResultCustomChannelUnset(True, "success")
+
+                    else:
+                        logger.error("Error in %s.unset_custom_channel_for_author for guild id: %s, channelid: %s, story url: %s", self.file_prefix, guildid, channelid, authorurl)
+
+                        if result.Notfound:
+                            return ResultCustomChannelUnset(False, "No custom channel found for this author", Notfound=True)
+
+
+                    
+            return ResultCustomChannelUnset(False, "Unknown error", UnknownError=True)
+
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.unset_custom_channel_for_author method invoked for server: %s, channel: %s, author: %s", self.file_prefix, guildid, channelid, authorurl,exc_info=1)
+            raise e
 
     async def __set_custom_channel(self, guildid:str, channelid:str, url: str, isauthor: bool=False, isstory:bool= False) -> Result:
         try:
@@ -172,7 +211,7 @@ class CustomChannlExec:
             self.logger.fatal("Exception occured in %s.__set_custom_channel method invoked for server: %s, channel: %s, url: %s, isauthor: %s, is story: %s", self.file_prefix, guildid, channelid, url, isauthor, isstory, exc_info=1)
             raise e
         
-    async def __unset_custome_channel(self, guildid:str, channelid:str, url: str, isauthor: bool=False, isstory:bool= False) -> ResultCustomChannelUnset:
+    async def __unset_custom_channel(self, guildid:str, channelid:str, url: str, isauthor: bool=False, isstory:bool= False) -> ResultCustomChannelUnset:
         try:
             self.logger.info("%s.__unset_custome_channel method invoked for server: %s, channel: %s, url: %s, isauthor: %s, isstory: %s", self.file_prefix, guildid, channelid, url, isauthor, isstory)
 
@@ -189,7 +228,7 @@ class CustomChannlExec:
                         if custom_channel_id:
                             #remove channel id from story and inactivate in channel table
 
-                            story_inactivate_result= await self.storyRepo.update_channel_id_for_stories(story_id, "", 1, 0)
+                            story_inactivate_result= await self.storyRepo.inactivate_custom_channel_for_stories(storyid=story_id, channelid="", isactive=1)
 
                             if story_inactivate_result:
                                 channel_inactivate_result= await self.channelRepo.inactivate_channel_by_channel_id(custom_channel_id)
@@ -215,7 +254,7 @@ class CustomChannlExec:
                         if custom_channel_id:
                             #remove channel id from author and inactivate in channel table
 
-                            author_inactivate_result= await self.authorRepo.update_channel_id_for_authors(author_id, "", 1, 0)
+                            author_inactivate_result= await self.authorRepo.inactivate_custom_channel_for_authors(author_id, "", 1, 0)
 
                             if author_inactivate_result:
                                 channel_inactivate_result= await self.channelRepo.inactivate_channel_by_channel_id(custom_channel_id)
