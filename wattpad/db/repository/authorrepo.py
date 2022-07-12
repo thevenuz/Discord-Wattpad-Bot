@@ -205,6 +205,33 @@ class AuthorRepo:
             self.logger.fatal("Exception occured in %s.get_custom_channel_id_from_author_id method invoked for server id: %s", self.file_prefix, authorid, exc_info=1)
             raise e
 
+    async def get_custom_channel_ids_for_authors_by_server_id(self, serverid:str, isactive: bool=1) -> List[str]:
+        try:
+            self.logger.info("%s.get_custom_channel_ids_for_authors_by_server_id method invoked for server id: %s isactive: %s", self.file_prefix, serverid, isactive)
+
+            sql="""SELECT ChannelId FROM 
+                    AUTHORS
+                    WHERE
+                    ServerId=:ServerId
+                    AND
+                    IsActive=:IsActive
+                """
+
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.execute(sql,[serverid, isactive])
+                    conn.commit()
+
+                    result=curs.fetchall()
+
+            if result:
+                return result
+
+            return None
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.get_custom_channel_ids_for_authors_by_server_id method invoked for server id: %s isactive: %s", self.file_prefix, serverid, isactive,exc_info=1)
+            raise e
     #endregion
 
 

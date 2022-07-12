@@ -5,9 +5,10 @@ from wattpad.db.repository.channelrepo import ChannelRepo
 from wattpad.db.repository.serverrepo import ServerRepo
 from wattpad.db.repository.storyrepo import StoryRepo
 from wattpad.logger.baselogger import BaseLogger
-from wattpad.meta.models.result import Result, ResultCustomChannelSet, ResultCustomChannelUnset
+from wattpad.meta.models.result import Result, ResultCheckCustomChannel, ResultCustomChannelSet, ResultCustomChannelUnset
 from wattpad.db.models.server import Server
 from wattpad.db.models.channel import Channel
+from copy import deepcopy
 
 class CustomChannlExec:
     def __init__(self) -> None:
@@ -149,6 +150,79 @@ class CustomChannlExec:
         except Exception as e:
             self.logger.fatal("Exception occured in %s.unset_custom_channel_for_author method invoked for server: %s, channel: %s, author: %s", self.file_prefix, guildid, channelid, authorurl,exc_info=1)
             raise e
+
+    async def check_custom_channels(self, guildid: str, category:str) -> ResultCheckCustomChannel:
+        try:
+            self.logger.info("%s.check_custom_channels method invoked for server: %s, category: %s", self.file_prefix, guildid, category)
+
+            isauthor=False
+            isstory=False
+            isempty= False
+
+            story_custom_channels=[]
+            author_custom_channels=[]
+
+            if category.lower() == "author":
+                isauthor = True
+            elif category.lower() == "story":
+                isstory = True
+            else:    
+                isauthor= True
+                isstory= True
+
+            #get server id
+            serverid= await self.serverRepo.get_serverid_from_server(guildid)
+
+            if serverid:
+                if isstory:
+                    #get custom channel ids from story table
+                    story_custom_channel_ids= await self.storyRepo.get_custom_channel_ids_for_stories_by_server_id(serverid, 1)
+
+                    if story_custom_channel_ids:
+                        isempty=False
+                        #get the actual discord channel ids from channel table
+                        for custom_channel_id in story_custom_channel_ids:
+                            story_custom_channel= await self.channelRepo.get_channel_from_channel_id(custom_channel_id, 1, 1)
+
+                            story_custom_channels.append(deepcopy(story_custom_channel))
+
+                    else:
+                        isempty= True
+
+                if isauthor:
+                    #get custom channel ids from author table
+                    author_custom_channel_ids= await self.authorRepo.get_custom_channel_ids_for_authors_by_server_id(serverid, 1)
+
+                    if author_custom_channel_ids:
+                        isempty=False
+                        #get the actual discord channel ids from channel table
+                        for custom_channel_id in author_custom_channel_ids:
+                            author_custom_channel= await self.channelRepo.get_channel_from_channel_id(custom_channel_id, 1, 1)
+
+                            author_custom_channels.append(deepcopy(author_custom_channel))
+
+                    else:
+                        isempty= True
+
+            else:
+                return ResultCheckCustomChannel(False, "Error while getting server id")
+
+            if not isempty:
+                return ResultCheckCustomChannel(False, "No custom channels foound for this server", IsEmpty=True)  
+            else:
+                if isauthor and isstory:
+                    return ResultCheckCustomChannel(True, "success", StoryCustomChannels=story_custom_channel, AuthorCustomChannels=author_custom_channels)
+                elif isstory:
+                    return ResultCheckCustomChannel(True, "success", StoryCustomChannels=story_custom_channel)
+                elif isauthor:
+                    return ResultCheckCustomChannel(True, "success", AuthorCustomChannels=author_custom_channels)
+                    
+            return ResultCheckCustomChannel(False, "unknown error")
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.check_custom_channels method invoked for server: %s, category: %s", self.file_prefix, guildid, category,exc_info=1)
+            raise e
+        
 
     async def __set_custom_channel(self, guildid:str, channelid:str, url: str, isauthor: bool=False, isstory:bool= False) -> Result:
         try:

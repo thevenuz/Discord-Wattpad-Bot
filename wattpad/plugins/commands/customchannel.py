@@ -254,6 +254,27 @@ async def unset_custom_channel_for_author(ctx:lightbulb.SlashContext) -> None:
         logger.fatal("Exception occured in %s.unset_custom_channel_for_author method invoked for server: %s, channel: %s, url: %s", file_prefix, ctx.guild_id, ctx.options.channel.id, ctx.options.url,exc_info=1)
         raise e
 
+@plugin.command
+@lightbulb.option("category","Select whether you want to check story/author custom channels",str, choices=("story", "announcements"), required=False)
+@lightbulb.command("check-custom-channels", "Check the custom channels for stories and author updates", auto_defer=True)
+@lightbulb.implements(lightbulb.SlashCommand)
+async def check_custom_channels(ctx: lightbulb.SlashContext) -> None:
+    try:
+        logger.info("%s.check_custom_channels method invoked for server: %s, category: %s", file_prefix, ctx.guild_id, ctx.options.category)
+
+        guildId= str(ctx.guild_id)
+        category= ctx.options.category
+
+        msgs= await Config().get_messages("en")
+
+        #call the exec
+        result= await CustomChannlExec().
+    
+    except Exception as e:
+        logger.fatal("Exception occured in %s.check_custom_channels method invoked for server: %s, category: %s", file_prefix, ctx.guild_id, ctx.options.category,exc_info=1)
+        raise e
+    
+
 def load(bot):
     bot.add_plugin(plugin)
 

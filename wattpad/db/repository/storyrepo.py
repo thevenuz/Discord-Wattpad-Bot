@@ -1,4 +1,5 @@
 from typing import List
+from wattpad.db.models.channel import Channel
 from wattpad.logger.baselogger import BaseLogger
 from wattpad.db.models.story import Story
 from wattpad.utils.db import DBConfig
@@ -218,7 +219,34 @@ class StoryRepo:
             self.logger.fatal("Exception occured in %s.get_story_id_whith_custom_channel_from_server_and_url method invoked for server id: %s, url: %s", self.file_prefix, serverid, url,exc_info=1)
             raise e
         
+    async def get_custom_channel_ids_for_stories_by_server_id(self, serverid:str, isactive: bool=1) -> List[str]:
+        try:
+            self.logger.info("%s.get_custom_channels_for_stories_by_server_id method invoked for server id: %s isactive: %s", self.file_prefix, serverid, isactive)
 
+            sql="""SELECT ChannelId FROM 
+                    STORIES
+                    WHERE
+                    ServerId=:ServerId
+                    AND
+                    IsActive=:IsActive
+                """
+
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.execute(sql,[serverid, isactive])
+                    conn.commit()
+
+                    result=curs.fetchall()
+
+            if result:
+                return result
+
+            return None
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.get_custom_channels_for_stories_by_server_id method invoked for server id: %s isactive: %s", self.file_prefix, serverid, isactive,exc_info=1)
+            raise e
+        
 
     #endregion
 

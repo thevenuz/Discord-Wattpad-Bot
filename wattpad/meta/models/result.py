@@ -52,3 +52,9 @@ class ResultCustomChannelUnset(Result):
     UnknownError:bool=False
     HasMultipleResults:bool= False
     Notfound:bool= False
+
+@dataclass 
+class ResultCheckCustomChannel(Result):
+    StoryCustomChannels:List[str]=[]
+    AuthorCustomChannels:List[str]=[]
+    IsEmpty:bool = False

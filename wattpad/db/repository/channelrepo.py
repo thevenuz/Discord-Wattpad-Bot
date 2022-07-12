@@ -2,11 +2,13 @@ from typing import List
 from wattpad.db.models.channel import Channel
 from wattpad.logger.baselogger import BaseLogger
 import cx_Oracle
+from wattpad.meta.mapping.map import Map
 
 class ChannelRepo:
     def __init__(self) -> None:
         self.file_prefix= "wattpad.db.repository.channelrepo"
         self.logger= BaseLogger().loggger_init()
+        self.map= Map()
 
     #region insert
     async def insert_channel_data(self, channel:Channel) -> str:
@@ -91,7 +93,7 @@ class ChannelRepo:
                         column_names=list(map(lambda x: x.lower(), [d[0] for d in curs.description]))
             
             if db_result and channel_data:
-                result= await self.map.map_story_records_list(channel_data, column_names)
+                result= await self.map.map_channel_records_list(channel_data, column_names)
 
                 return result
 
@@ -101,7 +103,40 @@ class ChannelRepo:
             self.logger.fatal("Exception occured in %s.get_channels_from_server_id method invoked for server id: %s", self.file_prefix, serverid,exc_info=1)
             raise e
         
-    
+    async def get_channel_from_channel_id(self, channelid:str, isactive:bool=1, iscustomchannel: bool=0) -> str:
+        try:
+            self.logger.info("%s.get_channel_from_channel_id method invoked for channel id: %s, isactive: %s, is custom channel: %s", self.file_prefix, channelid, isactive, iscustomchannel)
+
+            sql="""SELECT Channel FROM 
+                    CHANNELS
+                    WHERE
+                    ChannelId=:ChannelId
+                    AND
+                    IsActive=:IsActive
+                    AND
+                    IsCustomChannel=:IsCustomChannel
+                """
+
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.prefetchrows = 2
+                    curs.arraysize = 1
+
+                    curs.execute(sql,[channelid, isactive, iscustomchannel])
+                    conn.commit()
+
+                    result= curs.fetchone()
+                
+            if result:
+                return result
+
+            return None
+            
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.get_channel_from_channel_id method invoked for channel id: %s, isactive: %s, is custom channel: %s", self.file_prefix, channelid, isactive, iscustomchannel,exc_info=1)
+            raise e
+        
     #endregion
 
     #region update
