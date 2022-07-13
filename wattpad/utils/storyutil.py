@@ -3,6 +3,7 @@ from wattpad.db.models.story import Story
 from wattpad.logger.baselogger import BaseLogger
 from bs4 import BeautifulSoup
 import aiohttp
+from wattpad.meta.models.checkcustomchannels import StoryCustomChannel
 from wattpad.meta.models.result import ResultStory
 
 class StoryUtil:
@@ -76,6 +77,21 @@ class StoryUtil:
 
         except Exception as e:
             self.logger.fatal("Exception occured in %s.build_story_data_msg method invoked", self.file_prefix,exc_info=1)
+            raise e
+
+    async def build_check_custom_channel_msg(self, stories:List[StoryCustomChannel]) -> str:
+        try:
+            self.logger.info("%s.build_check_custom_channel_msg method invoked", self.file_prefix)
+
+            result=""
+
+            for story in stories:
+                result= f"{result}<#{story.Channel}>\n{[x +'\n' for x in story.Stories]}"
+
+            return result
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.build_check_custom_channel_msg method invoked", self.file_prefix,exc_info=1)
             raise e
         
 

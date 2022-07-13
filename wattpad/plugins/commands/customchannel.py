@@ -2,8 +2,10 @@ import hikari
 import lightbulb
 from wattpad.logger.baselogger import BaseLogger
 from wattpad.pluginsexecution.commandsexec.customchannelexec import CustomChannlExec
+from wattpad.utils.authorutil import AuthorUtil
 from wattpad.utils.config import Config
 from wattpad.utils.hikariutil import HikariUtil
+from wattpad.utils.storyutil import StoryUtil
 
 plugin= lightbulb.Plugin("CustomChannelPlugin")
 
@@ -268,7 +270,34 @@ async def check_custom_channels(ctx: lightbulb.SlashContext) -> None:
         msgs= await Config().get_messages("en")
 
         #call the exec
-        result= await CustomChannlExec().
+        result= await CustomChannlExec().check_custom_channels(guildId, category)
+
+        if result.IsSuccess:
+            if result.StoryCustomChannels:
+                story_return_msg= await StoryUtil().build_check_custom_channel_msg(result.StoryCustomChannels)
+
+            if result.AuthorCustomChannels:
+                author_return_msg= await AuthorUtil().build_check_custom_channel_msg(result.AuthorCustomChannels)
+
+            if category.lower() == "story":
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:channels']}", description=f"{msgs['story:custom:channels']}\n{story_return_msg}", color=0xFF0000))
+            
+            elif category.lower() == "announcements":
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:channels']}", description=f"{msgs['author:custom:channels']}\n{author_return_msg}", color=0xFF0000))
+
+            else:
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:channels']}", description=f"{msgs['story:custom:channels']}\n{story_return_msg}\n\n{msgs['author:custom:channels']}\n{author_return_msg}", color=0xFF0000))
+
+        else:
+            logger.error("Error occured in %s.check_custom_channels method for server: %s, category: %s, error: %s", file_prefix, guildId, category, result.ResultInfo)
+
+            if result.IsEmpty:
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['error']}", description=f"{msgs['custom:channels:not:set']}", color=0xFF0000))
+
+            else:
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['unknown:error']}", description=f"{msgs['unknown:error:msg']}", color=0xFF0000))
+
+
     
     except Exception as e:
         logger.fatal("Exception occured in %s.check_custom_channels method invoked for server: %s, category: %s", file_prefix, ctx.guild_id, ctx.options.category,exc_info=1)

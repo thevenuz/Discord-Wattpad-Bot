@@ -1,10 +1,10 @@
-from asyncio.log import logger
 from typing import List
 from wattpad.db.repository.authorrepo import AuthorRepo
 from wattpad.db.repository.channelrepo import ChannelRepo
 from wattpad.db.repository.serverrepo import ServerRepo
 from wattpad.db.repository.storyrepo import StoryRepo
 from wattpad.logger.baselogger import BaseLogger
+from wattpad.meta.models.checkcustomchannels import AuthorCustomChannel, StoryCustomChannel
 from wattpad.meta.models.result import Result, ResultCheckCustomChannel, ResultCustomChannelSet, ResultCustomChannelUnset
 from wattpad.db.models.server import Server
 from wattpad.db.models.channel import Channel
@@ -162,6 +162,7 @@ class CustomChannlExec:
             story_custom_channels=[]
             author_custom_channels=[]
 
+
             if category.lower() == "author":
                 isauthor = True
             elif category.lower() == "story":
@@ -174,46 +175,40 @@ class CustomChannlExec:
             serverid= await self.serverRepo.get_serverid_from_server(guildid)
 
             if serverid:
-                if isstory:
-                    #get custom channel ids from story table
-                    story_custom_channel_ids= await self.storyRepo.get_custom_channel_ids_for_stories_by_server_id(serverid, 1)
+                #get all the custom channels for this server id
+                custom_channels= await self.channelRepo.get_channels_from_server_id(serverid, 1, 1)
 
-                    if story_custom_channel_ids:
-                        isempty=False
-                        #get the actual discord channel ids from channel table
-                        for custom_channel_id in story_custom_channel_ids:
-                            story_custom_channel= await self.channelRepo.get_channel_from_channel_id(custom_channel_id, 1, 1)
+                if custom_channels:
+                    if isstory:
+                        #get stories that are associated with this custom channel
+                        for channel in custom_channels:
+                            stories= self.storyRepo.get_story_urls_from_channel_id(channel.ChannelId, 1, 1)
+
+                            story_custom_channel=StoryCustomChannel(channel.Channel, stories)
 
                             story_custom_channels.append(deepcopy(story_custom_channel))
 
-                    else:
-                        isempty= True
+                    if isauthor:
+                        #get authors that are associated with this custom channel
+                        for channel in custom_channels:
+                            authors= self.authorRepo.get_author_urls_from_channel_id(channel.ChannelId, 1, 1)
 
-                if isauthor:
-                    #get custom channel ids from author table
-                    author_custom_channel_ids= await self.authorRepo.get_custom_channel_ids_for_authors_by_server_id(serverid, 1)
-
-                    if author_custom_channel_ids:
-                        isempty=False
-                        #get the actual discord channel ids from channel table
-                        for custom_channel_id in author_custom_channel_ids:
-                            author_custom_channel= await self.channelRepo.get_channel_from_channel_id(custom_channel_id, 1, 1)
+                            author_custom_channel=AuthorCustomChannel(channel.Channel, authors)
 
                             author_custom_channels.append(deepcopy(author_custom_channel))
-
-                    else:
-                        isempty= True
+                else:
+                    isempty= True
 
             else:
                 return ResultCheckCustomChannel(False, "Error while getting server id")
 
-            if not isempty:
-                return ResultCheckCustomChannel(False, "No custom channels foound for this server", IsEmpty=True)  
+            if isempty:
+                return ResultCheckCustomChannel(False, "No custom channels found for this server", IsEmpty=True)  
             else:
                 if isauthor and isstory:
-                    return ResultCheckCustomChannel(True, "success", StoryCustomChannels=story_custom_channel, AuthorCustomChannels=author_custom_channels)
+                    return ResultCheckCustomChannel(True, "success", StoryCustomChannels=story_custom_channels, AuthorCustomChannels=author_custom_channels)
                 elif isstory:
-                    return ResultCheckCustomChannel(True, "success", StoryCustomChannels=story_custom_channel)
+                    return ResultCheckCustomChannel(True, "success", StoryCustomChannels=story_custom_channels)
                 elif isauthor:
                     return ResultCheckCustomChannel(True, "success", AuthorCustomChannels=author_custom_channels)
                     

@@ -49,5 +49,10 @@
     "unset:custom:channel:author:success" : "Channel <#{0}> is removed as custom channel for announcements from author {1}.",
     "custom:channel:not:set:author" : "No custom channel has been setup for this author's announcements. Use the command `/check-custom-channels` to see the custom channels that are already setup.",
 
+    "custom:channels" : "Your Custom Channels",
+    "story:custom:channels" : "Story Custom Channels:",
+    "author:custom:channels" : "Author Custom Channels:",
+    "custom:channels:not:set" : "No custom channels has been setup in this server yet. Use `/set-custom-channel` command to setup a custom channel."
+
 
 }

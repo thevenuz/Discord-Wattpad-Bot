@@ -247,6 +247,39 @@ class StoryRepo:
             self.logger.fatal("Exception occured in %s.get_custom_channels_for_stories_by_server_id method invoked for server id: %s isactive: %s", self.file_prefix, serverid, isactive,exc_info=1)
             raise e
         
+    async def get_story_urls_from_channel_id(self, channelid:str, isactive: bool=1, iscustomchannel: bool=0) -> List[str]:
+        """Returns a list of story urls
+        """
+        try:
+            self.logger.info("%s.get_story_urls_from_channel_id method invoked for channel id: %s, is active: %s, is custom channel: %s", channelid, isactive, iscustomchannel)
+
+            sql="""SELECT Url FROM
+                    STORIES
+                    WHERE
+                    ChannelId=:ChannelId
+                    AND
+                    IsActive=:IsActive
+                    AND
+                    IsCustomChannel=:IsCustomChannel
+                """
+
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.execute(sql,[channelid, isactive, iscustomchannel])
+                    conn.commit()
+            
+                    result=curs.fetchall()
+
+            if result:
+                return result
+
+            return None
+
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.get_story_urls_from_channel_id method invoked for channel id: %s, is active: %s, is custom channel: %s", channelid, isactive, iscustomchannel,exc_info=1)
+            raise e
+        
+
 
     #endregion
 
