@@ -102,7 +102,7 @@ class CustomChannlExec:
                         return ResultCustomChannelUnset(True, "success")
 
                     else:
-                        logger.error("Error in %s.unset_custom_channel_for_story for guild id: %s, channelid: %s, story url: %s", self.file_prefix, guildid, channelid, storyurl)
+                        self.logger.error("Error in %s.unset_custom_channel_for_story for guild id: %s, channelid: %s, story url: %s", self.file_prefix, guildid, channelid, storyurl)
 
                         if result.Notfound:
                             return ResultCustomChannelUnset(False, "No custom channel found for this story", Notfound=True)
@@ -138,7 +138,7 @@ class CustomChannlExec:
                         return ResultCustomChannelUnset(True, "success")
 
                     else:
-                        logger.error("Error in %s.unset_custom_channel_for_author for guild id: %s, channelid: %s, story url: %s", self.file_prefix, guildid, channelid, authorurl)
+                        self.logger.error("Error in %s.unset_custom_channel_for_author for guild id: %s, channelid: %s, story url: %s", self.file_prefix, guildid, channelid, authorurl)
 
                         if result.Notfound:
                             return ResultCustomChannelUnset(False, "No custom channel found for this author", Notfound=True)

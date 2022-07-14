@@ -1,6 +1,7 @@
 from typing import List
 from wattpad.db.models.channel import Channel
 from wattpad.logger.baselogger import BaseLogger
+from wattpad.utils.db import DBConfig
 import cx_Oracle
 from wattpad.meta.mapping.map import Map
 
@@ -8,6 +9,7 @@ class ChannelRepo:
     def __init__(self) -> None:
         self.file_prefix= "wattpad.db.repository.channelrepo"
         self.logger= BaseLogger().loggger_init()
+        self.connection_string=DBConfig().load_db_config()
         self.map= Map()
 
     #region insert
