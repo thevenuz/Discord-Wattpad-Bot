@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import List
 from wattpad.db.models.custommsg import CustomMsg
 from wattpad.db.repository.authorrepo import AuthorRepo
@@ -6,7 +5,7 @@ from wattpad.db.repository.channelrepo import ChannelRepo
 from wattpad.db.repository.serverrepo import ServerRepo
 from wattpad.db.repository.storyrepo import StoryRepo
 from wattpad.logger.baselogger import BaseLogger
-from wattpad.meta.models.result import Result, ResultCustomChannelSet
+from wattpad.meta.models.result import Result, ResultCustomChannelSet, ResultCustomChannelUnset
 from wattpad.db.repository.custommsgrepo import CustomMsgrepo
 from wattpad.meta.models.enum import CustomMsgType
 
@@ -78,6 +77,128 @@ class CustomMessageExec:
         except Exception as e:
             self.logger.fatal("Exception occured in %s.set_custom_message_for_author method invoked for author: %s, story: %s, msg: %s", self.file_prefix, guildid, authorurl, message,exc_info=1)
             raise e
+
+    async def unset_custom_message_for_story(self, guildid: str, storyurl:str) -> ResultCustomChannelUnset:
+        try:
+            self.logger.info("%s.unset_custom_message_for_story method invoked for server: %s, story: %s", self.file_prefix, guildid, storyurl)
+
+            story_urls=""            
+
+            if self.prefix not in storyurl:
+                story_urls= await self.__get_story_url_from_title(storyurl, guildid)
+
+            if not story_urls:
+                return ResultCustomChannelSet(False, "No story found with the title", IsInvalidTitle=True)
+
+            else:
+                if len(story_urls) > 1:
+                    return ResultCustomChannelSet(False, "Multiple stories found with this title", HasMultipleResults=True)
+
+                else:
+                    result= await self.__unset_custom_message(guildid, story_urls, isstory=True)
+
+                    if result.IsSuccess:
+                        return ResultCustomChannelSet(True, "success")
+
+                    elif result.Notfound:
+                        return ResultCustomChannelUnset(False, "Error while fetching the story id", Notfound=True)
+
+                    
+            return ResultCustomChannelSet(False, "Unknown error", UnknownError=True)
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.unset_custom_message_for_story method invoked for server: %s, story: %s", self.file_prefix, guildid, storyurl,exc_info=1)
+            raise e
+
+    async def unset_custom_message_for_author(self, guildid: str, authorurl:str) -> ResultCustomChannelUnset:
+        try:
+            self.logger.info("%s.author method invoked for server: %s, author: %s", self.file_prefix, guildid, authorurl)
+
+            author_urls=""            
+
+            if self.prefix not in authorurl:
+                author_urls= await self.__get_author_url_from_title(authorurl, guildid)
+
+            if not author_urls:
+                return ResultCustomChannelSet(False, "No author found with the title", IsInvalidTitle=True)
+
+            else:
+                if len(author_urls) > 1:
+                    return ResultCustomChannelSet(False, "Multiple authors found with this title", HasMultipleResults=True)
+
+                else:
+                    result= await self.__unset_custom_message(guildid, author_urls, isstory=False, isauthor=True)
+
+                    if result.IsSuccess:
+                        return ResultCustomChannelSet(True, "success")
+
+                    elif result.Notfound:
+                        return ResultCustomChannelUnset(False, "Error while fetching the author id", Notfound=True)
+
+                    
+            return ResultCustomChannelSet(False, "Unknown error", UnknownError=True)
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.author method invoked for server: %s, author: %s", self.file_prefix, guildid, authorurl,exc_info=1)
+            raise e       
+
+    async def __unset_custom_message(self, guildid: str, url: str, isstory:bool= True, isauthor:bool= False) -> ResultCustomChannelUnset:
+        try:
+            self.logger.info("%s.__unset_custom_message method invoked for server: %s, url: %s, is story: %s, is author: %s", self.file_prefix, guildid, url, isstory, isauthor)
+            
+            serverid= await self.serverRepo.get_serverid_from_server(guildid)
+
+            if serverid:
+                if isauthor:#get story id
+                    authorid= await self.authorRepo.get_author_id_from_server_and_url(url, serverid, 1)
+                    if authorid:
+                        #get custom msg id for this story id
+                        custom_msg_id= await self.customMsgRepo.get_custom_msg_id_from_author_id(authorid, 1)
+
+                        if len(custom_msg_id) > 1:
+                            return ResultCustomChannelUnset(False, "Multiple custom msgs were found for same author id", HasMultipleResults=True)
+
+                        else:
+                            #delete custom msg id
+                            delete_result= await self.customMsgRepo.delete_custom_msg_by_id(custom_msg_id)
+
+                            if delete_result:
+                                return ResultCustomChannelUnset(True, "success")
+                            else:
+                                return ResultCustomChannelUnset(False, "error while deleting custom msg")
+
+                    else:
+                        return ResultCustomChannelUnset(False, "Error while fetching the author id", Notfound=True) #return author not found
+                else:
+                    #get story id
+                    storyid= await self.storyRepo.get_story_id_from_server_and_url(url, serverid, 1)
+                    if storyid:
+                        #get custom msg id for this story id
+                        custom_msg_id= await self.customMsgRepo.get_custom_msg_id_from_story_id(storyid, 1)
+
+                        if len(custom_msg_id) > 1:
+                            return ResultCustomChannelUnset(False, "Multiple custom msgs were found for same story id", HasMultipleResults=True)
+
+                        else:
+                            #delete custom msg id
+                            delete_result= await self.customMsgRepo.delete_custom_msg_by_id(custom_msg_id)
+
+                            if delete_result:
+                                return ResultCustomChannelUnset(True, "success")
+                            else:
+                                return ResultCustomChannelUnset(False, "error while deleting custom msg")
+
+                    else:
+                        return ResultCustomChannelUnset(False, "Error while fetching the story id", Notfound=True) #return story not found
+
+            else:
+                return ResultCustomChannelUnset(False, "Error while fetching the server id")
+
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.__unset_custom_message method invoked for server: %s, url: %s, is story: %s, is author: %s", self.file_prefix, guildid, url, isstory, isauthor,exc_info=1)
+            raise e
+        
 
     async def __set_custom_message(self, guildid: str, url: str, message: str, isstory:bool= True, isauthor:bool= False) -> Result:
         try:
