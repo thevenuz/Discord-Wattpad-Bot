@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 from wattpad.db.models.story import Story
-from wattpad.meta.models.checkcustomchannels import AuthorCustomChannel, StoryCustomChannel
+from wattpad.meta.models.checkcustomchannels import AuthorCustomChannel, CheckCustomMsgAuthor, CheckCustomMsgStory, StoryCustomChannel
 
 @dataclass
 class Result:
@@ -58,6 +58,12 @@ class ResultCustomChannelUnset(Result):
 class ResultCheckCustomChannel(Result):
     StoryCustomChannels:List[StoryCustomChannel]=[]
     AuthorCustomChannels:List[AuthorCustomChannel]=[]
+    IsEmpty:bool = False
+
+@dataclass 
+class ResultCheckCustomMsg(Result):
+    StoryCustomMsgs:List[CheckCustomMsgStory]=[]
+    AuthorCustomMsgs:List[CheckCustomMsgAuthor]=[]
     IsEmpty:bool = False
 
 

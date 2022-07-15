@@ -163,7 +163,7 @@ class CustomChannlExec:
             author_custom_channels=[]
 
 
-            if category.lower() == "author":
+            if category.lower() == "announcements":
                 isauthor = True
             elif category.lower() == "story":
                 isstory = True

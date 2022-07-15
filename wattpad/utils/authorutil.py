@@ -2,7 +2,7 @@ from typing import List
 from wattpad.db.models.author import Author
 from wattpad.logger.baselogger import BaseLogger
 import aiohttp
-from wattpad.meta.models.checkcustomchannels import AuthorCustomChannel
+from wattpad.meta.models.checkcustomchannels import AuthorCustomChannel, CheckCustomMsgAuthor
 
 from wattpad.meta.models.result import ResultAuthor
 
@@ -86,7 +86,22 @@ class AuthorUtil:
         
         except Exception as e:
             self.logger.fatal("Exception occured in %s.build_check_custom_channel_msg method invoked", self.file_prefix,exc_info=1)
-            raise e   
+            raise e  
+
+    async def build_check_custom_msgs_msg(self, records:List[CheckCustomMsgAuthor]) -> str:
+        try:
+            self.logger.info("%s.build_check_custom_msgs_msg method invoked", self.file_prefix)
+
+            result=""
+
+            for record in records:
+                result= f"{result}\n{record.Author} - **{record.Message}**"
+
+            return result
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.build_check_custom_msgs_msg method invoked", self.file_prefix,exc_info=1)
+            raise e 
 
     async def __get_author_url_from_utm(self, authorurl:str) -> str:
         try:

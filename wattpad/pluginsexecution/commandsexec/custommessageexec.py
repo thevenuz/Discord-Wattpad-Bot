@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import List
 from wattpad.db.models.custommsg import CustomMsg
 from wattpad.db.repository.authorrepo import AuthorRepo
@@ -5,7 +6,8 @@ from wattpad.db.repository.channelrepo import ChannelRepo
 from wattpad.db.repository.serverrepo import ServerRepo
 from wattpad.db.repository.storyrepo import StoryRepo
 from wattpad.logger.baselogger import BaseLogger
-from wattpad.meta.models.result import Result, ResultCustomChannelSet, ResultCustomChannelUnset
+from wattpad.meta.models.checkcustomchannels import CheckCustomMsgAuthor, CheckCustomMsgStory, StoryCustomChannel
+from wattpad.meta.models.result import Result, ResultCheck, ResultCheckCustomChannel, ResultCheckCustomMsg, ResultCustomChannelSet, ResultCustomChannelUnset
 from wattpad.db.repository.custommsgrepo import CustomMsgrepo
 from wattpad.meta.models.enum import CustomMsgType
 
@@ -142,6 +144,78 @@ class CustomMessageExec:
             self.logger.fatal("Exception occured in %s.author method invoked for server: %s, author: %s", self.file_prefix, guildid, authorurl,exc_info=1)
             raise e       
 
+    async def check_custom_messages(self, guildid:str, category:str) -> ResultCheckCustomMsg:
+        try:
+            self.logger.info("%s.check_custom_messages method invoked for server: %s, category: %s", self.file_prefix, guildid, category)
+
+            isauthor=False
+            isstory=False
+            isempty= False
+
+            story_custom_msgs=[]
+            author_custom_msgs=[]
+
+
+            if category.lower() == "announcements":
+                isauthor = True
+            elif category.lower() == "story":
+                isstory = True
+            else:    
+                isauthor= True
+                isstory= True
+
+            #get server id
+            serverid= await self.serverRepo.get_serverid_from_server(guildid)
+
+            if serverid:
+                #get all the custom msgs for this server id
+                custom_msgs= await self.customMsgRepo.get_custom_msgs_from_server_id(serverid, 1)
+
+                if custom_msgs:
+                    if isstory:
+                        #get stories that are associated with this custom msg
+                        for msg in custom_msgs:
+                            if msg.StoryId:
+                                story= self.storyRepo.get_story_url_from_story_id(msg.StoryId, 1)
+
+                                story_custom_msg= CheckCustomMsgStory(story, msg.Message)
+
+                                story_custom_msgs.append(deepcopy(story_custom_msg))
+
+                    if isauthor:
+                        #get Authors that are associated with this custom msg
+                        for msg in custom_msgs:
+                            if msg.AuthorId:
+                                author= self.authorRepo.get_author_url_from_author_id(msg.AuthorId, 1)
+
+                                author_custom_msg= CheckCustomMsgAuthor(author, msg.Message)
+
+                                author_custom_msgs.append(deepcopy(author_custom_msg))
+
+                    else:
+                        isempty= True
+
+            else:
+                return ResultCheckCustomMsg(False, "Error while getting server id")
+
+            if isempty:
+                return ResultCheckCustomMsg(False, "No custom msgs found for this server", IsEmpty=True)  
+            else:
+                if isauthor and isstory:
+                    return ResultCheckCustomMsg(True, "success", StoryCustomMsgs=story_custom_msgs, AuthorCustomMsgs=author_custom_msgs)
+                elif isstory:
+                    return ResultCheckCustomMsg(True, "success", StoryCustomMsgs=story_custom_msgs)
+                elif isauthor:
+                    return ResultCheckCustomMsg(True, "success", AuthorCustomMsgs=author_custom_msgs)
+                    
+            return ResultCheckCustomMsg(False, "unknown error")
+
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.check_custom_messages method invoked for server: %s, category: %s", self.file_prefix, guildid, category,exc_info=1)
+            raise e
+        
+
     async def __unset_custom_message(self, guildid: str, url: str, isstory:bool= True, isauthor:bool= False) -> ResultCustomChannelUnset:
         try:
             self.logger.info("%s.__unset_custom_message method invoked for server: %s, url: %s, is story: %s, is author: %s", self.file_prefix, guildid, url, isstory, isauthor)
@@ -211,7 +285,7 @@ class CustomMessageExec:
                     authorid= await self.authorRepo.get_author_id_from_server_and_url(url, serverid, 1)
 
                     if authorid:
-                        custommsg= CustomMsg(Type=CustomMsgType.Author, StoryId=0, AuthorId=authorid, IsActive=1, Message=message)
+                        custommsg= CustomMsg(Type=CustomMsgType.Author, StoryId=0, AuthorId=authorid, ServerId=serverid, IsActive=1, Message=message)
                         result= await self.customMsgRepo.insert_custom_msg_data(custommsg)
                         if result:
                             return Result(True, "success")
@@ -225,7 +299,7 @@ class CustomMessageExec:
                     storyid= await self.storyRepo.get_story_id_from_server_and_url(url, serverid, 1)
 
                     if storyid:
-                        custommsg= CustomMsg(Type=CustomMsgType.Story, StoryId=storyid, AuthorId=0, IsActive=1, Message=message)
+                        custommsg= CustomMsg(Type=CustomMsgType.Story, StoryId=storyid, AuthorId=0, ServerId=serverid, IsActive=1, Message=message)
                         result= await self.customMsgRepo.insert_custom_msg_data(custommsg)
                         if result:
                             return Result(True, "success")

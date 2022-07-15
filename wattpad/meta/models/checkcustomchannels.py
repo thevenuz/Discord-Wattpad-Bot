@@ -11,3 +11,14 @@ class StoryCustomChannel:
 class AuthorCustomChannel:
     Channel:str=""
     Authors:List[str]=[]
+
+@dataclass
+class CheckCustomMsgStory:
+    Story:str=""
+    Message:str=""
+
+
+@dataclass
+class CheckCustomMsgAuthor:
+    Author:str=""
+    Message:str=""
