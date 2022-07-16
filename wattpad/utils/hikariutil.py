@@ -42,3 +42,13 @@ class HikariUtil:
             self.logger.fatal("Exception occured in %s.check_channel_read_perms method invoked for server: %s, channel: %s", self.file_prefix, ctx.guild_id, channelid,exc_info=1)
             raise e
     
+    async def send_story_update(self, serverid: str, channelid: str, msg:str, chapterlink: str) -> bool:
+        try:
+            self.logger.info("%s.send_story_update method invoked for server: %s, channel: %s, msg: %s, chapter: %s", self.file_prefix, serverid, channelid, msg, chapterlink)
+
+            
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s. method",exc_info=1)
+            raise e
+        

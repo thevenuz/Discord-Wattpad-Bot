@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List
 from wattpad.db.models.channel import Channel
 from wattpad.logger.baselogger import BaseLogger
@@ -184,7 +185,7 @@ class StoryRepo:
         
         except Exception as e:
             self.logger.fatal("Exception occured in %s.get_custom_channel_id_from_story_and_server method invoked for server id: %s", self.file_prefix, storyid,exc_info=1)
-            raise e
+            return None
         
     async def get_story_id_with_custom_channel_from_server_and_url(self, url:str, serverid:str, isactive: bool=1, iscustomchannel:bool=1) -> str:
         try:
@@ -306,7 +307,40 @@ class StoryRepo:
             self.logger.fatal("Exception occured in %s.get_story_url_from_story_id method invoked for story id: %s, isactive: %s", self.file_prefix, storyid, isactive,exc_info=1)
             raise e
         
+    async def get_active_stories(self, isactive:bool =1) -> List[Story]:
+        try:
+            self.logger.info("%s.get_active_stories method invoked", self.file_prefix)
 
+            sql="""SELECT * FROM
+                    STORIES
+                    WHERE
+                    IsActive=:IsActive
+                    ORDER BY
+                    LastcheckedOn ASC
+                """
+
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.execute(sql,[isactive])
+                    conn.commit()
+
+                    db_result=curs.fetchall()
+
+                    if db_result:
+                        story_data=list(db_result)
+                        column_names=list(map(lambda x: x.lower(), [d[0] for d in curs.description]))
+            
+            if db_result and story_data:
+                result= await self.map.map_story_records_list(story_data, column_names)
+
+                return result
+
+            return None
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.get_active_stories method invoked", self.file_prefix,exc_info=1)
+            raise e
+        
     #endregion
 
 
@@ -407,5 +441,46 @@ class StoryRepo:
             self.logger.fatal("Exception occured in %s.inactivate_custom_channel_for_stories method invoked for story id: %s, channel id: %s", self.file_prefix, storyid, channelid,exc_info=1)
             raise e
         
+    async def update_last_updated_date_for_story_id(self, storyid:str, lastupdated:datetime= datetime.utcnow()) -> bool:
+        try:
+            self.logger.info("%s.update_last_updated_date_for_story_id method invoked for story id: %s, last updated: %s", self.file_prefix, storyid, lastupdated)
 
+            sql="""UPDATE STORIES SET 
+                    LastUpdatedOn=:LastUpdatedOn
+                    WHERE
+                    StoryId=:StoryId
+                """
+
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.execute(sql,[lastupdated, storyid])
+                    conn.commit()
+            
+            return True
+
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.update_last_updated_date_for_story_id method for story id: %s, last updated: %s", self.file_prefix, storyid, lastupdated,exc_info=1)
+            return False
+
+    async def update_last_checked_date_for_story_id(self, storyid:str, lastchecked:datetime= datetime.utcnow()) -> bool:
+        try:
+            self.logger.info("%s.update_last_checked_date_for_story_id method invoked for story id: %s, last checked: %s", self.file_prefix, storyid, lastchecked)
+
+            sql="""UPDATE STORIES SET 
+                    LastcheckedOn=:LastcheckedOn
+                    WHERE
+                    StoryId=:StoryId
+                """
+
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.execute(sql,[lastchecked, storyid])
+                    conn.commit()
+            
+            return True
+
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.update_last_checked_date_for_story_id method for story id: %s, last checked: %s", self.file_prefix, storyid, lastchecked,exc_info=1)
+            return False
+        
     #endregion

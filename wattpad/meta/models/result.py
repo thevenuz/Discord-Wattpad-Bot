@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 from typing import List
 from wattpad.db.models.story import Story
 from wattpad.meta.models.checkcustomchannels import AuthorCustomChannel, CheckCustomMsgAuthor, CheckCustomMsgStory, StoryCustomChannel
@@ -67,5 +68,10 @@ class ResultCheckCustomMsg(Result):
     StoryCustomMsgs:List[CheckCustomMsgStory]=[]
     AuthorCustomMsgs:List[CheckCustomMsgAuthor]=[]
     IsEmpty:bool = False
+
+@dataclass
+class ResultNewUpdate(Result):
+    NewUpdate:str=""
+    UpdatedDate:datetime=datetime.utcnow()
 
 

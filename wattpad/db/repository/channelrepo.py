@@ -137,7 +137,7 @@ class ChannelRepo:
         
         except Exception as e:
             self.logger.fatal("Exception occured in %s.get_channel_from_channel_id method invoked for channel id: %s, isactive: %s, is custom channel: %s", self.file_prefix, channelid, isactive, iscustomchannel,exc_info=1)
-            raise e
+            return None
         
     #endregion
 
