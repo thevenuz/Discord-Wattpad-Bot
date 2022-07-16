@@ -42,16 +42,21 @@ class AuthorExec:
                 serverid= await self.serverRepo.insert_server_data(server)
 
             if serverid:
-                #insert the data in to author table
-                author= Author(Url=authorUrl, ServerId=serverid, IsActive=1)
+                #check if this uthor exists in lredy following list
+                author_exists= await self.authorRepo.get_author_id_from_server_and_url(url=authorUrl, serverid=serverid, isactive=1)
+                if not author_exists:
+                    #insert the data in to author table
+                    author= Author(Url=authorUrl, ServerId=serverid, IsActive=1)
 
-                author_result= await self.authorRepo.insert_author_data(author)
+                    author_result= await self.authorRepo.insert_author_data(author)
 
-                if author_result:
-                    return ResultAuthor(True, "Success")
+                    if author_result:
+                        return ResultAuthor(True, "Success")
 
+                    else:
+                        return ResultAuthor(False, "Error with inserting author data")
                 else:
-                    return ResultAuthor(False, "Error with inserting author data")
+                    return ResultAuthor(False, "This author is already in following list", AlreadyFollowing=True)
             
             else:
                 return ResultAuthor(False, "Error in inserting server data")

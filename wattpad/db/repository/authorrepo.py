@@ -73,11 +73,11 @@ class AuthorRepo:
             self.logger.fatal("Exception occured in %s.get_author_url_from_title method invoked for author: %s, server id: %s", self.file_prefix, title, serverid,exc_info=1)
             raise e
         
-    async def get_author_id_from_server_and_url(self, url:str, serverid:str,) -> str:
+    async def get_author_id_from_server_and_url(self, url:str, serverid:str,isactive:bool=1) -> str:
         try:
             self.logger.info("%s.get_author_id_from_server_and_url method invoked for url: %s, serverid: %s", self.file_prefix, url, serverid)
 
-            sql="""SELECT StoryId FROM
+            sql="""SELECT AuthorId FROM
                     AUTHORS
                     WHERE
                     ServerId=:ServerId AND
@@ -91,7 +91,7 @@ class AuthorRepo:
                     curs.prefetchrows = 2
                     curs.arraysize = 1
 
-                    curs.execute(sql,[serverid, 1, url])
+                    curs.execute(sql,[serverid, isactive, url])
                     conn.commit()
 
                     result=curs.fetchone()

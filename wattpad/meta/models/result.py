@@ -12,6 +12,7 @@ class Result:
 class ResultStory(Result):
     IsInvalidUrl:bool=False
     HasPattern:bool=True
+    AlreadyFollowing:bool=False
 
 @dataclass
 class ResultUnfollow(Result):
@@ -29,6 +30,7 @@ class ResultCheck(Result):
 class ResultAuthor(Result):
     IsInvalidUrl:bool=False
     HasPattern:bool=True
+    AlreadyFollowing:bool=False
 
 @dataclass
 class ResultPermissionsCheck(Result):

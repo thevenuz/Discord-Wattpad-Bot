@@ -104,7 +104,7 @@ class StoryRepo:
                     curs.prefetchrows = 2
                     curs.arraysize = 1
 
-                    curs.execute(sql,[serverid, 1, url])
+                    curs.execute(sql,[serverid, isactive, url])
                     conn.commit()
 
                     result=curs.fetchone()

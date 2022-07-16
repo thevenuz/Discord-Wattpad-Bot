@@ -36,6 +36,9 @@ async def follow_author(ctx: lightbulb.SlashContext) -> None:
 
             if result.IsInvalidUrl:
                 await ctx.respond(embed=hikari.Embed(title=f"{msgs['invalid:url']}", description=f"{msgs['invalid:author:url']}", color=0xFF0000))
+
+            elif result.AlreadyFollowing:
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['error']}", description=f"{msgs['already:following:author']}", color=0xFF0000))
             
             else:
                 await ctx.respond(embed=hikari.Embed(title=f"{msgs['unknown:error']}", description=f"{msgs['unknown:error:msg']}", color=0xFF0000))

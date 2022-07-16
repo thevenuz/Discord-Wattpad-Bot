@@ -44,16 +44,22 @@ class StoryExec:
                 serverid= await self.serverRepo.insert_server_data(server)
 
             if serverid:
-                #insert the data in to story table
-                story= Story(Url=storyUrl, ServerId=serverid)
+                #check if this story already exists in following list
+                story_exits= await self.storyRepo.get_story_id_from_server_and_url(url=storyUrl, serverid=serverid, isactive=1)
 
-                story_result= await self.storyRepo.insert_stories(story)
+                if not story_exits:
+                    #insert the data in to story table
+                    story= Story(Url=storyUrl, ServerId=serverid)
 
-                if story_result:
-                    return ResultStory(True, "Success")
+                    story_result= await self.storyRepo.insert_stories(story)
 
+                    if story_result:
+                        return ResultStory(True, "Success")
+
+                    else:
+                        return ResultStory(False, "Error with inserting story data")
                 else:
-                    return ResultStory(False, "Error with inserting story data")
+                    return ResultStory(False, "Already following this story", AlreadyFollowing=True)
             
             else:
                 return ResultStory(False, "Error in inserting server data")

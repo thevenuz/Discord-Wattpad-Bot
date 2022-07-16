@@ -14,6 +14,7 @@
 
     "follow:story:success" : "You have succesfully followed this story. The bot will post new chapter updates for this story.",
     "invalid:story:url" : "There is something wrong with the story URL you entered. Please check if this is the correct URL and try again.",
+    "already:following:story" : "You're already following this story in this server, no need to follow the same story twice. Use `/check-stories` command to check the stories you're already following.",
     "unknown:error:msg" : "Some unknown error has occured while running this command. Please try using the command again, if the issue still persists contact the dev.",
 
     "unfollow:story:success" : "You have succesfully unfollowed this story. The bot will not post new chapter updates for this story from now on.",
@@ -27,6 +28,7 @@
 
     "follow:author:success" : "You have succesfully followed this author. The bot will post the new announcment updates from this author.",
     "invalid:author:url" : "There is something wrong with the author profile URL you entered. Please check if this is the correct URL and try again.",
+    "already:following:author" : "You're already following this author in this server, no need to follow the same author twice. Use `/check-authors` command to check the authors you're already following.",
 
     "unfollow:author:success" : "You have succesfully unfollowed this author. The bot will not post new announcment updates for this author from now on.",
     "unfollow:author:not:following" : "You are not following this author in this server. Please use `/check-authors` command to see the authors you're following in this server",
