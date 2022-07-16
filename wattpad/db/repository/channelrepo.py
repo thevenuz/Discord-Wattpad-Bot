@@ -163,6 +163,28 @@ class ChannelRepo:
         except Exception as e:
             self.logger.fatal("Exception occured in %s.inactivate_channel_by_channel_id method invoked for channel id: %s", self.file_prefix, channelid,exc_info=1)
             raise e
-        
+
+    async def inactivate_all_channels_by_server_id(self, serverid:str) -> bool:
+        try:
+            self.logger.info("%s.inactivate_all_channels_by_server_id method invoked for server id: %s", self.file_prefix, serverid)
+
+            sql="""UPDATE CHANNELS 
+                    SET 
+                    IsActive=:IsActive
+                    WHERE
+                    ServerId=:ServerId
+                """
+            
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.execute(sql,[0, serverid])
+                    conn.commit()
+
+            
+            return True
+                    
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.inactivate_all_channels_by_server_id method invoked for server id: %s", self.file_prefix, serverid,exc_info=1)
+            return False  
 
     #endregion

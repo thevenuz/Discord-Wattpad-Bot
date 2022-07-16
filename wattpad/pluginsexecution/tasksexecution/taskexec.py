@@ -1,11 +1,10 @@
 from datetime import datetime
-import hikari
 import lightbulb
 from wattpad.db.models.author import Author
 from wattpad.db.models.story import Story
 from wattpad.db.repository.authorrepo import AuthorRepo
 from wattpad.logger.baselogger import BaseLogger
-from wattpad.meta.models.result import Result, ResultNewUpdate
+from wattpad.meta.models.result import ResultNewUpdate
 from wattpad.db.repository.storyrepo import StoryRepo
 from wattpad.db.repository.channelrepo import ChannelRepo
 from wattpad.db.repository.custommsgrepo import CustomMsgrepo
@@ -201,7 +200,7 @@ class TaskExec:
                     self.logger.error("Unknown error occured while getting channel from channel id: %s", channel_id)
 
             else:
-                self.logger.error("Error in %s.__trigger_message_for_story method - no channel id found for server: %s, story id: %s", self.file_prefix, story.ServerId, story.StoryId)
+                self.logger.error("Error in %s.__trigger_message_for_announcement method - no channel id found for server: %s, author id: %s", self.file_prefix, author.ServerId, author.AuthorId)
 
             return False
         

@@ -34,12 +34,12 @@ class ServerRepo:
             
             except Exception as e:
                 self.logger.fatal("Exception occured in %s.insert_server_data method while inserting data in to servers", self.file_prefix,exc_info=1)
-                raise e
+                return None
             
         
         except Exception as e:
             self.logger.fatal("Exception occured in %s.insert_server_data method invoked for server : %s", self.file_prefix, server.GuildId,exc_info=1)
-            raise e
+            return None
         
     #endregion
 
@@ -77,4 +77,29 @@ class ServerRepo:
             raise e
         
            
+    #endregion
+
+    #region update
+    async def inactivate_server_from_guild_id(self, guildid: str) -> bool:
+        try:
+            self.logger.info("%s.inactivate_server_from_guild_id method invoked for server: %s", self.file_prefix, guildid)
+
+            sql="""UPDATE SERVERS SET 
+                    IsActive=:IsActive
+                    WHERE
+                    GuildId=:GuildId
+                    AND
+                    IsActive=:IsActive2
+                """
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.execute(sql,[0, guildid, 1])
+                    conn.commit()
+            
+            return True
+
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.inactivate_server_from_guild_id method invoked for server: %s", self.file_prefix, guildid,exc_info=1)
+            return False
+        
     #endregion

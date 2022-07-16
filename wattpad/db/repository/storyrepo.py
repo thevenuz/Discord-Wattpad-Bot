@@ -482,5 +482,28 @@ class StoryRepo:
         except Exception as e:
             self.logger.fatal("Exception occured in %s.update_last_checked_date_for_story_id method for story id: %s, last checked: %s", self.file_prefix, storyid, lastchecked,exc_info=1)
             return False
-        
+
+    async def inactivate_all_stories_by_server_id(self, serverid:str) -> bool:
+        try:
+            self.logger.info("%s.inactivate_all_stories_by_server_id method invoked for server id: %s", self.file_prefix, serverid)
+
+            sql="""UPDATE STORIES 
+                    SET 
+                    IsActive=:IsActive
+                    WHERE
+                    ServerId=:ServerId
+                """
+            
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.execute(sql,[0, serverid])
+                    conn.commit()
+
+            
+            return True
+                    
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.inactivate_all_stories_by_server_id method invoked for server id: %s", self.file_prefix, serverid,exc_info=1)
+            return False
+
     #endregion

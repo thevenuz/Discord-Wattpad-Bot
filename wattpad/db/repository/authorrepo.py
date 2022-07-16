@@ -445,4 +445,28 @@ class AuthorRepo:
         except Exception as e:
             self.logger.fatal("Exception occured in %s.update_last_checked_date_for_author_id method for author id: %s, last checked: %s", self.file_prefix, authorid, lastchecked,exc_info=1)
             return False
+    
+    async def inactivate_all_authors_by_server_id(self, serverid:str) -> bool:
+        try:
+            self.logger.info("%s.inactivate_all_authors_by_server_id method invoked for server id: %s", self.file_prefix, serverid)
+
+            sql="""UPDATE AUTHORS 
+                    SET 
+                    IsActive=:IsActive
+                    WHERE
+                    ServerId=:ServerId
+                """
+            
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.execute(sql,[0, serverid])
+                    conn.commit()
+
+            
+            return True
+                    
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.inactivate_all_authors_by_server_id method invoked for server id: %s", self.file_prefix, serverid,exc_info=1)
+            return False
+    
     #endregion
