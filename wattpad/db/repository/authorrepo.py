@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List
 from wattpad.db.models.author import Author
 from wattpad.logger.baselogger import BaseLogger
@@ -291,7 +292,42 @@ class AuthorRepo:
         except Exception as e:
             self.logger.fatal("Exception occured in %s.get_author_url_from_author_id method invoked for author id: %s, is active: %s", self.file_prefix, authorid, isactive,exc_info=1)
             raise e
+
+    async def get_active_authors(self, isactive:bool =1) -> List[Author]:
+        try:
+            self.logger.info("%s.get_active_stories method invoked", self.file_prefix)
+
+            sql="""SELECT * FROM
+                    AUTHORS
+                    WHERE
+                    IsActive=:IsActive
+                    ORDER BY
+                    LastcheckedOn ASC
+                """
+
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.execute(sql,[isactive])
+                    conn.commit()
+
+                    db_result=curs.fetchall()
+
+                    if db_result:
+                        author_data=list(db_result)
+                        column_names=list(map(lambda x: x.lower(), [d[0] for d in curs.description]))
+            
+            if db_result and author_data:
+                result= await self.map.map_author_records_list(author_data, column_names)
+
+                return result
+
+            return None
         
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.get_active_stories method invoked", self.file_prefix,exc_info=1)
+            return None
+
+    
     #endregion
 
 
@@ -367,4 +403,46 @@ class AuthorRepo:
         except Exception as e:
             self.logger.fatal("Exception occured in %s.inactivate_custom_channel_for_authors method invoked for author id: %s, channel id: %s", self.file_prefix, authorid, channelid,exc_info=1)
             raise e
+    
+    async def update_last_updated_date_for_author_id(self, authorid:str, lastupdated:datetime= datetime.utcnow()) -> bool:
+        try:
+            self.logger.info("%s.update_last_updated_date_for_author_id method invoked for story id: %s, last updated: %s", self.file_prefix, authorid, lastupdated)
+
+            sql="""UPDATE AUTHORS SET 
+                    LastUpdatedOn=:LastUpdatedOn
+                    WHERE
+                    AuthorId=:AuthorId
+                """
+
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.execute(sql,[lastupdated, authorid])
+                    conn.commit()
+            
+            return True
+
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.update_last_updated_date_for_author_id method for story id: %s, last updated: %s", self.file_prefix, authorid, lastupdated,exc_info=1)
+            return False
+
+    async def update_last_checked_date_for_author_id(self, authorid:str, lastchecked:datetime= datetime.utcnow()) -> bool:
+        try:
+            self.logger.info("%s.update_last_checked_date_for_author_id method invoked for author id: %s, last checked: %s", self.file_prefix, authorid, lastchecked)
+
+            sql="""UPDATE AUTHORS SET 
+                    LastcheckedOn=:LastcheckedOn
+                    WHERE
+                    AuthorId=:AuthorId
+                """
+
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.execute(sql,[lastchecked, authorid])
+                    conn.commit()
+            
+            return True
+
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.update_last_checked_date_for_author_id method for author id: %s, last checked: %s", self.file_prefix, authorid, lastchecked,exc_info=1)
+            return False
     #endregion

@@ -158,6 +158,38 @@ class CustomMsgrepo:
             self.logger.fatal("Exception occured in %s.get_custom_msg_from_story_id method invoked for story id: %s, is active: %s", self.file_prefix, storyid, isactive, exc_info=1)
             return None
 
+    async def get_custom_msg_from_author_id(self, authorid:str, isactive:bool=1) -> str:
+        try:
+            self.logger.info("%s.get_custom_msg_from_author_id method invoked for author id: %s, is active: %s", self.file_prefix, authorid, isactive)
+
+            sql="""SELECT Message FROM
+                    CUSTOMMSG
+                    WHERE 
+                    AuthorId=:AuthorId
+                    AND
+                    IsActive=:IsActive
+                """
+
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.prefetchrows = 2
+                    curs.arraysize = 1
+
+                    curs.execute(sql,[authorid, isactive])
+                    conn.commit()
+
+                    result=curs.fetchone()
+
+            if result:
+                return result
+
+            return None
+            
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.get_custom_msg_from_author_id method invoked for author id: %s, is active: %s", self.file_prefix, authorid, isactive, exc_info=1)
+            return None
+
 
     #endregion
 

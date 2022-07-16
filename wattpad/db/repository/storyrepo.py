@@ -339,7 +339,7 @@ class StoryRepo:
         
         except Exception as e:
             self.logger.fatal("Exception occured in %s.get_active_stories method invoked", self.file_prefix,exc_info=1)
-            raise e
+            return None
         
     #endregion
 

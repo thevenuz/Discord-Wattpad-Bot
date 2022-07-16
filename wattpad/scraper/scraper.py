@@ -95,7 +95,7 @@ class Scraper:
                                         
                                         #if the published date of new chpater is greater than lastchecked date, return the chapter url
                                         if actualDate > lastcheckeddate:
-                                            self.logger.info("%s.get_new_chapter method ended", self.file_prefix)
+                                            self.logger.info("%s.get_new_chapter method ended for story: %s", self.file_prefix, url)
                                             
                                             return ResultNewUpdate(True, "Success in getting new chapter", NewUpdate=chapterLink, UpdatedDate=actualDate)
 
@@ -105,7 +105,58 @@ class Scraper:
             self.logger.fatal("Exception occured in %s.get_new_chapter method for story: %s, lastchecked: %s", self.file_prefix, url, lastchecked, exc_info=1)
             pass
 
-    
+    async def get_new_announcement(self, url:str, lastchecked: datetime) -> ResultNewUpdate:
+        try:
+            self.logger.info("%s.get_new_announcement method invoked for url: %s, last checked: %s", self.file_prefix, url, lastchecked)
+
+            author_name=url.split('/user/')[1]
+            conversations_url=f'{url}/conversations'
+            try:
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(conversations_url,headers=self.headers) as response:
+                        r=await response.text()
+
+            except:
+                self.logger.error("Exception occured in %s.get_new_announcement method while sending request to author url: %s", self.file_prefix, conversations_url, exc_info=1)
+                return None
+
+            if response.status==200:
+                current_date_time = datetime.utcnow()
+                if not lastchecked:
+                    lastchecked=current_date_time - timedelta(minutes=10)
+
+                soup=BeautifulSoup(r,'html.parser')
+                announcements= soup.find('div', class_='pinned-item')
+
+                if announcements:
+                    from_name=announcements.find('h3',class_='from-name')
+
+                    if from_name.text.lower()==author_name.lower():
+                        timestamp=announcements.find('time',class_='timestamp')
+
+                        try:
+                            timestampList=timestamp.attrs['datetime']
+
+                        except:
+                            pass
+
+                        lastUpdateTime=datetime.strptime(timestampList,"%Y-%m-%dT%H:%M:%SZ")
+                        lastcheckeddate=datetime.strptime(lastchecked,"%Y-%m-%d %H:%M:%S")
+
+                        if lastUpdateTime > lastcheckeddate:
+                            panel=announcements.select('div.panel-body.new-message')
+                            announcement_text=panel[0].text.strip() 
+
+                            self.logger.info("%s.get_new_announcement method ended for author: %s", self.file_prefix, url)
+
+                            return ResultNewUpdate(True, "succes", NewUpdate=announcement_text, UpdatedDate=lastUpdateTime)
+                            
+            return ResultNewUpdate(False, "some unknown error occured")   
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.get_new_announcement method invoked for url: %s, last checked: %s", self.file_prefix, url, lastchecked,exc_info=1)
+            raise e
+        
     #region misc methods
     async def __script_with_data(self, scripts):
         try:
