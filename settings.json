@@ -1,0 +1,5 @@
+{
+    "Token":"Bot's token",
+    "PublicLogChannel" : "public log channel id",
+    "LogChannel" : "private log channel id"
+}

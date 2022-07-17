@@ -2,6 +2,7 @@ from typing import Dict
 import aiofiles
 import json
 from wattpad.logger.baselogger import BaseLogger
+from wattpad.meta.models.settings import Settings
 
 class Config:
     def __init__(self) -> None:
@@ -24,3 +25,20 @@ class Config:
             self.logger.fatal("Exception occured in %s.get_messages method invoked for language: %s", self.file_prefix, language, exc_info=1)
             raise e
         
+    def load_settings(self) -> Settings:
+        try:
+            self.logger.info("%s.load_settings method invoked", self.file_prefix)
+
+            with open("settings.json") as f:
+                result= json.load(f)
+
+            settings= Settings()
+            settings.Token= result["Token"]
+            settings.PublicLogChannel= result["PublicLogChannel"]
+            settings.LogChannel= result["LogChannel"]
+
+            return settings
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.load_settings method", self.file_prefix, exc_info=1)
+            raise e
