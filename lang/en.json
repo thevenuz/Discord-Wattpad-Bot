@@ -164,9 +164,12 @@
     "help:set:custom:msg:author" : "Set a custom message for a particular author announcements.",
     "help:unset:custom:msg:story" : "Unset a customm message for story.",
     "help:unset:custom:msg:author" : "Unset a customm message for author.",
-    "help:check:custom:msgs" : "Check custom messages that are already set."
+    "help:check:custom:msgs" : "Check custom messages that are already set.",
 
-
-
+    "error:missing:perms" : "You do not have required permission to run this command. You need to have either ADMINISTRATOR or MODERATEMEMBERS or MANAGECHANNELS permission to use this command.",
+    "error:check:failure" : "You are not authorized to use this command! You need to have either ADMINISTRATOR or MODERATEMEMBERS or MANAGECHANNELS permission to use this command.",
+    "error:bot:missing:perms" : "Bot doesn't have required permissions.",
+    "error:invalid:command" : "Uh-oh. Something's wrong, You used an invalid command.",
+    "error:unknown" : "Uh-oh! Some unknown error occured. The developer has messed up somewhere!"
 
 }
