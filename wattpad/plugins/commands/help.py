@@ -25,10 +25,31 @@ async def help(ctx: lightbulb.SlashContext):
 
             embed= hikari.Embed(title=f"{msgs['help:title']}", description=f"{msgs['help:desc']}", color=0xFF0000)
 
-            embed.add_field(name=f"{msgs['']}", value=f"{msgs['']}", inline=False)
+            embed.add_field(name=f"{msgs['help:note:title']}", value=f"{msgs['help:note']}", inline=False)
 
-            embed.add_field(name=f"{msgs['']}", value=f"{msgs['']}", inline=False)
+            embed.add_field(name=f"**set-channel**", value=f"{msgs['help:set:channel']}", inline=False)
+            embed.add_field(name=f"**unset-channel**", value=f"{msgs['help:unset:channel']}", inline=True)
+            embed.add_field(name=f"**check-channels**", value=f"{msgs['help:check:channels']}", inline=True)
 
+            embed.add_field(name=f"**follow-story**", value=f"{msgs['help:follow:story']}", inline=False)
+            embed.add_field(name=f"**unfollow-story**", value=f"{msgs['help:unfollow:story']}", inline=True)
+            embed.add_field(name=f"**check-stories**", value=f"{msgs['help:check:stories']}", inline=True)
+
+            embed.add_field(name=f"**follow-author**", value=f"{msgs['help:follow:author']}", inline=False)
+            embed.add_field(name=f"**unfollow-author**", value=f"{msgs['help:unfollow:author']}", inline=True)
+            embed.add_field(name=f"**check-authors**", value=f"{msgs['help:check:authors']}", inline=True)
+
+            embed.add_field(name=f"**set-custom-channel for-story**", value=f"{msgs['help:set:custom:channel:story']}", inline=False)
+            embed.add_field(name=f"**set-custom-channel for-author**", value=f"{msgs['help:set:custom:channel:author']}", inline=True)
+            embed.add_field(name=f"**unset-custom-channel for-story**", value=f"{msgs['help:unset:custom:channel:story']}", inline=True)
+            embed.add_field(name=f"**unset-custom-channel for-author**", value=f"{msgs['help:unset:custom:channel:author']}", inline=True)
+            embed.add_field(name=f"**check-custom-channels**",value=f"{msgs['help:check:custom:channels']}", inline=True)
+
+            embed.add_field(name=f"**set-custom-message for-story**", value=f"{msgs['help:set:custom:msg:story']}", inline=False)
+            embed.add_field(name=f"**set-custom-message for-author**", value=f"{msgs['help:set:custom:msg:author']}", inline=True)
+            embed.add_field(name=f"**unset-custom-message for-story**", value=f"{msgs['help:unset:custom:msg:story']}", inline=True)
+            embed.add_field(name=f"**unset-custom-message for-author**", value=f"{msgs['help:unset:custom:msg:author']}", inline=True)
+            embed.add_field(name=f"**check-custom-messages**",value=f"{msgs['help:check:custom:msgs']}", inline=True)
 
         elif category.lower() == HelpCategory.About:
             logger.info("About help command triggered")
