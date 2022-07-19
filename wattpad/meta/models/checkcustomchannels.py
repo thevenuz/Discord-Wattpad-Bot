@@ -1,16 +1,16 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List
 
 
 @dataclass
 class StoryCustomChannel:
     Channel:str=""
-    Stories:List[str]=[]
+    Stories:List[str]= field(default_factory=list)
 
 @dataclass
 class AuthorCustomChannel:
     Channel:str=""
-    Authors:List[str]=[]
+    Authors:List[str]=field(default_factory=list)
 
 @dataclass
 class CheckCustomMsgStory:

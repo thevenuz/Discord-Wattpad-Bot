@@ -78,9 +78,10 @@ class AuthorUtil:
             self.logger.info("%s.build_check_custom_channel_msg method invoked", self.file_prefix)
 
             result=""
+            newline="\n"
 
             for author in authors:
-                result= f"{result}<#{author.Channel}>\n{[x +'\n' for x in author.Authors]}"
+                result= f"{result}<#{author.Channel}>{newline}{[x +f'{newline}' for x in author.Authors]}"
 
             return result
         
@@ -93,9 +94,10 @@ class AuthorUtil:
             self.logger.info("%s.build_check_custom_msgs_msg method invoked", self.file_prefix)
 
             result=""
+            newline="\n"
 
             for record in records:
-                result= f"{result}\n{record.Author} - **{record.Message}**"
+                result= f"{result}{newline}{record.Author} - **{record.Message}**"
 
             return result
         

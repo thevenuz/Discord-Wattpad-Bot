@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List
 from wattpad.db.models.story import Story
@@ -59,14 +59,14 @@ class ResultCustomChannelUnset(Result):
 
 @dataclass 
 class ResultCheckCustomChannel(Result):
-    StoryCustomChannels:List[StoryCustomChannel]=[]
-    AuthorCustomChannels:List[AuthorCustomChannel]=[]
+    StoryCustomChannels:List[StoryCustomChannel]=field(default_factory=list)
+    AuthorCustomChannels:List[AuthorCustomChannel]=field(default_factory=list)
     IsEmpty:bool = False
 
 @dataclass 
 class ResultCheckCustomMsg(Result):
-    StoryCustomMsgs:List[CheckCustomMsgStory]=[]
-    AuthorCustomMsgs:List[CheckCustomMsgAuthor]=[]
+    StoryCustomMsgs:List[CheckCustomMsgStory]=field(default_factory=list)
+    AuthorCustomMsgs:List[CheckCustomMsgAuthor]=field(default_factory=list)
     IsEmpty:bool = False
 
 @dataclass

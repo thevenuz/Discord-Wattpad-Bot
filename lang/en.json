@@ -73,7 +73,7 @@
     "help:about" : "The bot can automatically share the chapter links of the stories that you're following as soon as a new chapter is published.\nThe bot can share the announcements when an author you're following makes a new announcment.\n",
 
     "help:setup:title" : "Steps for setting up the bot",
-    "help:setup" : "The first step in the setup is to setup a channel where bot can share the updates. To set this channel, use `/set-channel` command.\nAfter setting a channel you can follow the stories and authors you like by using `/follow-story` and `/follow-author` commands and teh bot will share the updates automatically whenever there is an update from the story or author.",
+    "help:setup" : "The first step in the setup is to setup a channel where bot can share the updates. To set this channel, use `/set-channel` command.\nAfter setting a channel you can follow the stories and authors you like by using `/follow-story` and `/follow-author` commands and the bot will share the updates automatically whenever there is an update from the story or author.",
 
     "help:channel:title" : "CHANNEL COMMANDS",
     "set:channel" : "Use this command to set a channel in which the bot can share all the story and announcement updates by default.\n",
@@ -99,7 +99,7 @@
     "follow:author" : "Use this command to follow an author. Use the proper URL of the author's profile when following an author. After following, the bot will share new announcements from the author you followed.\n",
     "follow:author:ex" : "> Command: `/follow-author <url of the story>`\n**Example: /follow-author https://www.wattpad.com/user/testuserwp**\n",
 
-    "unfollow:author" : "Use this command to unfollow an author you're already following. After unfollowing, you won;t receive new announcement updates from the author.\n",
+    "unfollow:author" : "Use this command to unfollow an author you're already following. After unfollowing, you won't receive new announcement updates from the author.\n",
     "unfollow:author:ex" : "> Command: `/unfollow-author <url of the author>`\n**Example: /unfollow-author https://www.wattpad.com/user/testuserwp**\n",
 
     "check:authors" : "Use this command to check all the authors you're following in your server.\n",
@@ -119,7 +119,7 @@
     "unset:custom:channel:author:ex" : "> Command: `/unset-custom-channel for-author <#channel> <title/URL of the author>`\n",
 
     "check:custom:channels" : "Use this command to check the custom channels that have been already setup in your server. Use the category `story` or `announcement` to see the custom channels related to only that category.\n",
-    "check:custom:channels:ex" : "> command: `check-custom-channels <category: story/announcement>`\n",
+    "check:custom:channels:ex" : "> command: `/check-custom-channels <category: story/announcement>`\n",
 
     "help:custom:msg:title" : "CUSTOM MESSAGE COMMANDS",
     "set:custom:msg:story" : "Use this command to set a custom message for a particular story. When you set a custom message for a story, the bot will use this message as title when sharing new chapter updates from this story.\n",
@@ -135,7 +135,7 @@
     "unset:custom:msg:author:ex" : "> Command: `/unset-custom-message for-author  <title/URL of the author>`\n",
 
     "check:custom:msgs" : "Use this command to check the custom messages that have been already setup in your server. Use the category `story` or `announcement` to see the custom messages related to only that category.\n",
-    "check:custom:msgs:ex" : "> command: `check-custom-messages <category: story/announcement>`\n",
+    "check:custom:msgs:ex" : "> command: `/check-custom-messages <category: story/announcement>`\n",
 
     "help:title" : "HELP",
     "help:desc" : "Use the command `/help <category>` to get help about specific category with more details. You can use setup/channel/story/author/about/custom message/custom channel as category.\n",
@@ -156,14 +156,14 @@
 
     "help:set:custom:channel:story" : "Set a custom channel for sharing updates related to particular story.",
     "help:set:custom:channel:author" : "Set a custom channel for sharing updates related to particular author.",
-    "help:unset:custom:channel:story" : "Unset a customm channel for story.",
-    "help:unset:custom:channel:author" : "Unset a customm channel for author.",
+    "help:unset:custom:channel:story" : "Unset a custom channel for story.",
+    "help:unset:custom:channel:author" : "Unset a custom channel for author.",
     "help:check:custom:channels" : "Check custom channels that are already set.",
 
     "help:set:custom:msg:story" : "Set a custom message for a particular story.",
     "help:set:custom:msg:author" : "Set a custom message for a particular author announcements.",
-    "help:unset:custom:msg:story" : "Unset a customm message for story.",
-    "help:unset:custom:msg:author" : "Unset a customm message for author.",
+    "help:unset:custom:msg:story" : "Unset a custom message for story.",
+    "help:unset:custom:msg:author" : "Unset a custom message for author.",
     "help:check:custom:msgs" : "Check custom messages that are already set.",
 
     "error:missing:perms" : "You do not have required permission to run this command. You need to have either ADMINISTRATOR or MODERATEMEMBERS or MANAGECHANNELS permission to use this command.",

@@ -84,9 +84,10 @@ class StoryUtil:
             self.logger.info("%s.build_check_custom_channel_msg method invoked", self.file_prefix)
 
             result=""
+            newline="\n"
 
             for story in stories:
-                result= f"{result}<#{story.Channel}>\n{[x +'\n' for x in story.Stories]}"
+                result= f"{result}<#{story.Channel}>{newline}{[x +f'{newline}' for x in story.Stories]}"
 
             return result
         
@@ -99,9 +100,10 @@ class StoryUtil:
             self.logger.info("%s.build_check_custom_msgs_msg method invoked", self.file_prefix)
 
             result=""
+            newline="\n"
 
             for record in records:
-                result= f"{result}\n{record.Story} - **{record.Message}**"
+                result= f"{result}{newline}{record.Story} - **{record.Message}**"
 
             return result
         
