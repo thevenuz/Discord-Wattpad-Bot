@@ -18,7 +18,7 @@ class CustomMsgrepo:
         try:
             self.logger.info("%s.insert_custom_msg_data method invoked for type: %s, story id: %s, author id: %s, message: %s", self.file_prefix, custommsg.Type, custommsg.StoryId, custommsg.AuthorId, custommsg.Message)
 
-            sql="""INSERT INTO CUSTOMMSG
+            sql="""INSERT INTO CUSTOMMSGS
                     (Type, StoryId, AuthorId, Message, ServerId IsActive, RegisteredOn)
                     VALUES
                     (:Type, :StoryId, :AuthorId, :Message, :ServerId, :IsActive, :RegisteredOn)
@@ -46,7 +46,7 @@ class CustomMsgrepo:
             self.logger.info("%s.get_custom_msg_id_from_story_id method invoked for story id: %s, isactive: %s", self.file_prefix, storyid, isactive)
 
             sql="""SELECT * FROM 
-                    CUSTOMMSG
+                    CUSTOMMSGS
                     WHERE 
                     StoryId=:StoryId
                     AND
@@ -71,7 +71,7 @@ class CustomMsgrepo:
             self.logger.info("%s.get_custom_msg_id_from_author_id method invoked for author id: %s, isactive: %s", self.file_prefix, authorid, isactive)
 
             sql="""SELECT * FROM 
-                    CUSTOMMSG
+                    CUSTOMMSGS
                     WHERE 
                     AuthorId=:AuthorId
                     AND
@@ -96,7 +96,7 @@ class CustomMsgrepo:
             self.logger.info("%s.get_custom_msgs_from_server_id method invoked for server id: %s, is active: %s, type: %s", self.file_prefix, serverid, isactive, type)
 
             sql="""SELECT * FROM
-                    CUSTOMMSG
+                    CUSTOMMSGS
                     WHERE 
                     ServerId=:ServerId
                     AND
@@ -131,7 +131,7 @@ class CustomMsgrepo:
             self.logger.info("%s.get_custom_msg_from_story_id method invoked for story id: %s, is active: %s", self.file_prefix, storyid, isactive)
 
             sql="""SELECT Message FROM
-                    CUSTOMMSG
+                    CUSTOMMSGS
                     WHERE 
                     StoryId=:StoryId
                     AND
@@ -163,7 +163,7 @@ class CustomMsgrepo:
             self.logger.info("%s.get_custom_msg_from_author_id method invoked for author id: %s, is active: %s", self.file_prefix, authorid, isactive)
 
             sql="""SELECT Message FROM
-                    CUSTOMMSG
+                    CUSTOMMSGS
                     WHERE 
                     AuthorId=:AuthorId
                     AND
@@ -198,7 +198,7 @@ class CustomMsgrepo:
         try:
             self.logger.info("%s.delete_custom_msg_by_id method invoked for custom msg id: %s", self.file_prefix, custom_msg_id)
 
-            sql="""UPDATE CUSTOMMSG SET
+            sql="""UPDATE CUSTOMMSGS SET
                     IsActive=:IsActive,
                     StoryId=:StoryId,
                     AuthorId=:AuthorId

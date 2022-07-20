@@ -15,20 +15,23 @@ class ServerRepo:
     async def insert_server_data(self, server:Server) -> str:
         try:
             self.logger.info("%s.insert_server_data method invoked for server : %s", self.file_prefix, server.GuildId)
-
+            
             sql="""INSERT INTO SERVERS
                     (GuildId, IsActive)
                     VALUES
                     (:GuildId, :IsActive)
+                    RETURNING ServerId INTO :ServerId
                 """
+
 
             try:
                 with cx_Oracle.connect(self.connection_string) as conn:
                     with conn.cursor() as curs:
-                        curs.execute(sql,[server.GuildId, server.IsActive])
-                        conn.commit()
+                        serverid= curs.var(int)
+                        curs.execute(sql,[server.GuildId, server.IsActive, serverid])
 
-                        id= curs.lastrowid()
+                        id= serverid.getvalue()
+                        conn.commit()
 
                 return id
             

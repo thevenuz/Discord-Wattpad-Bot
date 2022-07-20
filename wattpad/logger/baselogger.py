@@ -9,6 +9,9 @@ class BaseLogger:
     def loggger_init(self):
         try:
             logger=logging.getLogger()
+            if (logger.hasHandlers()):
+                logger.handlers.clear()
+
             logger.setLevel(logging.DEBUG)
 
             formatter=logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
