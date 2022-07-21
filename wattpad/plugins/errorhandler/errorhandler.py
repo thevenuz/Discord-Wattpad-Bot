@@ -12,7 +12,7 @@ async def on_error(event: lightbulb.CommandErrorEvent) -> None:
 
         msgs= await Config().get_messages("en")
 
-        embed= hikari.Embed(title="🛑 An error occurred with the `{event.context.command.name}` command.", color=0xFF0000)
+        embed= hikari.Embed(title=f"🛑 An error occurred with the `{event.context.command.name}` command.", color=0xFF0000)
 
         if isinstance(event.exception, lightbulb.MissingRequiredPermission):
             logger.error("Error occured due to missing permissions in server: %s", event.context.guild_id)

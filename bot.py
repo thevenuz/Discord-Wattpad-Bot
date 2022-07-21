@@ -3,6 +3,7 @@ import lightbulb
 from lightbulb.ext import tasks
 from wattpad.utils.config import Config
 from wattpad.logger.baselogger import BaseLogger
+from wattpad.utils.db import DBConfig
 
 file_prefix= "bot"
 logger= BaseLogger().loggger_init()
@@ -15,12 +16,15 @@ PUBLICLOGCHANNEL= settings.PublicLogChannel
 
 bot=lightbulb.BotApp(token=TOKEN)
 
+#initialize oracle client path upon startup
+DBConfig().initialize_oracle_client_path()
 
 tasks.load(bot)
 
-bot.load_extensions_from("./plugins/commands",must_exist=True)
-bot.load_extensions_from("./plugins/events",must_exist=True)
-bot.load_extensions_from("./plugins/tasks",must_exist=True)
+bot.load_extensions_from("./wattpad/plugins/commands",must_exist=True)
+bot.load_extensions_from("./wattpad/plugins/events",must_exist=True)
+bot.load_extensions_from("./wattpad/plugins/tasks",must_exist=True)
+bot.load_extensions_from("./wattpad/plugins/errorhandler",must_exist=True)
 
 
 @bot.listen(hikari.StartedEvent)

@@ -42,7 +42,6 @@ class StoryRepo:
                 self.logger.fatal("Exception occured in %s.insert_stories method while inserting in to stories for story: %s", self.file_prefix, story.Url,exc_info=1)
                 raise e
             
-
         
         except Exception as e:
             self.logger.fatal("Exception occured in %s.insert_stories invoked for story: %s, server Id: %s", self.file_prefix, story.Url, story.ServerId,exc_info=1)
@@ -112,7 +111,7 @@ class StoryRepo:
 
                     result=curs.fetchone()
 
-            return result
+            return result[0]
 
         
         except Exception as e:

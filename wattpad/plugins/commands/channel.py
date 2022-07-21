@@ -39,7 +39,8 @@ async def set_channel(ctx: lightbulb.SlashContext) -> None:
             result= await ChannelExec().set_channel(guildid=guildId, channelid=channel_id)
 
             if result.IsSuccess:
-                await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{msgs['set:channel:success']}", color=0xFF0000))
+                msg_description= msgs['set:channel:success'].format(f"{channel_id}")
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{msg_description}", color=0xFF0000))
 
             else:
                 logger.error("Error occured in %s.set_channel method for channel: %s, server: %s, Error: %s", file_prefix, channel_id, guildId, result.ResultInfo)

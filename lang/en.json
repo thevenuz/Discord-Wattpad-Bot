@@ -36,6 +36,7 @@
     "check:authors:following" : "The authors you're following in this server:",
     "check:authors:empty" : "You're not following any authors in this server currently. Use `/follow-author` command to follow a new author.",
 
+    "set:channel:success" : "Your channel has been succesfully set. All the updates from the stories and authors will be shared in the channel <#{0}>",
     "channel:unset:success" : "Your channel has been succesfully unset. The bot will not send any updates in this channel from now on.",
     "channel:not:set:msg" : "No channel has been setup for receiving updates in this channel. Use `/set-channel` to configure a channel to receive updates.",
 

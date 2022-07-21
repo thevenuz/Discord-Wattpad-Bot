@@ -8,7 +8,7 @@ from wattpad.logger.baselogger import BaseLogger
 class ChannelExec:
     def __init__(self) -> None:
         self.file_prefix= "wattpad.pluginsexecution.commandsexec.channelexec"
-        self.logger= BaseLogger().loggger_init
+        self.logger= BaseLogger().loggger_init()
         self.serverRepo= ServerRepo()
         self.channelRepo= ChannelRepo()
 
@@ -26,7 +26,7 @@ class ChannelExec:
 
             if serverid:
                 #insert the data in to channel table
-                channel= Channel(channel=channelid, ServerId=serverid, IsActive=1, IsCustomChannel=0)
+                channel= Channel(Channel=channelid, ServerId=serverid, IsActive=1, IsCustomChannel=0)
                 
                 channel_result= await self.channelRepo.insert_channel_data(channel)
 
