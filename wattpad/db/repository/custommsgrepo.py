@@ -22,16 +22,19 @@ class CustomMsgrepo:
                     (Type, StoryId, AuthorId, Message, ServerId IsActive, RegisteredOn)
                     VALUES
                     (:Type, :StoryId, :AuthorId, :Message, :ServerId, :IsActive, :RegisteredOn)
+                    RETURNING MsgId INTO :MsgId
                 """
 
             with cx_Oracle.connect(self.connection_string) as conn:
                 with conn.cursor() as curs:
-                    curs.execute(sql,[custommsg.Type, custommsg.StoryId, custommsg.AuthorId, custommsg.Message, custommsg.ServerId ,custommsg.IsActive, datetime.utcnow()])
+                    msgid= curs.var(int)
+                    curs.execute(sql,[custommsg.Type, custommsg.StoryId, custommsg.AuthorId, custommsg.Message, custommsg.ServerId ,custommsg.IsActive, datetime.utcnow(), msgid])
+                    
+                    id=msgid.getvalue()
+
                     conn.commit()
             
-                    id= curs.lastrowid()
-
-            return id
+            return id[0]
             
         except Exception as e:
             self.logger.fatal("Exception occured in %s.insert_custom_msg_data method invoked for type: %s, story id: %s, author id: %s, message: %s", self.file_prefix, custommsg.Type, custommsg.StoryId, custommsg.AuthorId, custommsg.Message,exc_info=1)

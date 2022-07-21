@@ -21,17 +21,21 @@ class ChannelRepo:
                     (Channel, ServerId, IsActive, IsCustomChannel)
                     VALUES
                     (:Channel, :ServerId, :IsActive, :IsCustomChannel)
+                    RETURNING ChannelId INTO :ChannelId
                 """
 
             
             with cx_Oracle.connect(self.connection_string) as conn:
                 with conn.cursor() as curs:
-                    curs.execute(sql,[channel.Channel, channel.ServerId, channel.IsActive, channel.IsCustomChannel])
+                    channelid= curs.var(int)
+                    curs.execute(sql,[channel.Channel, channel.ServerId, channel.IsActive, channel.IsCustomChannel, channelid])
+
+                    id=channelid.getvalue()
+
                     conn.commit()
 
-                    id= curs.lastrowid()
 
-            return id
+            return id[0]
             
         
         except Exception as e:

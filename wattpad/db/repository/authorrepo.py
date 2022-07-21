@@ -22,16 +22,17 @@ class AuthorRepo:
                     (Url, ServerId, IsActive)
                     VALUES
                     (:Url, :ServerId, :IsActive)
+                    RETURNING AuthorId INTO :AuthorId
                 """
 
             with cx_Oracle.connect(self.connection_string) as conn:
                     with conn.cursor() as curs:
-                        curs.execute(sql,[author.Url, author.ServerId, author.IsActive])
+                        authorid= curs.var(int)
+                        curs.execute(sql,[author.Url, author.ServerId, author.IsActive, authorid])
+                        id= authorid.getvalue()
                         conn.commit()
 
-                        id= curs.lastrowid()
-
-            return id
+            return id[0]
         
         except Exception as e:
             self.logger.fatal("Exception occured in %s.insert_author_data method invoked for author: %s, server id: %s", self.file_prefix, author.Url, author.ServerId,exc_info=1)

@@ -33,7 +33,7 @@ class ServerRepo:
                         id= serverid.getvalue()
                         conn.commit()
 
-                return id
+                return id[0]
             
             except Exception as e:
                 self.logger.fatal("Exception occured in %s.insert_server_data method while inserting data in to servers", self.file_prefix,exc_info=1)

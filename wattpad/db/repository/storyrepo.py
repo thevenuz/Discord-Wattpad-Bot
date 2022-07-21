@@ -23,15 +23,17 @@ class StoryRepo:
                     (Url, ServerId)
                     VALUES
                     (:Url, :ServerId)
+                    RETURNING StoryId INTO :StoryId
                 """
 
             try:
                 with cx_Oracle.connect(self.connection_string) as conn:
                     with conn.cursor() as curs:
-                        curs.execute(sql,[story.Url, story.ServerId])
-                        conn.commit()
+                        storyid= curs.var(int)
+                        curs.execute(sql,[story.Url, story.ServerId, storyid])
 
-                        id= curs.lastrowid()
+                        id= storyid.getvalue()
+                        conn.commit()
 
                 return id
                 
