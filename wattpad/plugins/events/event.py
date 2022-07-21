@@ -2,6 +2,7 @@ import hikari
 import lightbulb
 from wattpad.logger.baselogger import BaseLogger
 from wattpad.pluginsexecution.eventsexecution.eventexec import Eventexec
+from wattpad.utils.config import Config
 
 plugin= lightbulb.Plugin("EventPlugin")
 
@@ -14,8 +15,15 @@ async def guild_join_event(event: hikari.GuildJoinEvent):
         logger.info("%s.guild_join_event method invoked for server: %s", file_prefix, event.guild_id)
 
         guildId= str(event.guild_id)
+        settings= Config().load_settings()
         #call the exec
         result= await Eventexec().guild_join_event(guildId)
+
+        if result:
+            publicjoinmsg=f"Bot joined a new server: {event.guild.name}"
+            joinmsg= f"Bot joined a new server: {event.guild.name}, Id: {event.guild_id}"
+            await plugin.bot.rest.create_message(settings.LogChannel, joinmsg)
+            await plugin.bot.rest.create_message(settings.PublicLogChannel, publicjoinmsg)
 
         logger.info("Guild join method ended for server: %s", event.guild_id)
     
@@ -30,8 +38,15 @@ async def guild_leave_event(event: hikari.GuildLeaveEvent):
         logger.info("%s.guild_leave_event method invoked for server: %s", file_prefix, event.guild_id)
 
         guildId= str(event.guild_id)
+        settings= Config().load_settings()
         #call the exec
         result= await Eventexec().guild_leave_event(guildId)
+
+        if result:
+            publicleftmsg=f"Bot joined a new server: {event.old_guild.name}"
+            leftmsg= f"Bot joined a new server: {event.old_guild.name}, Id: {event.guild_id}"
+            await plugin.bot.rest.create_message(settings.LogChannel, leftmsg)
+            await plugin.bot.rest.create_message(settings.PublicLogChannel, publicleftmsg)
 
         logger.info("Guild leave method ended for server: %s", event.guild_id)
     
