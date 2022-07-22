@@ -67,7 +67,7 @@ class ChannelRepo:
             
                     result=curs.fetchone()
         
-            return result
+            return result[0]
 
         except Exception as e:
             self.logger.fatal("Exception occured in %s.get_channel_id_from_server_id method invoked for server id: %s", self.file_prefix, serverid,exc_info=1)
@@ -190,5 +190,31 @@ class ChannelRepo:
         except Exception as e:
             self.logger.fatal("Exception occured in %s.inactivate_all_channels_by_server_id method invoked for server id: %s", self.file_prefix, serverid,exc_info=1)
             return False  
+
+    async def update_channel_by_channel_id_and_server_id(self, channelid: str, serverid: str, channel: str, isactive: bool=1) -> bool:
+        try:
+            self.logger.info("%s.update_channel_by_channel_id_and_server_id method invoked for channel id: %s, server id: %s, channel: %s", self.file_prefix, channelid, serverid, channel)
+
+            sql="""UPDATE CHANNELS SET 
+                    Channel=:Channel
+                    WHERE
+                    ChannelId=:ChannelId
+                    AND
+                    ServerId=:ServerId
+                    AND
+                    IsActive=:IsActive
+                """
+
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.execute(sql,[channel, channelid, serverid, isactive])
+                    conn.commit()
+            
+            return True
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.update_channel_by_channel_id_and_server_id method invoked for channel id: %s, server id: %s, channel: %s", self.file_prefix, channelid, serverid, channel,exc_info=1)
+            return False
+        
 
     #endregion

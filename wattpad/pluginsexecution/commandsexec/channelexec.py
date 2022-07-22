@@ -25,16 +25,29 @@ class ChannelExec:
                 serverid= await self.serverRepo.insert_server_data(server)
 
             if serverid:
-                #insert the data in to channel table
-                channel= Channel(Channel=channelid, ServerId=serverid, IsActive=1, IsCustomChannel=0)
-                
-                channel_result= await self.channelRepo.insert_channel_data(channel)
+                #check if there is already a channel id set for this server
+                existing_channel= await self.channelRepo.get_channel_id_from_server_id(serverid)
 
-                if channel_result:
-                    return Result(True, "Success")
+                if existing_channel:
+                    #update the channel value for this record
+                    update_result= await self.channelRepo.update_channel_by_channel_id_and_server_id(existing_channel, serverid, channelid, 1)
+
+                    if update_result:
+                        return Result(True, "Success")
+                    
+                    return Result(False, "Error with updating channels data")
 
                 else:
-                    return Result(False, "Error with inserting channels data")
+                    #insert the data in to channel table
+                    channel= Channel(Channel=channelid, ServerId=serverid, IsActive=1, IsCustomChannel=0)
+                    
+                    channel_result= await self.channelRepo.insert_channel_data(channel)
+
+                    if channel_result:
+                        return Result(True, "Success")
+
+                    else:
+                        return Result(False, "Error with inserting channels data")
             
             else:
                 return Result(False, "Error in inserting server data")
