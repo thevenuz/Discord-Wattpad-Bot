@@ -14,7 +14,7 @@ class Channelutil:
             return_msg=""
 
             for index, channel in enumerate(channels):
-                return_msg= f"{return_msg}{index}. <#{channel.Channel}>\n"
+                return_msg= f"{return_msg}{index + 1}. <#{channel.Channel}>\n"
 
             
             return return_msg

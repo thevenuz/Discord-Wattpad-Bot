@@ -66,8 +66,9 @@ class ChannelRepo:
                     conn.commit()
             
                     result=curs.fetchone()
-        
-            return result[0]
+
+            if result:
+                return result[0]
 
         except Exception as e:
             self.logger.fatal("Exception occured in %s.get_channel_id_from_server_id method invoked for server id: %s", self.file_prefix, serverid,exc_info=1)
@@ -134,7 +135,7 @@ class ChannelRepo:
                     result= curs.fetchone()
                 
             if result:
-                return result
+                return result[0]
 
             return None
             

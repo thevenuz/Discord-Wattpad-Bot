@@ -67,8 +67,9 @@ class ServerRepo:
                         conn.commit()
 
                         result=curs.fetchone()
-                
-                return result[0]
+                        
+                if result:
+                    return result[0]
 
             except Exception as e:
                 self.logger.fatal("Exception occured in %s.get_serverid_from_server method",self.file_prefix,exc_info=1)
