@@ -92,7 +92,7 @@ async def unfollow_story(ctx: lightbulb.SlashContext) -> None:
     
 
 @plugin.command
-@lightbulb.command('check-stories','check the stories that you are already following in this server')
+@lightbulb.command("check-stories","check the stories that you are following in this server", auto_defer=True)
 @lightbulb.implements(lightbulb.SlashCommand)
 async def check_stories(ctx: lightbulb.SlashContext) -> None:
     try:

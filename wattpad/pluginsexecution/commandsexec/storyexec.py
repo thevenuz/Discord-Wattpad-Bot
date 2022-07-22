@@ -78,6 +78,9 @@ class StoryExec:
                 #try to get the full story url from title
                 story_url= await self.__get_story_url_from_title(url, guildid)
 
+            else:
+                story_url = url
+
             if not story_url:
                 #invalid title
                 return ResultUnfollow(False, "Invalid Title", IsInvalidTitle=True)
@@ -96,7 +99,7 @@ class StoryExec:
 
                 
                     #get story id from server and story url
-                    storyid= await self.storyRepo.get_story_id_from_server_and_url(url=story_url, serverid=serverid)
+                    storyid= await self.storyRepo.get_story_id_from_server_and_url(url=story_url[0], serverid=serverid)
 
                     if not storyid:
                         return ResultUnfollow(False, "Not following the story", NotFollowing=True)

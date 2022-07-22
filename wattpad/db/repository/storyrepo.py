@@ -35,7 +35,8 @@ class StoryRepo:
                         id= storyid.getvalue()
                         conn.commit()
 
-                return id
+                if id:
+                    return id[0]
                 
             
             except Exception as e:
@@ -72,16 +73,15 @@ class StoryRepo:
                     curs.execute(sql,[serverid, 1, title])
                     conn.commit()
 
-                    result=curs.fetchmany()
+                    db_result=curs.fetchmany()
 
-            return result
+                    if db_result:
+                        result=list(map(lambda x: x.lower(), [r[0] for r in db_result]))
 
-            # if len(result) == 1:
-            #     return result[0]
+            if result:
+                return result
 
-            # else:
-            #     self.logger.error("Multiple stories were found with similar entered title: %s in server: %s", self.file_prefix, title, serverid)
-            #     return ""
+            return None
   
         except Exception as e:
             self.logger.fatal("Exception occured in %s.get_story_url_from_title method invoked for server: %s, title: %s", self.file_prefix, serverid, title,exc_info=1)
@@ -111,7 +111,8 @@ class StoryRepo:
 
                     result=curs.fetchone()
 
-            return result[0]
+            if result:
+                return result[0]
 
         
         except Exception as e:

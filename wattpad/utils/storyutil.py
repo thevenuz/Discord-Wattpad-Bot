@@ -24,7 +24,7 @@ class StoryUtil:
             #make a request to story and see if it's valid
             request_result= await self.__make_request_to_url(storyUrl)
 
-            if request_result == "0" or request_result == "200":
+            if str(request_result) == "0" or str(request_result) == "200":
                 validurl= True
             
             if validurl:
@@ -70,7 +70,7 @@ class StoryUtil:
             return_msg=""
 
             for index, story in enumerate(stories):
-                return_msg= f"{return_msg}{index}. {story.Url}\n"
+                return_msg= f"{return_msg}{index + 1}. {story.Url}\n"
 
             
             return return_msg
