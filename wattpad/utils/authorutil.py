@@ -24,7 +24,7 @@ class AuthorUtil:
             #make a request to author url and see if it's valid
             request_result= await self.__make_request_to_url(authorurl)
 
-            if request_result == "0" or request_result == "200":
+            if str(request_result) == "0" or str(request_result) == "200":
                 validurl= True
             
             if validurl:
@@ -64,7 +64,7 @@ class AuthorUtil:
             return_msg=""
 
             for index, author in enumerate(authors):
-                return_msg= f"{return_msg}{index}. {author.Url}\n"
+                return_msg= f"{return_msg}{index + 1}. {author.Url}\n"
 
             
             return return_msg

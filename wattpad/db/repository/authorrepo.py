@@ -18,7 +18,7 @@ class AuthorRepo:
         try:
             self.logger.info("%s.insert_author_data method invoked for author: %s, server id: %s", self.file_prefix, author.Url, author.ServerId)
 
-            sql="""INSERT INTO STORIES
+            sql="""INSERT INTO AUTHORS
                     (Url, ServerId, IsActive)
                     VALUES
                     (:Url, :ServerId, :IsActive)
@@ -62,14 +62,15 @@ class AuthorRepo:
                     curs.execute(sql,[serverid, 1, title])
                     conn.commit()
 
-                    result=curs.fetchmany()
+                    db_result=curs.fetchmany()
 
-            if len(result) == 1:
-                return result[0]
+                    if db_result:
+                        result=list(map(lambda x: x.lower(), [r[0] for r in db_result]))
 
-            else:
-                self.logger.error("Multiple authors were found with similar entered title: %s in server: %s", self.file_prefix, title, serverid)
-                return ""
+            if result:
+                return result
+
+            return None
         
         except Exception as e:
             self.logger.fatal("Exception occured in %s.get_author_url_from_title method invoked for author: %s, server id: %s", self.file_prefix, title, serverid,exc_info=1)
@@ -98,7 +99,8 @@ class AuthorRepo:
 
                     result=curs.fetchone()
 
-            return result
+            if result:
+                return result[0]
         
         except Exception as e:
             self.logger.fatal("Exception occured in %s.get_author_id_from_server_and_url method invoked for url: %s, serverid: %s", self.file_prefix, url, serverid,exc_info=1)
@@ -164,7 +166,8 @@ class AuthorRepo:
 
                     result=curs.fetchone()
 
-            return result
+            if result:
+                return result[0]
 
         
         except Exception as e:
@@ -199,7 +202,8 @@ class AuthorRepo:
 
                     result=curs.fetchone()
 
-            return result
+            if result:
+                return result[0]
 
             
         
@@ -288,7 +292,8 @@ class AuthorRepo:
             
                     result=curs.fetchone()
 
-            return result
+            if result:
+                return result[0]
         
         except Exception as e:
             self.logger.fatal("Exception occured in %s.get_author_url_from_author_id method invoked for author id: %s, is active: %s", self.file_prefix, authorid, isactive,exc_info=1)
@@ -340,7 +345,7 @@ class AuthorRepo:
             sql="""UPDATE AUTHORS 
                     SET IsActive=:IsActive
                     WHERE
-                    StoryId=:StoryId
+                    AuthorId=:AuthorId
                 """
             
             with cx_Oracle.connect(self.connection_string) as conn:

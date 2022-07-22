@@ -26,11 +26,11 @@
     "check:stories:following" : "The stories you're following in this server:",
     "check:stories:empty" : "You're not following any stories in this server currently. Use `/follow-story` command to follow a new story.",
 
-    "follow:author:success" : "You have succesfully followed this author. The bot will post the new announcment updates from this author.",
+    "follow:author:success" : "You have succesfully followed this author. The bot will post the new announcement updates from this author.",
     "invalid:author:url" : "There is something wrong with the author profile URL you entered. Please check if this is the correct URL and try again.",
     "already:following:author" : "You're already following this author in this server, no need to follow the same author twice. Use `/check-authors` command to check the authors you're already following.",
 
-    "unfollow:author:success" : "You have succesfully unfollowed this author. The bot will not post new announcment updates for this author from now on.",
+    "unfollow:author:success" : "You have succesfully unfollowed this author. The bot will not post new announcement updates for this author from now on.",
     "unfollow:author:not:following" : "You are not following this author in this server. Please use `/check-authors` command to see the authors you're following in this server",
 
     "check:authors:following" : "The authors you're following in this server:",
@@ -45,7 +45,7 @@
 
     "custom:channel:success" : "Custom channel is set succesfully",
     "custom:channel:story:success" : "All the updates from story {0} will be shared in the channel <#{1}> from now on.",
-    "custom:channel:author:success" : "All the announcments from author {0} will be shared in the channel <#{1}> from now on.",
+    "custom:channel:author:success" : "All the announcements from author {0} will be shared in the channel <#{1}> from now on.",
 
     "unset:custom:channel:story:success" : "Channel <#{0}> is removed as custom channel for story {1}.",
     "custom:channel:not:set:story" : "No custom channel has been setup for this story. Use the command `/check-custom-channels` to see the custom channels that are already setup.",
@@ -71,7 +71,7 @@
     "new:announcement:msg" : "**New announcement from {0}**",
 
     "help:about:title" : "About the Bot",
-    "help:about" : "The bot can automatically share the chapter links of the stories that you're following as soon as a new chapter is published.\nThe bot can share the announcements when an author you're following makes a new announcment.\n",
+    "help:about" : "The bot can automatically share the chapter links of the stories that you're following as soon as a new chapter is published.\nThe bot can share the announcements when an author you're following makes a new announcement.\n",
 
     "help:setup:title" : "Steps for setting up the bot",
     "help:setup" : "The first step in the setup is to setup a channel where bot can share the updates. To set this channel, use `/set-channel` command.\nAfter setting a channel you can follow the stories and authors you like by using `/follow-story` and `/follow-author` commands and the bot will share the updates automatically whenever there is an update from the story or author.",

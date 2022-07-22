@@ -89,13 +89,13 @@ class AuthorExec:
                     return ResultUnfollow(False, "Error while getting server id", UnknownError=True)
                 
                 #get author id from server and author url
-                storyid= await self.authorRepo.get_author_id_from_server_and_url(url=author_url, serverid=serverid)
+                authorid= await self.authorRepo.get_author_id_from_server_and_url(url=author_url[0], serverid=serverid)
 
-                if not storyid:
+                if not authorid:
                     return ResultUnfollow(False, "Not following the author", NotFollowing=True)
 
                 #inactivate author by id
-                inactivate_result= await self.authorRepo.inactivate_author_by_id(storyid)
+                inactivate_result= await self.authorRepo.inactivate_author_by_id(authorid)
 
                 if inactivate_result:
                     return ResultUnfollow(True, "Success")
