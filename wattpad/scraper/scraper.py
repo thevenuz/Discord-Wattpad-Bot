@@ -91,7 +91,7 @@ class Scraper:
                                         createDate=validJson[prefix]['data']['createDate']
 
                                         actualDate=datetime.strptime(createDate,"%Y-%m-%dT%H:%M:%SZ")
-                                        lastcheckeddate=datetime.strptime(lastchecked,"%Y-%m-%d %H:%M:%S")
+                                        lastcheckeddate=datetime.strptime(str(lastchecked),"%Y-%m-%d %H:%M:%S")
                                         
                                         #if the published date of new chpater is greater than lastchecked date, return the chapter url
                                         if actualDate > lastcheckeddate:
@@ -141,7 +141,7 @@ class Scraper:
                             pass
 
                         lastUpdateTime=datetime.strptime(timestampList,"%Y-%m-%dT%H:%M:%SZ")
-                        lastcheckeddate=datetime.strptime(lastchecked,"%Y-%m-%d %H:%M:%S")
+                        lastcheckeddate=datetime.strptime(str(lastchecked),"%Y-%m-%d %H:%M:%S")
 
                         if lastUpdateTime > lastcheckeddate:
                             panel=announcements.select('div.panel-body.new-message')
@@ -149,7 +149,7 @@ class Scraper:
 
                             self.logger.info("%s.get_new_announcement method ended for author: %s", self.file_prefix, url)
 
-                            return ResultNewUpdate(True, "succes", NewUpdate=announcement_text, UpdatedDate=lastUpdateTime)
+                            return ResultNewUpdate(True, "success", NewUpdate=announcement_text, UpdatedDate=lastUpdateTime)
                             
             return ResultNewUpdate(False, "some unknown error occured")   
         

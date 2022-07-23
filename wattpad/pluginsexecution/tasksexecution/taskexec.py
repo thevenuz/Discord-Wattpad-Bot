@@ -1,4 +1,5 @@
 from datetime import datetime
+import hikari
 import lightbulb
 from wattpad.db.models.author import Author
 from wattpad.db.models.story import Story
@@ -142,6 +143,7 @@ class TaskExec:
                 if channel:
                     story_title= await self.__get_story_title_from_url(story.Url)
                     msg_content= msg.format(f"{story_title}")
+                    msg_content= msg_content + "\n" + result.NewUpdate
 
                     await plugin.bot.rest.create_message(channel, msg_content)
 
@@ -192,8 +194,9 @@ class TaskExec:
                 if channel:
                     author_name= await self.__get_author_title_from_url(author.Url)
                     msg_content= msg.format(f"{author_name}")
+                    embed=hikari.Embed(title="Annoncement:", description=f"{result.NewUpdate}")
 
-                    await plugin.bot.rest.create_message(channel, msg_content)
+                    await plugin.bot.rest.create_message(channel, embed=embed, content= msg_content)
 
                     return True
                 else:

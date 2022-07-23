@@ -183,7 +183,7 @@ class AuthorRepo:
                     ON
                     a.ChannelId = c.ChannelId
                     WHERE
-                    StoryId=:StoryId
+                    AuthorId=:AuthorId
                     AND 
                     a.IsActive=:IsActive
                     AND
