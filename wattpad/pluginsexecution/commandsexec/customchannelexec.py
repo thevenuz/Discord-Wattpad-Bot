@@ -8,7 +8,11 @@ from wattpad.meta.models.checkcustomchannels import AuthorCustomChannel, StoryCu
 from wattpad.meta.models.result import Result, ResultCheckCustomChannel, ResultCustomChannelSet, ResultCustomChannelUnset
 from wattpad.db.models.server import Server
 from wattpad.db.models.channel import Channel
+from wattpad.meta.models.enum import Category
 from copy import deepcopy
+
+from wattpad.utils.authorutil import AuthorUtil
+from wattpad.utils.storyutil import StoryUtil
 
 class CustomChannlExec:
     def __init__(self) -> None:
@@ -18,6 +22,8 @@ class CustomChannlExec:
         self.storyRepo= StoryRepo()
         self.channelRepo= ChannelRepo()
         self.authorRepo= AuthorRepo()
+        self.authorUtil= AuthorUtil()
+        self.storyUtil= StoryUtil()
         self.prefix= "wattpad.com"
 
 
@@ -25,22 +31,27 @@ class CustomChannlExec:
         try:
             self.logger.info("%s.set_custom_channel_for_story method invokedfor server: %s, channel: %s, story url: %s", self.file_prefix, guildid, channelid, storyurl)
 
-            story_urls=""            
+            story_urls=[]           
 
             if self.prefix not in storyurl:
                 story_urls= await self.__get_story_url_from_title(storyurl, guildid)
 
+            
+            else:
+                story_urls.append(storyurl)
+
             if not story_urls:
-                return ResultCustomChannelSet(False, "No story found with the title", IsInvalidTitle=True)
+                return ResultCustomChannelSet(False, "No story found with the title", IsInvalidTitle=True)  
             
             else:
                 if len(story_urls) > 1:
                     return ResultCustomChannelSet(False, "Multiple stories found with this title", HasMultipleResults=True)
 
                 else:
-                    result= await self.__set_custom_channel(guildid, channelid, story_urls, isstory=True)
+                    result= await self.__set_custom_channel(guildid, channelid, story_urls[0], isstory=True)
 
                     if result.IsSuccess:
+                        story_name= await self.storyUtil.get_story_title_from_url(story_urls[0])
                         return ResultCustomChannelSet(True, "success")
 
                     
@@ -54,10 +65,13 @@ class CustomChannlExec:
         try:
             self.logger.info("%s.set_custom_channel_for_author method invokedfor server: %s, channel: %s, author url: %s", self.file_prefix, guildid, channelid, authorurl)
 
-            author_urls=""            
+            author_urls= []      
 
             if self.prefix not in authorurl:
                 author_urls= await self.__get_author_url_from_title(authorurl, guildid)
+
+            else:
+                author_urls.append(authorurl)
 
             if not author_urls:
                 return ResultCustomChannelSet(False, "No author found with the title", IsInvalidTitle=True)
@@ -67,10 +81,11 @@ class CustomChannlExec:
                     return ResultCustomChannelSet(False, "Multiple authors found with this title", HasMultipleResults=True)
 
                 else:
-                    result= await self.__set_custom_channel(guildid, channelid, author_urls, isauthor=True)
+                    result= await self.__set_custom_channel(guildid, channelid, author_urls[0], isauthor=True)
 
                     if result.IsSuccess:
-                        return ResultCustomChannelSet(True, "success")
+                        author_name= await self.authorUtil.get_author_name_from_url(author_urls[0])
+                        return ResultCustomChannelSet(True, "success", Name=author_name)
 
                     
             return ResultCustomChannelSet(False, "Unknown error", UnknownError=True)
@@ -162,12 +177,16 @@ class CustomChannlExec:
             story_custom_channels=[]
             author_custom_channels=[]
 
+            if category:
+                if category.lower() == Category.Announcements.value:
+                    isauthor = True
+                elif category.lower() == Category.Story.value:
+                    isstory = True
+                else:    
+                    isauthor= True
+                    isstory= True
 
-            if category.lower() == "announcements":
-                isauthor = True
-            elif category.lower() == "story":
-                isstory = True
-            else:    
+            else:
                 isauthor= True
                 isstory= True
 
@@ -182,7 +201,7 @@ class CustomChannlExec:
                     if isstory:
                         #get stories that are associated with this custom channel
                         for channel in custom_channels:
-                            stories= self.storyRepo.get_story_urls_from_channel_id(channel.ChannelId, 1, 1)
+                            stories= await self.storyRepo.get_story_urls_from_channel_id(channel.ChannelId, 1, 1)
 
                             story_custom_channel=StoryCustomChannel(channel.Channel, stories)
 
@@ -191,7 +210,7 @@ class CustomChannlExec:
                     if isauthor:
                         #get authors that are associated with this custom channel
                         for channel in custom_channels:
-                            authors= self.authorRepo.get_author_urls_from_channel_id(channel.ChannelId, 1, 1)
+                            authors= await self.authorRepo.get_author_urls_from_channel_id(channel.ChannelId, 1, 1)
 
                             author_custom_channel=AuthorCustomChannel(channel.Channel, authors)
 
@@ -232,49 +251,66 @@ class CustomChannlExec:
                 serverid= await self.serverRepo.insert_server_data(server)
 
             if serverid:
-                #insert the data in to channel table
-                channel= Channel(channel=channelid, ServerId=serverid, IsActive=1, IsCustomChannel=1)
+                if isstory:
+                    story_id= await self.storyRepo.get_story_id_from_server_and_url(url, serverid)
+                    #check if there is already a custom channel set for this story
+                    existing_channel= await self.storyRepo.get_custom_channel_id_from_story_id(story_id, 1)
+                
+                else:
+                    author_id= await self.authorRepo.get_author_id_from_server_and_url(url, serverid)
+                    #check if there is already a custom channel set for this author
+                    existing_channel= await self.authorRepo.get_custom_channel_id_from_author_id(author_id, 1)
 
-                channel_result= await self.channelRepo.insert_channel_data(channel)
+                if existing_channel:
+                    #update the channel value for this record
+                    update_result= await self.channelRepo.update_channel_by_channel_id_and_server_id(existing_channel, serverid, channelid, 1)
 
-                if channel_result:
-                    if isstory:
-                        #get the storyid
-                        story_id= await self.storyRepo.get_story_id_from_server_and_url(url, serverid)
-                        if not story_id:
-                            return Result(False, "Error while getting story id from db")
-
-                        else:
-                            #update the story table with the custom channel id
-                            update_result= await self.storyRepo.update_channel_id_for_stories(story_id, channel_result, 1)
-
-                            if update_result:
-                                return Result(True, "success")
-
-                            else:
-                                return Result(False, "Error while updating channel id to db")
-
-                    else:
-                        #get the author id
-                        author_id= await self.authorRepo.get_author_id_from_server_and_url(url, serverid)
-
-                        if not author_id:
-                            return Result(False, "Error while getting author id from db")
-
-                        else:
-                            #update the author table with custom channel id
-                            update_result= await self.authorRepo.update_channel_id_for_authors(author_id, channel_result, 1)
-
-                            if update_result:
-                                return Result(True, "success")
-
-                            else:
-                                return Result(False, "Error while updating channel id to db")
-
+                    if update_result:
+                        return Result(True, "Success")
+                    
+                    return Result(False, "Error with updating channels data")
 
                 else:
-                    #unknown error
-                    return Result(False, "Error while getting story id from db")
+                    #insert the data in to channel table
+                    channel= Channel(Channel=channelid, ServerId=serverid, IsActive=1, IsCustomChannel=1)
+
+                    channel_result= await self.channelRepo.insert_channel_data(channel)
+
+                    if channel_result:
+                        if isstory:
+                            if not story_id:
+                                return Result(False, "Error while getting story id from db")
+
+                            else:
+                                #update the story table with the custom channel id
+                                update_result= await self.storyRepo.update_channel_id_for_stories(story_id, channel_result, 1)
+
+                                if update_result:
+                                    return Result(True, "success")
+
+                                else:
+                                    return Result(False, "Error while updating channel id to db")
+
+                        else:
+                            if not author_id:
+                                return Result(False, "Error while getting author id from db")
+
+                            else:
+                                #update the author table with custom channel id
+                                update_result= await self.authorRepo.update_channel_id_for_authors(author_id, channel_result, 1)
+
+                                if update_result:
+                                    return Result(True, "success")
+
+                                else:
+                                    return Result(False, "Error while updating channel id to db")
+
+
+                    else:
+                        #unknown error
+                        return Result(False, "Unknown error")
+
+            return Result(False, "Error while getting story id from db")
         
         except Exception as e:
             self.logger.fatal("Exception occured in %s.__set_custom_channel method invoked for server: %s, channel: %s, url: %s, isauthor: %s, is story: %s", self.file_prefix, guildid, channelid, url, isauthor, isstory, exc_info=1)

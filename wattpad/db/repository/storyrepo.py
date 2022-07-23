@@ -181,7 +181,8 @@ class StoryRepo:
 
                     result=curs.fetchone()
 
-            return result
+            if result:
+                return result[0]
 
             
         
@@ -254,32 +255,39 @@ class StoryRepo:
         """Returns a list of story urls
         """
         try:
-            self.logger.info("%s.get_story_urls_from_channel_id method invoked for channel id: %s, is active: %s, is custom channel: %s", channelid, isactive, iscustomchannel)
+            self.logger.info("%s.get_story_urls_from_channel_id method invoked for channel id: %s, is active: %s, is custom channel: %s", self.file_prefix, channelid, isactive, iscustomchannel)
 
             sql="""SELECT Url FROM
-                    STORIES
+                    STORIES s
+                    JOIN 
+                    CHANNELS c
+                    ON s.ChannelId = c.ChannelId
                     WHERE
-                    ChannelId=:ChannelId
+                    s.ChannelId=:ChannelId
                     AND
-                    IsActive=:IsActive
+                    s.IsActive=:IsActive
                     AND
-                    IsCustomChannel=:IsCustomChannel
+                    c.IsActive=:IsActiveC
+                    AND
+                    c.IsCustomChannel=:IsCustomChannel
                 """
 
             with cx_Oracle.connect(self.connection_string) as conn:
                 with conn.cursor() as curs:
-                    curs.execute(sql,[channelid, isactive, iscustomchannel])
+                    curs.execute(sql,[channelid, isactive, isactive, iscustomchannel])
                     conn.commit()
             
-                    result=curs.fetchall()
+                    db_result=curs.fetchall()
+                    if db_result:
+                        result= list(map(lambda x: x.lower(), [d[0] for d in db_result]))
 
-            if result:
+            if db_result and result:
                 return result
 
             return None
 
         except Exception as e:
-            self.logger.fatal("Exception occured in %s.get_story_urls_from_channel_id method invoked for channel id: %s, is active: %s, is custom channel: %s", channelid, isactive, iscustomchannel,exc_info=1)
+            self.logger.fatal("Exception occured in %s.get_story_urls_from_channel_id method invoked for channel id: %s, is active: %s, is custom channel: %s", self.file_prefix, channelid, isactive, iscustomchannel,exc_info=1)
             raise e
         
     async def get_story_url_from_story_id(self, storyid:str, isactive:bool=1) -> str:
@@ -398,7 +406,7 @@ class StoryRepo:
             self.logger.info("%s.update_channel_id_for_stories method invoked for storyid: %s, channel id: %s", self.file_prefix, storyid, channelid)
 
             sql="""UPDATE STORIES SET
-                    ChannelId=:ChannelId,
+                    ChannelId=:ChannelId
                     WHERE
                     StoryId=:StoryId
                     AND

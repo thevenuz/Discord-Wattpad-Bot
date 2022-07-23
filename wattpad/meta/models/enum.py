@@ -12,3 +12,7 @@ class HelpCategory(enum.Enum):
     CustomChannel="custom channel"
     Setup="setup"
     About="about"
+
+class Category(enum.Enum):
+    Story= "story"
+    Announcements= "announcements"

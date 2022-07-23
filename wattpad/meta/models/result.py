@@ -48,6 +48,7 @@ class ResultCustomChannelSet(Result):
     IsInvalidTitle:bool=False
     UnknownError:bool=False
     HasMultipleResults:bool= False
+    Name:str=""
     
 
 @dataclass

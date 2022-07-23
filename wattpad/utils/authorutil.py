@@ -79,9 +79,14 @@ class AuthorUtil:
 
             result=""
             newline="\n"
+            author_data=""
 
             for author in authors:
-                result= f"{result}<#{author.Channel}>{newline}{[x +f'{newline}' for x in author.Authors]}"
+                if author.Authors:
+                    for a in  author.Authors:
+                        author_data= author_data + a + newline
+                        
+                    result= f"{result}<#{author.Channel}>{newline}{author_data}"
 
             return result
         
@@ -114,6 +119,18 @@ class AuthorUtil:
         
         except Exception as e:
             self.logger.fatal("Exception occured in %s.__get_author_url_from_utm method invoked for author: %s", self.file_prefix, authorurl,exc_info=1)
+            raise e
+
+    async def get_author_name_from_url(self, url:str)  -> str:
+        try:
+            self.logger.info("%s.get_author_name_from_url method invoked for url: %s", self.file_prefix,url)
+
+            author_name=url.split('/user/')[1]
+
+            return author_name
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.get_author_name_from_url method invoked for url: %s", self.file_prefix,url,exc_info=1)
             raise e
         
 

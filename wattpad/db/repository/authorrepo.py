@@ -67,7 +67,7 @@ class AuthorRepo:
                     if db_result:
                         result=list(map(lambda x: x.lower(), [r[0] for r in db_result]))
 
-            if result:
+            if db_result and result:
                 return result
 
             return None
@@ -243,32 +243,40 @@ class AuthorRepo:
         """Returns a list of author urls
         """
         try:
-            self.logger.info("%s.get_author_urls_from_channel_id method invoked for channel id: %s, is active: %s, is custom channel: %s", channelid, isactive, iscustomchannel)
+            self.logger.info("%s.get_author_urls_from_channel_id method invoked for channel id: %s, is active: %s, is custom channel: %s", self.file_prefix, channelid, isactive, iscustomchannel)
 
             sql="""SELECT Url FROM
-                    AUTHORS
+                    AUTHORS a
+                    JOIN 
+                    CHANNELS c
+                    ON a.ChannelId = c.ChannelId
                     WHERE
-                    ChannelId=:ChannelId
+                    a.ChannelId=:ChannelId
                     AND
-                    IsActive=:IsActive
+                    a.IsActive=:IsActive
                     AND
-                    IsCustomChannel=:IsCustomChannel
+                    c.IsActive=:IsActiveC
+                    AND
+                    c.IsCustomChannel=:IsCustomChannel
                 """
 
             with cx_Oracle.connect(self.connection_string) as conn:
                 with conn.cursor() as curs:
-                    curs.execute(sql,[channelid, isactive, iscustomchannel])
+                    curs.execute(sql,[channelid, isactive, isactive, iscustomchannel])
                     conn.commit()
             
-                    result=curs.fetchall()
+                    db_result=curs.fetchall()
+                    if db_result:
+                        result= list(map(lambda x: x.lower(), [d[0] for d in db_result]))
 
-            if result:
+            if db_result and result:
                 return result
+
 
             return None
 
         except Exception as e:
-            self.logger.fatal("Exception occured in %s.get_author_urls_from_channel_id method invoked for channel id: %s, is active: %s, is custom channel: %s", channelid, isactive, iscustomchannel,exc_info=1)
+            self.logger.fatal("Exception occured in %s.get_author_urls_from_channel_id method invoked for channel id: %s, is active: %s, is custom channel: %s", self.file_prefix, channelid, isactive, iscustomchannel,exc_info=1)
             raise e
 
     async def get_author_url_from_author_id(self, authorid: str, isactive: bool=1) -> str:
@@ -360,7 +368,6 @@ class AuthorRepo:
             self.logger.fatal("Exception occured in %s.inactivate_author_by_id method invoked for author id: %s", self.file_prefix, authorid,exc_info=1)
             raise e
         
-
     async def update_channel_id_for_authors(self, authorid: str, channelid:str, isactive:bool=1) -> bool:
         try:
             self.logger.info("%s.update_channel_id_for_stories method invoked for author id: %s, channel id: %s", self.file_prefix, authorid, channelid)
@@ -368,7 +375,7 @@ class AuthorRepo:
             sql="""UPDATE AUTHORS SET
                     ChannelId=:ChannelId
                     WHERE
-                    StoryId=:StoryId
+                    AuthorId=:AuthorId
                     AND
                     IsActive=:IsActive
                 """

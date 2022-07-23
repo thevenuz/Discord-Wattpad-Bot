@@ -6,6 +6,7 @@ from wattpad.utils.authorutil import AuthorUtil
 from wattpad.utils.config import Config
 from wattpad.utils.hikariutil import HikariUtil
 from wattpad.utils.storyutil import StoryUtil
+from wattpad.meta.models.enum import Category
 
 plugin= lightbulb.Plugin("CustomChannelPlugin")
 
@@ -56,7 +57,7 @@ async def set_custom_channel_for_story(ctx: lightbulb.SlashContext) -> None:
             result= await CustomChannlExec().set_custom_channel_for_story(guildId, channel_id, storyurl)
 
             if result.IsSuccess:
-                msg_description= msgs['custom:channel:story:success'].format(f"{storyurl}", f"{channel_id}")
+                msg_description= msgs['custom:channel:story:success'].format(f"{result.Name}", f"{channel_id}")
                 
                 await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:channel:success']}", description=f"{msg_description}", color=0xFF0000))
 
@@ -115,7 +116,7 @@ async def set_custom_channel_for_author(ctx: lightbulb.SlashContext) -> None:
             result= await CustomChannlExec().set_custom_channel_for_author(guildId, channel_id, authorurl)
 
             if result.IsSuccess:
-                msg_description= msgs['custom:channel:author:success'].format(f"{authorurl}", f"{channel_id}")
+                msg_description= msgs['custom:channel:author:success'].format(f"{result.Name}", f"{channel_id}")
                 
                 await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:channel:success']}", description=f"{msg_description}", color=0xFF0000))
 
@@ -279,11 +280,12 @@ async def check_custom_channels(ctx: lightbulb.SlashContext) -> None:
             if result.AuthorCustomChannels:
                 author_return_msg= await AuthorUtil().build_check_custom_channel_msg(result.AuthorCustomChannels)
 
-            if category.lower() == "story":
-                await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:channels']}", description=f"{msgs['story:custom:channels']}\n{story_return_msg}", color=0xFF0000))
-            
-            elif category.lower() == "announcements":
-                await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:channels']}", description=f"{msgs['author:custom:channels']}\n{author_return_msg}", color=0xFF0000))
+            if category:
+                if category.lower() == Category.Story.value:
+                    await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:channels']}", description=f"{msgs['story:custom:channels']}\n{story_return_msg}", color=0xFF0000))
+                
+                elif category.lower() == Category.Announcements.value:
+                    await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:channels']}", description=f"{msgs['author:custom:channels']}\n{author_return_msg}", color=0xFF0000))
 
             else:
                 await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:channels']}", description=f"{msgs['story:custom:channels']}\n{story_return_msg}\n\n{msgs['author:custom:channels']}\n{author_return_msg}", color=0xFF0000))

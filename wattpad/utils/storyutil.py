@@ -85,9 +85,14 @@ class StoryUtil:
 
             result=""
             newline="\n"
+            story_data=""
 
             for story in stories:
-                result= f"{result}<#{story.Channel}>{newline}{[x +f'{newline}' for x in story.Stories]}"
+                if story.Stories:
+                    for s in  story.Stories:
+                        story_data= story_data + s + newline
+
+                    result= f"{result}<#{story.Channel}>{newline}{story_data}"
 
             return result
         
@@ -190,4 +195,21 @@ class StoryUtil:
         except Exception as e:
             self.logger.fatal("Exception occured in %s.__make_request_to_url method invoked for url: %s", self.file_prefix, url,exc_info=1)
             return 0
+
+    async def get_story_title_from_url(self, url:str) -> str:
+        try:
+            self.logger.info("%s.get_story_title_from_url method invoked for story: %s", self.file_prefix, url)
+
+            if "utm" in url:
+                url= await self.__get_story_url_from_utm(url)
+
+            storytitle= str(url).split('/')
+            title= storytitle[-1].split('-',1)
+            title= title[-1].replace('-',' ')
+
+            return title
+            
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.get_story_title_from_url method invoked for story: %s", self.file_prefix, url,exc_info=1)
+            raise e
         
