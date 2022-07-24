@@ -153,7 +153,7 @@ class StoryExec:
 
             if serverid:
                 format_title=f"%{title}%"
-                story_urls= await self.storyRepo.get_story_url_from_title(format_title, serverid=serverid)
+                story_urls= await self.storyRepo.get_story_url_from_title(format_title.lower(), serverid=serverid)
 
                 return story_urls
 

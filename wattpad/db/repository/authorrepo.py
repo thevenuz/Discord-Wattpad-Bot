@@ -51,7 +51,7 @@ class AuthorRepo:
                     WHERE
                     ServerId=:ServerId AND
                     IsActive=:IsActive AND
-                    Url LIKE :Url
+                    lower(Url) LIKE :Url
                 """
 
             with cx_Oracle.connect(self.connection_string) as conn:
@@ -65,7 +65,7 @@ class AuthorRepo:
                     db_result=curs.fetchmany()
 
                     if db_result:
-                        result=list(map(lambda x: x.lower(), [r[0] for r in db_result]))
+                        result=list(map(lambda x: x, [r[0] for r in db_result]))
 
             if db_result and result:
                 return result
@@ -145,15 +145,21 @@ class AuthorRepo:
             self.logger.info("%s.get_author_id_with_custom_channel_from_server_and_url method invoked for server id: %s, url: %s", self.file_prefix, serverid, url)
 
             sql="""SELECT AuthorId FROM
-                    AUTHORS
+                    AUTHORS a 
+                    JOIN 
+                    CHANNELS c
+                    ON
+                    a.ChannelId= c.ChannelId
                     WHERE
-                    ServerId=:ServerId 
+                    a.ServerId=:ServerId 
                     AND
-                    IsActive=:IsActive
+                    a.IsActive=:IsActive
                     AND
-                    Url=:Url
+                    c.IsActive=:IsActivec
                     AND
-                    IsCustomChannel=:IsCustomChannel
+                    a.Url=:Url
+                    AND
+                    c.IsCustomChannel=:IsCustomChannel
                 """
             
             with cx_Oracle.connect(self.connection_string) as conn:
@@ -161,7 +167,7 @@ class AuthorRepo:
                     curs.prefetchrows = 2
                     curs.arraysize = 1
 
-                    curs.execute(sql,[serverid, 1, url, iscustomchannel])
+                    curs.execute(sql,[serverid, isactive, isactive, url, iscustomchannel])
                     conn.commit()
 
                     result=curs.fetchone()
@@ -183,7 +189,7 @@ class AuthorRepo:
                     ON
                     a.ChannelId = c.ChannelId
                     WHERE
-                    AuthorId=:AuthorId
+                    a.AuthorId=:AuthorId
                     AND 
                     a.IsActive=:IsActive
                     AND
@@ -402,13 +408,11 @@ class AuthorRepo:
                     AuthorId=:AuthorId
                     AND
                     IsActive=:IsActive
-                    AND
-                    IsCustomChannel=:IsCustomChannel
                 """
 
             with cx_Oracle.connect(self.connection_string) as conn:
                 with conn.cursor() as curs:
-                    curs.execute(sql,[channelid, 0, authorid, isactive, 1])
+                    curs.execute(sql,[channelid, 0, authorid, isactive])
                     conn.commit()
             
             return True

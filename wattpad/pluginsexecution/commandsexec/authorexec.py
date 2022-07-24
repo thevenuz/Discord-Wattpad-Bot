@@ -143,7 +143,7 @@ class AuthorExec:
 
             if serverid:
                 format_title=f"%{title}%"
-                author_url= await self.authorRepo.get_author_url_from_title(format_title, serverid=serverid)
+                author_url= await self.authorRepo.get_author_url_from_title(format_title.lower(), serverid=serverid)
 
                 if author_url:
                     return author_url

@@ -111,7 +111,7 @@ class CustomChannlExec:
                     return ResultCustomChannelUnset(False, "Multiple stories found with this title", HasMultipleResults=True)
 
                 else:
-                    result= await self.__unset_custom_channel(guildid, channelid, story_urls, isstory=True)
+                    result= await self.__unset_custom_channel(guildid, channelid, story_urls[0], isstory=True)
 
                     if result.IsSuccess:
                         return ResultCustomChannelUnset(True, "success")
@@ -134,10 +134,13 @@ class CustomChannlExec:
         try:
             self.logger.info("%s.unset_custom_channel_for_author method invoked for server: %s, channel: %s, author: %s", self.file_prefix, guildid, channelid, authorurl)
             
-            author_urls=""            
+            author_urls= [] 
 
             if self.prefix not in authorurl:
                 author_urls= await self.__get_author_url_from_title(authorurl, guildid)
+
+            else:
+                author_urls.append(authorurl)
 
             if not author_urls:
                 return ResultCustomChannelUnset(False, "No author found with the title", IsInvalidTitle=True)
@@ -147,7 +150,7 @@ class CustomChannlExec:
                     return ResultCustomChannelUnset(False, "Multiple authors found with this title", HasMultipleResults=True)
 
                 else:
-                    result= await self.__unset_custom_channel(guildid, channelid, author_urls, isauthor=True)
+                    result= await self.__unset_custom_channel(guildid, channelid, author_urls[0], isauthor=True)
 
                     if result.IsSuccess:
                         return ResultCustomChannelUnset(True, "success")
@@ -174,8 +177,8 @@ class CustomChannlExec:
             isstory=False
             isempty= False
 
-            story_custom_channels=[]
-            author_custom_channels=[]
+            story_custom_channels: List[StoryCustomChannel]=[]
+            author_custom_channels: List[AuthorCustomChannel]=[]
 
             if category:
                 if category.lower() == Category.Announcements.value:
@@ -203,18 +206,28 @@ class CustomChannlExec:
                         for channel in custom_channels:
                             stories= await self.storyRepo.get_story_urls_from_channel_id(channel.ChannelId, 1, 1)
 
-                            story_custom_channel=StoryCustomChannel(channel.Channel, stories)
+                            if stories:
+                                story_custom_channel=StoryCustomChannel(channel.Channel, stories)
 
-                            story_custom_channels.append(deepcopy(story_custom_channel))
+                                story_custom_channels.append(deepcopy(story_custom_channel))
+
+                        if not story_custom_channels:
+                            isempty= True
 
                     if isauthor:
                         #get authors that are associated with this custom channel
                         for channel in custom_channels:
                             authors= await self.authorRepo.get_author_urls_from_channel_id(channel.ChannelId, 1, 1)
+                            
+                            if authors:
+                                author_custom_channel=AuthorCustomChannel(channel.Channel, authors)
 
-                            author_custom_channel=AuthorCustomChannel(channel.Channel, authors)
+                                author_custom_channels.append(deepcopy(author_custom_channel))
 
-                            author_custom_channels.append(deepcopy(author_custom_channel))
+                        
+                        if not story_custom_channels and not author_custom_channels:
+                            isempty= True
+
                 else:
                     isempty= True
 
@@ -253,11 +266,19 @@ class CustomChannlExec:
             if serverid:
                 if isstory:
                     story_id= await self.storyRepo.get_story_id_from_server_and_url(url, serverid)
+
+                    if not story_id:
+                        return Result(False, "Error in getting story Id")
+
                     #check if there is already a custom channel set for this story
                     existing_channel= await self.storyRepo.get_custom_channel_id_from_story_id(story_id, 1)
                 
                 else:
                     author_id= await self.authorRepo.get_author_id_from_server_and_url(url, serverid)
+
+                    if not author_id:
+                        return Result(False, "Error in getting Author Id")
+
                     #check if there is already a custom channel set for this author
                     existing_channel= await self.authorRepo.get_custom_channel_id_from_author_id(author_id, 1)
 
@@ -328,7 +349,7 @@ class CustomChannlExec:
                     story_id= await self.storyRepo.get_story_id_with_custom_channel_from_server_and_url(url, serverid, 1, 1)
 
                     if story_id:
-                        custom_channel_id= await self.storyRepo.get_custom_channel_id_from_story_id(story_id, url, 1)
+                        custom_channel_id= await self.storyRepo.get_custom_channel_id_from_story_id(story_id, 1)
 
                         if custom_channel_id:
                             #remove channel id from story and inactivate in channel table
@@ -354,12 +375,12 @@ class CustomChannlExec:
                     author_id= await self.authorRepo.get_author_id_with_custom_channel_from_server_and_url(serverid=serverid, url=url, isactive=1, iscustomchannel=1)
 
                     if author_id:
-                        custom_channel_id= await self.authorRepo.get_custom_channel_id_from_author_id(author_id, url, 1)
+                        custom_channel_id= await self.authorRepo.get_custom_channel_id_from_author_id(author_id, 1)
 
                         if custom_channel_id:
                             #remove channel id from author and inactivate in channel table
 
-                            author_inactivate_result= await self.authorRepo.inactivate_custom_channel_for_authors(author_id, "", 1, 0)
+                            author_inactivate_result= await self.authorRepo.inactivate_custom_channel_for_authors(author_id, "", 1)
 
                             if author_inactivate_result:
                                 channel_inactivate_result= await self.channelRepo.inactivate_channel_by_channel_id(custom_channel_id)
@@ -398,7 +419,7 @@ class CustomChannlExec:
 
             if serverid:
                 format_title=f"%{title}%"
-                story_urls= await self.storyRepo.get_story_url_from_title(format_title, serverid=serverid)
+                story_urls= await self.storyRepo.get_story_url_from_title(format_title.lower(), serverid=serverid)
 
                 return story_urls
 
@@ -417,7 +438,7 @@ class CustomChannlExec:
 
             if serverid:
                 format_title=f"%{title}%"
-                author_urls= await self.authorRepo.get_author_url_from_title(format_title, serverid=serverid)
+                author_urls= await self.authorRepo.get_author_url_from_title(format_title.lower(), serverid=serverid)
 
                 return author_urls
 

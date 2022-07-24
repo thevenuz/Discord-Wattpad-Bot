@@ -62,7 +62,7 @@ class StoryRepo:
                     WHERE
                     ServerId=:ServerId AND
                     IsActive=:IsActive AND
-                    Url LIKE :Url
+                    lower(Url) LIKE :Url
                 """
 
             with cx_Oracle.connect(self.connection_string) as conn:
@@ -76,7 +76,7 @@ class StoryRepo:
                     db_result=curs.fetchmany()
 
                     if db_result:
-                        result=list(map(lambda x: x.lower(), [r[0] for r in db_result]))
+                        result=list(map(lambda x: x, [r[0] for r in db_result]))
 
             if result:
                 return result
@@ -195,15 +195,21 @@ class StoryRepo:
             self.logger.info("%s.get_story_id_whith_custom_channel_from_server_and_url method invoked for server id: %s, url: %s", self.file_prefix, serverid, url)
 
             sql="""SELECT StoryId FROM
-                    STORIES
+                    STORIES s
+                    JOIN 
+                    CHANNELS c
+                    ON
+                    s.ChannelId= c.ChannelId
                     WHERE
-                    ServerId=:ServerId 
+                    s.ServerId=:ServerId 
                     AND
-                    IsActive=:IsActive
+                    s.IsActive=:IsActive
                     AND
-                    Url=:Url
+                    c.IsActive=:IsActivec
                     AND
-                    IsCustomChannel=:IsCustomChannel
+                    s.Url=:Url
+                    AND
+                    c.IsCustomChannel=:IsCustomChannel
                 """
             
             with cx_Oracle.connect(self.connection_string) as conn:
@@ -211,12 +217,13 @@ class StoryRepo:
                     curs.prefetchrows = 2
                     curs.arraysize = 1
 
-                    curs.execute(sql,[serverid, 1, url, iscustomchannel])
+                    curs.execute(sql,[serverid, isactive, isactive, url, iscustomchannel])
                     conn.commit()
 
                     result=curs.fetchone()
 
-            return result
+            if result:
+                return result[0]
 
         
         except Exception as e:
@@ -436,13 +443,11 @@ class StoryRepo:
                     StoryId=:StoryId
                     AND
                     IsActive=:IsActive
-                    AND
-                    IsCustomChannel=:IsCustomChannel
                 """
 
             with cx_Oracle.connect(self.connection_string) as conn:
                 with conn.cursor() as curs:
-                    curs.execute(sql,[channelid, 0, storyid, 1, 1])
+                    curs.execute(sql,[channelid, 0, storyid, 1])
                     conn.commit()
             
             return True
