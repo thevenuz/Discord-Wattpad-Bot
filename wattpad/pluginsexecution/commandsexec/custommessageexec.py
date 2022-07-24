@@ -10,6 +10,7 @@ from wattpad.meta.models.checkcustomchannels import CheckCustomMsgAuthor, CheckC
 from wattpad.meta.models.result import Result, ResultCheck, ResultCheckCustomChannel, ResultCheckCustomMsg, ResultCustomChannelSet, ResultCustomChannelUnset
 from wattpad.db.repository.custommsgrepo import CustomMsgrepo
 from wattpad.meta.models.enum import CustomMsgType
+from wattpad.meta.models.enum import Category
 
 class CustomMessageExec:
     def __init__(self) -> None:
@@ -26,10 +27,13 @@ class CustomMessageExec:
         try:
             self.logger.info("%s.set_custom_message_for_story method invoked for server: %s, story: %s, msg: %s", self.file_prefix, guildid, storyurl, message)
 
-            story_urls=""            
+            story_urls= []       
 
             if self.prefix not in storyurl:
                 story_urls= await self.__get_story_url_from_title(storyurl, guildid)
+
+            else:
+                story_urls.append(storyurl)
 
             if not story_urls:
                 return ResultCustomChannelSet(False, "No story found with the title", IsInvalidTitle=True)
@@ -39,7 +43,7 @@ class CustomMessageExec:
                     return ResultCustomChannelSet(False, "Multiple stories found with this title", HasMultipleResults=True)
 
                 else:
-                    result= await self.__set_custom_message(guildid, story_urls, message, isstory=True)
+                    result= await self.__set_custom_message(guildid, story_urls[0], message, isstory=True)
 
                     if result.IsSuccess:
                         return ResultCustomChannelSet(True, "success")
@@ -55,10 +59,13 @@ class CustomMessageExec:
         try:
             self.logger.info("%s.set_custom_message_for_author method invoked for server: %s, author: %s, msg: %s", self.file_prefix, guildid, authorurl, message)
 
-            author_urls=""            
+            author_urls= []         
 
             if self.prefix not in authorurl:
                 author_urls= await self.__get_author_url_from_title(authorurl, guildid)
+
+            else:
+                author_urls.append(authorurl)
 
             if not author_urls:
                 return ResultCustomChannelSet(False, "No Author found with the name", IsInvalidTitle=True)
@@ -68,7 +75,7 @@ class CustomMessageExec:
                     return ResultCustomChannelSet(False, "Multiple authors found with this name", HasMultipleResults=True)
 
                 else:
-                    result= await self.__set_custom_message(guildid, author_urls, message, isauthor=True, isstory=False)
+                    result= await self.__set_custom_message(guildid, author_urls[0], message, isauthor=True, isstory=False)
 
                     if result.IsSuccess:
                         return ResultCustomChannelSet(True, "success")
@@ -84,10 +91,13 @@ class CustomMessageExec:
         try:
             self.logger.info("%s.unset_custom_message_for_story method invoked for server: %s, story: %s", self.file_prefix, guildid, storyurl)
 
-            story_urls=""            
+            story_urls= []     
 
             if self.prefix not in storyurl:
                 story_urls= await self.__get_story_url_from_title(storyurl, guildid)
+
+            else:
+                story_urls.append(storyurl)
 
             if not story_urls:
                 return ResultCustomChannelSet(False, "No story found with the title", IsInvalidTitle=True)
@@ -97,7 +107,7 @@ class CustomMessageExec:
                     return ResultCustomChannelSet(False, "Multiple stories found with this title", HasMultipleResults=True)
 
                 else:
-                    result= await self.__unset_custom_message(guildid, story_urls, isstory=True)
+                    result= await self.__unset_custom_message(guildid, story_urls[0], isstory=True)
 
                     if result.IsSuccess:
                         return ResultCustomChannelSet(True, "success")
@@ -116,10 +126,13 @@ class CustomMessageExec:
         try:
             self.logger.info("%s.author method invoked for server: %s, author: %s", self.file_prefix, guildid, authorurl)
 
-            author_urls=""            
+            author_urls= []       
 
             if self.prefix not in authorurl:
                 author_urls= await self.__get_author_url_from_title(authorurl, guildid)
+            
+            else:
+                author_urls.append(authorurl)
 
             if not author_urls:
                 return ResultCustomChannelSet(False, "No author found with the title", IsInvalidTitle=True)
@@ -129,7 +142,7 @@ class CustomMessageExec:
                     return ResultCustomChannelSet(False, "Multiple authors found with this title", HasMultipleResults=True)
 
                 else:
-                    result= await self.__unset_custom_message(guildid, author_urls, isstory=False, isauthor=True)
+                    result= await self.__unset_custom_message(guildid, author_urls[0], isstory=False, isauthor=True)
 
                     if result.IsSuccess:
                         return ResultCustomChannelSet(True, "success")
@@ -155,11 +168,11 @@ class CustomMessageExec:
             story_custom_msgs=[]
             author_custom_msgs=[]
 
-
-            if category.lower() == "announcements":
-                isauthor = True
-            elif category.lower() == "story":
-                isstory = True
+            if category:
+                if category.lower() == Category.Announcements.value:
+                    isauthor = True
+                elif category.lower() == Category.Story.value:
+                    isstory = True
             else:    
                 isauthor= True
                 isstory= True
@@ -176,24 +189,32 @@ class CustomMessageExec:
                         #get stories that are associated with this custom msg
                         for msg in custom_msgs:
                             if msg.StoryId:
-                                story= self.storyRepo.get_story_url_from_story_id(msg.StoryId, 1)
+                                story= await self.storyRepo.get_story_url_from_story_id(msg.StoryId, 1)
 
-                                story_custom_msg= CheckCustomMsgStory(story, msg.Message)
+                                if story:
+                                    story_custom_msg= CheckCustomMsgStory(story, msg.Message)
 
-                                story_custom_msgs.append(deepcopy(story_custom_msg))
+                                    story_custom_msgs.append(deepcopy(story_custom_msg))
+                            
+                        if not story_custom_msgs:
+                            isempty= True
 
                     if isauthor:
                         #get Authors that are associated with this custom msg
                         for msg in custom_msgs:
                             if msg.AuthorId:
-                                author= self.authorRepo.get_author_url_from_author_id(msg.AuthorId, 1)
+                                author= await self.authorRepo.get_author_url_from_author_id(msg.AuthorId, 1)
 
-                                author_custom_msg= CheckCustomMsgAuthor(author, msg.Message)
+                                if author:
+                                    author_custom_msg= CheckCustomMsgAuthor(author, msg.Message)
 
-                                author_custom_msgs.append(deepcopy(author_custom_msg))
+                                    author_custom_msgs.append(deepcopy(author_custom_msg))
+                            
+                        if not story_custom_msgs and not author_custom_msgs:
+                            isempty= True
 
-                    else:
-                        isempty= True
+                else:
+                    isempty= True
 
             else:
                 return ResultCheckCustomMsg(False, "Error while getting server id")
@@ -229,17 +250,17 @@ class CustomMessageExec:
                         #get custom msg id for this story id
                         custom_msg_id= await self.customMsgRepo.get_custom_msg_id_from_author_id(authorid, 1)
 
-                        if len(custom_msg_id) > 1:
-                            return ResultCustomChannelUnset(False, "Multiple custom msgs were found for same author id", HasMultipleResults=True)
+                        # if len(custom_msg_id) > 1:
+                        #     return ResultCustomChannelUnset(False, "Multiple custom msgs were found for same author id", HasMultipleResults=True)
 
-                        else:
+                        # else:
                             #delete custom msg id
-                            delete_result= await self.customMsgRepo.delete_custom_msg_by_id(custom_msg_id)
+                        delete_result= await self.customMsgRepo.delete_custom_msg_by_id(custom_msg_id)
 
-                            if delete_result:
-                                return ResultCustomChannelUnset(True, "success")
-                            else:
-                                return ResultCustomChannelUnset(False, "error while deleting custom msg")
+                        if delete_result:
+                            return ResultCustomChannelUnset(True, "success")
+                        else:
+                            return ResultCustomChannelUnset(False, "error while deleting custom msg")
 
                     else:
                         return ResultCustomChannelUnset(False, "Error while fetching the author id", Notfound=True) #return author not found
@@ -250,17 +271,17 @@ class CustomMessageExec:
                         #get custom msg id for this story id
                         custom_msg_id= await self.customMsgRepo.get_custom_msg_id_from_story_id(storyid, 1)
 
-                        if len(custom_msg_id) > 1:
-                            return ResultCustomChannelUnset(False, "Multiple custom msgs were found for same story id", HasMultipleResults=True)
+                        # if len(custom_msg_id) > 1:
+                        #     return ResultCustomChannelUnset(False, "Multiple custom msgs were found for same story id", HasMultipleResults=True)
 
-                        else:
+                        # else:
                             #delete custom msg id
-                            delete_result= await self.customMsgRepo.delete_custom_msg_by_id(custom_msg_id)
+                        delete_result= await self.customMsgRepo.delete_custom_msg_by_id(custom_msg_id)
 
-                            if delete_result:
-                                return ResultCustomChannelUnset(True, "success")
-                            else:
-                                return ResultCustomChannelUnset(False, "error while deleting custom msg")
+                        if delete_result:
+                            return ResultCustomChannelUnset(True, "success")
+                        else:
+                            return ResultCustomChannelUnset(False, "error while deleting custom msg")
 
                     else:
                         return ResultCustomChannelUnset(False, "Error while fetching the story id", Notfound=True) #return story not found
@@ -285,12 +306,27 @@ class CustomMessageExec:
                     authorid= await self.authorRepo.get_author_id_from_server_and_url(url, serverid, 1)
 
                     if authorid:
-                        custommsg= CustomMsg(Type=CustomMsgType.Author, StoryId=0, AuthorId=authorid, ServerId=serverid, IsActive=1, Message=message)
-                        result= await self.customMsgRepo.insert_custom_msg_data(custommsg)
-                        if result:
-                            return Result(True, "success")
+                        #check if any custom msg exists for this author id
+                        existing_custom_msg= await self.customMsgRepo.get_custom_msg_from_author_id(authorid, 1)
+
+                        if existing_custom_msg:
+                            #update the existing custom msg with the new one
+                            update_result= await self.customMsgRepo.update_custom_msg_by_author_id(authorid, message, 1)
+
+                            if update_result:
+                                return Result(True, "success")
+                            else:
+                                return Result(False, "Error while updating the custom msg data")
+
                         else:
-                            return Result(False, "Error while inserting the custom msg data")
+                            custommsg= CustomMsg(Type=CustomMsgType.Author.value, StoryId="", AuthorId=authorid, ServerId=serverid, IsActive=1, Message=message)
+
+                            result= await self.customMsgRepo.insert_custom_msg_data(custommsg)
+
+                            if result:
+                                return Result(True, "success")
+                            else:
+                                return Result(False, "Error while inserting the custom msg data")
                     else:
                         return Result(False, "Error while fetching the author id") #return story not found
 
@@ -299,12 +335,26 @@ class CustomMessageExec:
                     storyid= await self.storyRepo.get_story_id_from_server_and_url(url, serverid, 1)
 
                     if storyid:
-                        custommsg= CustomMsg(Type=CustomMsgType.Story, StoryId=storyid, AuthorId=0, ServerId=serverid, IsActive=1, Message=message)
-                        result= await self.customMsgRepo.insert_custom_msg_data(custommsg)
-                        if result:
-                            return Result(True, "success")
+                        #check if any custom msg exists for this story id
+                        existing_custom_msg= await self.customMsgRepo.get_custom_msg_from_story_id(storyid, 1)
+
+                        if existing_custom_msg:
+                            #update the existing custom msg with the new one
+                            update_result= await self.customMsgRepo.update_custom_msg_by_story_id(storyid, message, 1)
+
+                            if update_result:
+                                return Result(True, "success")
+                            else:
+                                return Result(False, "Error while updating the custom msg data")
+
                         else:
-                            return Result(False, "Error while inserting the custom msg data")
+                            custommsg= CustomMsg(Type=CustomMsgType.Story.value, StoryId=storyid, AuthorId="", ServerId=serverid, IsActive=1, Message=message)
+
+                            result= await self.customMsgRepo.insert_custom_msg_data(custommsg)
+                            if result:
+                                return Result(True, "success")
+                            else:
+                                return Result(False, "Error while inserting the custom msg data")
                     else:
                         return Result(False, "Error while fetching the story id") #return story not found
             

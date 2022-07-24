@@ -357,13 +357,13 @@ class CustomChannlExec:
                             story_inactivate_result= await self.storyRepo.inactivate_custom_channel_for_stories(storyid=story_id, channelid="", isactive=1)
 
                             if story_inactivate_result:
-                                channel_inactivate_result= await self.channelRepo.inactivate_channel_by_channel_id(custom_channel_id)
+                                # channel_inactivate_result= await self.channelRepo.inactivate_channel_by_channel_id(custom_channel_id)
 
-                                if channel_inactivate_result:
-                                    return ResultCustomChannelUnset(True, "success")
+                                # if channel_inactivate_result:
+                                return ResultCustomChannelUnset(True, "success")
                                 
-                                else:
-                                    return ResultCustomChannelUnset(False, "Error inactivating custom channel")
+                                # else:
+                                #     return ResultCustomChannelUnset(False, "Error inactivating custom channel")
                             
                             else:
                                 return  ResultCustomChannelUnset(False, "Error while updating channel in story table")
@@ -383,13 +383,13 @@ class CustomChannlExec:
                             author_inactivate_result= await self.authorRepo.inactivate_custom_channel_for_authors(author_id, "", 1)
 
                             if author_inactivate_result:
-                                channel_inactivate_result= await self.channelRepo.inactivate_channel_by_channel_id(custom_channel_id)
+                                # channel_inactivate_result= await self.channelRepo.inactivate_channel_by_channel_id(custom_channel_id)
 
-                                if channel_inactivate_result:
-                                    return ResultCustomChannelUnset(True, "success")
+                                # if channel_inactivate_result:
+                                return ResultCustomChannelUnset(True, "success")
                                 
-                                else:
-                                    return ResultCustomChannelUnset(False, "Error inactivating custom channel")
+                                # else:
+                                #     return ResultCustomChannelUnset(False, "Error inactivating custom channel")
                             
                             else:
                                 return  ResultCustomChannelUnset(False, "Error while updating channel in author table")

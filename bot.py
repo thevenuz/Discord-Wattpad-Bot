@@ -36,7 +36,7 @@ async def msg(event):
 @lightbulb.implements(lightbulb.SlashCommand)
 async def ping(ctx):
     try:
-        await ctx.respond(f'**Bot\'s Latency: {bot.heartbeat_latency*1000:.2f}ms**')
+        await ctx.respond(f"**Bot's Latency: {bot.heartbeat_latency*1000:.2f}ms**")
     except Exception as e:
         logger.critical("Exception occured in %s.ping command for server: %s", file_prefix, ctx.guild_id, exc_info=1)
         raise e

@@ -1,4 +1,5 @@
 from soupsieve import select
+from wattpad.meta.models.enum import Category
 from wattpad.pluginsexecution.commandsexec.custommessageexec import CustomMessageExec
 from wattpad.utils.authorutil import AuthorUtil
 from wattpad.utils.config import Config
@@ -175,7 +176,7 @@ async def unset_custom_message_for_author(ctx:lightbulb.SlashContext) -> None:
         msgs= await Config().get_messages("en")
 
         #call the exec
-        result= await CustomMessageExec().unset_custom_message_for_story(guildId, story_url)
+        result= await CustomMessageExec().unset_custom_message_for_author(guildId, story_url)
 
         if result.IsSuccess:
             msg_description= msgs["custom:msg:unset:story:success"].format(f"{story_url}")
@@ -209,6 +210,9 @@ async def check_custom_messages(ctx: lightbulb.SlashContext) -> None:
 
         guildId= str(ctx.guild_id)
         category= ctx.options.category
+        story_return_msg=""
+        author_return_msg=""
+        msg_description=""
 
         msgs= await Config().get_messages("en")
 
@@ -220,16 +224,23 @@ async def check_custom_messages(ctx: lightbulb.SlashContext) -> None:
                 story_return_msg= await StoryUtil().build_check_custom_msgs_msg(result.StoryCustomMsgs)
 
             if result.AuthorCustomMsgs:
-                author_return_msg= await AuthorUtil().build_check_custom_channel_msg(result.AuthorCustomMsgs)
+                author_return_msg= await AuthorUtil().build_check_custom_msgs_msg(result.AuthorCustomMsgs)
 
-            if category.lower() == "story":
-                await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:msgs']}", description=f"{msgs['story:custom:msgs']}\n{story_return_msg}", color=0xFF0000))
-            
-            elif category.lower() == "announcements":
-                await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:msgs']}", description=f"{msgs['author:custom:msgs']}\n{author_return_msg}", color=0xFF0000))
+            if category:
+                if category.lower() == Category.Story.value:
+                    await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:msgs']}", description=f"{msgs['story:custom:msgs']}\n{story_return_msg}", color=0xFF0000))
+                
+                elif category.lower() == Category.Announcements.value:
+                    await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:msgs']}", description=f"{msgs['author:custom:msgs']}\n{author_return_msg}", color=0xFF0000))
 
             else:
-                await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:msgs']}", description=f"{msgs['story:custom:msgs']}\n{story_return_msg}\n\n{msgs['author:custom:msgs']}\n{author_return_msg}", color=0xFF0000))
+                if story_return_msg:
+                    msg_description= msg_description + msgs['story:custom:msgs'] + "\n" + story_return_msg + "\n\n"
+
+                if author_return_msg:
+                    msg_description= msg_description + msgs['author:custom:msgs'] + "\n" + author_return_msg
+
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:msgs']}", description=f"{msg_description}", color=0xFF0000))
 
         else:
             logger.error("Error occured in %s.check_custom_messages method for server: %s, category: %s, error: %s", file_prefix, guildId, category, result.ResultInfo)

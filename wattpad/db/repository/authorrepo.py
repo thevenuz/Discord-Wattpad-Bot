@@ -412,7 +412,7 @@ class AuthorRepo:
 
             with cx_Oracle.connect(self.connection_string) as conn:
                 with conn.cursor() as curs:
-                    curs.execute(sql,[channelid, 0, authorid, isactive])
+                    curs.execute(sql,[channelid, 1, authorid, isactive])
                     conn.commit()
             
             return True

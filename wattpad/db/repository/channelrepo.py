@@ -120,8 +120,6 @@ class ChannelRepo:
                     ChannelId=:ChannelId
                     AND
                     IsActive=:IsActive
-                    AND
-                    IsCustomChannel=:IsCustomChannel
                 """
 
             with cx_Oracle.connect(self.connection_string) as conn:
@@ -129,7 +127,7 @@ class ChannelRepo:
                     curs.prefetchrows = 2
                     curs.arraysize = 1
 
-                    curs.execute(sql,[channelid, isactive, iscustomchannel])
+                    curs.execute(sql,[channelid, isactive])
                     conn.commit()
 
                     result= curs.fetchone()

@@ -78,7 +78,7 @@ class StoryRepo:
                     if db_result:
                         result=list(map(lambda x: x, [r[0] for r in db_result]))
 
-            if result:
+            if db_result and result:
                 return result
 
             return None
@@ -318,7 +318,8 @@ class StoryRepo:
             
                     result=curs.fetchone()
 
-            return result
+            if result:
+                return result[0]
 
         except Exception as e:
             self.logger.fatal("Exception occured in %s.get_story_url_from_story_id method invoked for story id: %s, isactive: %s", self.file_prefix, storyid, isactive,exc_info=1)
@@ -447,7 +448,7 @@ class StoryRepo:
 
             with cx_Oracle.connect(self.connection_string) as conn:
                 with conn.cursor() as curs:
-                    curs.execute(sql,[channelid, 0, storyid, 1])
+                    curs.execute(sql,[channelid, 1, storyid, 1])
                     conn.commit()
             
             return True

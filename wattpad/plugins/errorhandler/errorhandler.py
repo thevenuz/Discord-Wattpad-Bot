@@ -43,10 +43,11 @@ async def on_error(event: lightbulb.CommandErrorEvent) -> None:
 
     except Exception as e:
         logger.fatal("Exception occured in Error handler for command %s in server: %s", event.context.command.name, event.context.guild_id, exc_info=1)
-        embed=hikari.Embed(title=f"🛑 An error occurred with the `{event.context.command.name}` command.", color=0xFF0000)
-        msgs= await Config().get_messages("en")
-        embed.add_field(name="Error:", value=f"{msgs['error:unknown']}")
-        await event.context.respond(embed=embed)
+        # embed=hikari.Embed(title=f"🛑 An error occurred with the `{event.context.command.name}` command.", color=0xFF0000)
+        # msgs= await Config().get_messages("en")
+        # embed.add_field(name="Error:", value=f"{msgs['error:unknown']}")
+        # await event.context.respond(embed=embed)
+        pass
 
     
 

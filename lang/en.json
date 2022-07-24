@@ -65,7 +65,7 @@
     "custom:msgs" : "Your Custom Messages",
     "story:custom:msgs" : "Story Custom Messages:",
     "author:custom:msgs" : "Author Custom Messages:",
-    "custom:msgs:not:set" : "No custom Messages have been setup in this server yet. Use `/set-custom-msg` command to set a new custom message.",
+    "custom:msgs:not:set" : "No custom Messages have been setup in this server yet. Use `/set-custom-message` command to set a new custom message.",
 
     "new:chapter:msg" : "**New chapter from {0}**",
     "new:announcement:msg" : "**New announcement from {0}**",

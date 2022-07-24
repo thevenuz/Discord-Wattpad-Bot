@@ -19,7 +19,7 @@ class CustomMsgrepo:
             self.logger.info("%s.insert_custom_msg_data method invoked for type: %s, story id: %s, author id: %s, message: %s", self.file_prefix, custommsg.Type, custommsg.StoryId, custommsg.AuthorId, custommsg.Message)
 
             sql="""INSERT INTO CUSTOMMSGS
-                    (Type, StoryId, AuthorId, Message, ServerId IsActive, RegisteredOn)
+                    (Type, StoryId, AuthorId, Message, ServerId, IsActive, RegisteredOn)
                     VALUES
                     (:Type, :StoryId, :AuthorId, :Message, :ServerId, :IsActive, :RegisteredOn)
                     RETURNING MsgId INTO :MsgId
@@ -48,7 +48,7 @@ class CustomMsgrepo:
         try:
             self.logger.info("%s.get_custom_msg_id_from_story_id method invoked for story id: %s, isactive: %s", self.file_prefix, storyid, isactive)
 
-            sql="""SELECT * FROM 
+            sql="""SELECT MsgId FROM 
                     CUSTOMMSGS
                     WHERE 
                     StoryId=:StoryId
@@ -61,9 +61,9 @@ class CustomMsgrepo:
                     curs.execute(sql,[storyid, isactive])
                     conn.commit()
             
-                    result=curs.fetchall()
-
-            return result
+                    result=curs.fetchone()
+            if result:
+                return result[0]
 
         except Exception as e:
             self.logger.fatal("Exception occured in %s.get_custom_msg_id_from_story_id method invoked for story id: %s, isactive: %s", self.file_prefix, storyid, isactive,exc_info=1)
@@ -73,7 +73,7 @@ class CustomMsgrepo:
         try:
             self.logger.info("%s.get_custom_msg_id_from_author_id method invoked for author id: %s, isactive: %s", self.file_prefix, authorid, isactive)
 
-            sql="""SELECT * FROM 
+            sql="""SELECT MsgId FROM 
                     CUSTOMMSGS
                     WHERE 
                     AuthorId=:AuthorId
@@ -86,9 +86,10 @@ class CustomMsgrepo:
                     curs.execute(sql,[authorid, isactive])
                     conn.commit()
             
-                    result=curs.fetchall()
+                    result=curs.fetchone()
 
-            return result
+            if result:
+                return result[0]
 
         except Exception as e:
             self.logger.fatal("Exception occured in %s.get_custom_msg_id_from_author_id method invoked for author id: %s, isactive: %s", self.file_prefix, authorid, isactive,exc_info=1)
@@ -152,7 +153,7 @@ class CustomMsgrepo:
                     result=curs.fetchone()
 
             if result:
-                return result
+                return result[0]
 
             return None
             
@@ -184,7 +185,7 @@ class CustomMsgrepo:
                     result=curs.fetchone()
 
             if result:
-                return result
+                return result[0]
 
             return None
             
@@ -213,7 +214,7 @@ class CustomMsgrepo:
             
             with cx_Oracle.connect(self.connection_string) as conn:
                 with conn.cursor() as curs:
-                    curs.execute(sql,[0, 0, 0, custom_msg_id, 1])
+                    curs.execute(sql,[0, "", "", custom_msg_id, 1])
                     conn.commit()
 
             return True
@@ -222,5 +223,54 @@ class CustomMsgrepo:
             self.logger.fatal("Exception occured in %s.delete_custom_msg_by_id method invoked for custom msg id: %s", self.file_prefix, custom_msg_id,exc_info=1)
             raise e
         
+    async def update_custom_msg_by_author_id(self, authorid: str, msg:str, isactive:bool=1) -> bool:
+        try:
+            self.logger.info("%s.update_custom_msg_by_author_id method invoked for author id: %s,  msg: %s", self.file_prefix, authorid, msg)
+
+            sql="""UPDATE CUSTOMMSGS
+                    SET
+                    Message=:Message
+                    WHERE
+                    AuthorId=:AuthorId
+                    AND
+                    IsActive=:IsActive
+                """
+
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.execute(sql,[msg, authorid, isactive])
+                    conn.commit()
+            
+            return True
+
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.update_custom_msg_by_author_id method invoked for author id: %s, msg: %s", self.file_prefix, authorid, msg, exc_info=1)
+            raise e
+        
+    async def update_custom_msg_by_story_id(self, storyid: str, msg:str, isactive:bool=1) -> bool:
+        try:
+            self.logger.info("%s.update_custom_msg_by_story_id method invoked for storyid: %s,  msg: %s", self.file_prefix, storyid, msg)
+
+            sql="""UPDATE CUSTOMMSGS
+                    SET
+                    Message=:Message
+                    WHERE
+                    StoryId=:StoryId
+                    AND
+                    IsActive=:IsActive
+                """
+
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.execute(sql,[msg, storyid, isactive])
+                    conn.commit()
+            
+            return True
+
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.update_custom_msg_by_story_id method invoked for storyid: %s, msg: %s", self.file_prefix, storyid, msg, exc_info=1)
+            raise e
 
     #endregion
