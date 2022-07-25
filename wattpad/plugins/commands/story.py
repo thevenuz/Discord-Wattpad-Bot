@@ -30,7 +30,7 @@ async def follow_story(ctx: lightbulb.SlashContext) -> None:
         result= await StoryExec().follow_story(storyURL, guildId)
 
         if result.IsSuccess:
-            await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{msgs['follow:story:success']}", color=0xFF0000))
+            await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{msgs['follow:story:success']}", color=0Xff500a))
 
         else:
             logger.error("Error occured in %s.follow_story method for story: %s, server: %s, Error: %s", file_prefix, storyURL, guildId, result.ResultInfo)
@@ -67,7 +67,7 @@ async def unfollow_story(ctx: lightbulb.SlashContext) -> None:
         result= await StoryExec().unfollow_story(storyURL, guildId)
 
         if result.IsSuccess:
-            await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{msgs['unfollow:story:success']}", color=0xFF0000))
+            await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{msgs['unfollow:story:success']}", color=0Xff500a))
 
         else:
             logger.error("Error occured in %s.unfollow_story method for story: %s, server: %s, Error: %s", file_prefix, storyURL, guildId, result.ResultInfo)
@@ -109,7 +109,7 @@ async def check_stories(ctx: lightbulb.SlashContext) -> None:
             #build the description of the msg
             story_data= await StoryUtil().build_story_data_msg(result.Data)
 
-            await ctx.respond(embed=hikari.Embed(title=f"{msgs['check:stories:following']}", description=f"{story_data}", color=0xFF0000))
+            await ctx.respond(embed=hikari.Embed(title=f"{msgs['check:stories:following']}", description=f"{story_data}", color=0Xff500a))
 
         else:
             logger.error("Error occured in %s.check_stories method for server: %s, Error: %s", file_prefix, guildId, result.ResultInfo)

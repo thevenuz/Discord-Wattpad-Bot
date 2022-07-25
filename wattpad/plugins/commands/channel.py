@@ -40,7 +40,7 @@ async def set_channel(ctx: lightbulb.SlashContext) -> None:
 
             if result.IsSuccess:
                 msg_description= msgs['set:channel:success'].format(f"{channel_id}")
-                await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{msg_description}", color=0xFF0000))
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{msg_description}", color=0Xff500a))
 
             else:
                 logger.error("Error occured in %s.set_channel method for channel: %s, server: %s, Error: %s", file_prefix, channel_id, guildId, result.ResultInfo)
@@ -82,7 +82,7 @@ async def unset_channel(ctx: lightbulb.SlashContext) -> None:
         result= await ChannelExec().unset_channel(guildId)
 
         if result.IsSuccess:
-            await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{msgs['channel:unset:success']}", color=0xFF0000))
+            await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{msgs['channel:unset:success']}", color=0Xff500a))
 
         else:
             logger.error("Error occured in %s.unset_channel for server: %s, Error: %s", file_prefix, guildId, result.ResultInfo)
@@ -113,7 +113,7 @@ async def check_channels(ctx: lightbulb.SlashContext) -> None:
 
         if result.IsSuccess:
             channel_data= await Channelutil().build_channel_data_msg(result.Data)
-            await ctx.respond(embed=hikari.Embed(title=f"{msgs['check:channels:title']}", description=f"{channel_data}", color=0xFF0000))
+            await ctx.respond(embed=hikari.Embed(title=f"{msgs['check:channels:title']}", description=f"{channel_data}", color=0Xff500a))
 
         else:
             logger.error("Error occured in %s.check_channels for server: %s, error: %s", file_prefix, guildId, result.ResultInfo)

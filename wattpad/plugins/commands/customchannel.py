@@ -22,7 +22,7 @@ async def set_custom_channel(ctx:lightbulb.SlashContext) -> None:
         logger.info("%s.set_custom_channel method invoked for server: %s", file_prefix, ctx.guild_id)
 
         #code should not hit this
-        await ctx.respond(embed=hikari.Embed(title=f"Check subcommands", description=f"Check sub commands", color=0xFF0000))
+        await ctx.respond(embed=hikari.Embed(title=f"Check subcommands", description=f"Check sub commands", color=0Xff500a))
     
     except Exception as e:
         logger.fatal("Exception occured in %s.set_custom_channel method invoked for server: %s", file_prefix, ctx.guild_id,exc_info=1)
@@ -59,7 +59,7 @@ async def set_custom_channel_for_story(ctx: lightbulb.SlashContext) -> None:
             if result.IsSuccess:
                 msg_description= msgs['custom:channel:story:success'].format(f"{result.Name}", f"{channel_id}")
                 
-                await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:channel:success']}", description=f"{msg_description}", color=0xFF0000))
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:channel:success']}", description=f"{msg_description}", color=0Xff500a))
 
             else:
                 logger.error("error occured in %s.set_custom_channel_for_story for server: %s, channel: %s, story: %s", file_prefix, guildId, channel_id, storyurl)
@@ -122,7 +122,7 @@ async def set_custom_channel_for_author(ctx: lightbulb.SlashContext) -> None:
             if result.IsSuccess:
                 msg_description= msgs['custom:channel:author:success'].format(f"{result.Name}", f"{channel_id}")
                 
-                await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:channel:success']}", description=f"{msg_description}", color=0xFF0000))
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:channel:success']}", description=f"{msg_description}", color=0Xff500a))
 
             else:
                 logger.error("error occured in %s.set_custom_channel_for_author for server: %s, channel: %s, story: %s", file_prefix, guildId, channel_id, authorurl)
@@ -196,7 +196,7 @@ async def unset_custom_channel_for_story(ctx:lightbulb.SlashContext) -> None:
 
         if result.IsSuccess:
             msg_description= msgs['unset:custom:channel:story:success'].format(f"{channelid}", f"{storyurl}")
-            await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{msg_description}", color=0xFF0000))
+            await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{msg_description}", color=0Xff500a))
 
         else:
             logger.error("Error in %s.unset_custom_channel_for_story method for server: %s, channel: %s, story: %s, error: %s", file_prefix, guildId, channelid, storyurl, result.ResultInfo)
@@ -243,7 +243,7 @@ async def unset_custom_channel_for_author(ctx:lightbulb.SlashContext) -> None:
 
         if result.IsSuccess:
             msg_description= msgs['unset:custom:channel:author:success'].format(f"{channelid}", f"{authorurl}")
-            await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{msg_description}", color=0xFF0000))
+            await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{msg_description}", color=0Xff500a))
 
         else:
             logger.error("Error in %s.unset_custom_channel_for_author method for server: %s, channel: %s, author: %s, error: %s", file_prefix, guildId, channelid, authorurl, result.ResultInfo)
@@ -293,10 +293,10 @@ async def check_custom_channels(ctx: lightbulb.SlashContext) -> None:
 
             if category:
                 if category.lower() == Category.Story.value:
-                    await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:channels']}", description=f"{msgs['story:custom:channels']}\n{story_return_msg}", color=0xFF0000))
+                    await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:channels']}", description=f"{msgs['story:custom:channels']}\n{story_return_msg}", color=0Xff500a))
                 
                 elif category.lower() == Category.Announcements.value:
-                    await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:channels']}", description=f"{msgs['author:custom:channels']}\n{author_return_msg}", color=0xFF0000))
+                    await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:channels']}", description=f"{msgs['author:custom:channels']}\n{author_return_msg}", color=0Xff500a))
 
             else:
                 if story_return_msg:
@@ -305,7 +305,7 @@ async def check_custom_channels(ctx: lightbulb.SlashContext) -> None:
                 if author_return_msg:
                     msg_description= f"{msg_description}{msgs['author:custom:channels']}" + "\n" + author_return_msg
                 
-                await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:channels']}", description=f"{msg_description}", color=0xFF0000))
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:channels']}", description=f"{msg_description}", color=0Xff500a))
 
         else:
             logger.error("Error occured in %s.check_custom_channels method for server: %s, category: %s, error: %s", file_prefix, guildId, category, result.ResultInfo)

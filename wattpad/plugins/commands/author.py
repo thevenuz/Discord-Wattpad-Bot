@@ -29,7 +29,7 @@ async def follow_author(ctx: lightbulb.SlashContext) -> None:
         result= await AuthorExec().follow_author(profileUrl, guildId)
 
         if result.IsSuccess:
-            await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{msgs['follow:author:success']}", color=0xFF0000))
+            await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{msgs['follow:author:success']}", color=0Xff500a))
 
         else:
             logger.error("Error occured in %s.follow_author method for author: %s, server: %s, Error: %s", file_prefix, profileUrl, guildId, result.ResultInfo)
@@ -65,7 +65,7 @@ async def unfollow_author(ctx: lightbulb.SlashContext) -> None:
         result= await AuthorExec().unfollow_author(profileUrl, guildId)
 
         if result.IsSuccess:
-            await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{msgs['unfollow:author:success']}", color=0xFF0000))
+            await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{msgs['unfollow:author:success']}", color=0Xff500a))
 
         else:
             logger.error("Error occured in %s.unfollow_author method for author: %s, server: %s, Error: %s", file_prefix, profileUrl, guildId, result.ResultInfo)
@@ -104,7 +104,7 @@ async def check_authors(ctx: lightbulb.SlashContext) -> None:
             #build the description of the msg
             author_data= await AuthorUtil().build_author_data_msg(result.Data)
 
-            await ctx.respond(embed=hikari.Embed(title=f"{msgs['check:authors:following']}", description=f"{author_data}", color=0xFF0000))
+            await ctx.respond(embed=hikari.Embed(title=f"{msgs['check:authors:following']}", description=f"{author_data}", color=0Xff500a))
 
         else:
             logger.error("Error occured in %s.check_authors method for server: %s, Error: %s", file_prefix, guildId, result.ResultInfo)

@@ -194,7 +194,7 @@ class TaskExec:
                 if channel:
                     author_name= await self.__get_author_title_from_url(author.Url)
                     msg_content= msg.format(f"{author_name}")
-                    embed=hikari.Embed(title="Annoncement:", description=f"{result.NewUpdate}")
+                    embed=hikari.Embed(title="Annoncement:", description=f"{result.NewUpdate}", color=0Xff500a)
 
                     await plugin.bot.rest.create_message(channel, embed=embed, content= msg_content)
 

@@ -22,7 +22,7 @@ async def set_custom_message(ctx:lightbulb.SlashContext) -> None:
         logger.info("%s.set_custom_message method invoked for server: %s", file_prefix, ctx.guild_id)
 
         #code should not hit this
-        await ctx.respond(embed=hikari.Embed(title=f"Check subcommands", description=f"Check sub commands", color=0xFF0000))
+        await ctx.respond(embed=hikari.Embed(title=f"Check subcommands", description=f"Check sub commands", color=0Xff500a))
     
     except Exception as e:
         logger.fatal("Exception occured in %s.set_custom_message method invoked for server: %s", file_prefix, ctx.guild_id,exc_info=1)
@@ -50,7 +50,7 @@ async def set_custom_message_for_story(ctx:lightbulb.SlashContext) -> None:
 
         if result.IsSuccess:
             msg_description= msgs['custom:msg:set:story:success'].format(f"{message}", f"{story_url}")
-            await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{msg_description}", color=0xFF0000))
+            await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{msg_description}", color=0Xff500a))
 
         else:
             logger.error("Error occured in %s.set_custom_message_for_story method for server: %s, story: %s, msg: %s, error: %s", file_prefix, ctx.guild_id, ctx.options.url, ctx.options.message, result.ResultInfo)
@@ -89,7 +89,7 @@ async def set_custom_message_for_author(ctx:lightbulb.SlashContext) -> None:
 
         if result.IsSuccess:
             msg_description= msgs['custom:msg:set:author:success'].format(f"{message}", f"{author_url}")
-            await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{msg_description}", color=0xFF0000))
+            await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{msg_description}", color=0Xff500a))
 
         else:
             logger.error("Error occured in %s.set_custom_message_for_author method for server: %s, author: %s, msg: %s, error: %s", file_prefix, ctx.guild_id, ctx.options.url, ctx.options.message, result.ResultInfo)
@@ -115,7 +115,7 @@ async def unset_custom_message(ctx:lightbulb.SlashContext) -> None:
         logger.info("%s.unset_custom_message method invoked for server: %s", file_prefix, ctx.guild_id)
 
         #code should not hit this
-        await ctx.respond(embed=hikari.Embed(title=f"Check subcommands", description=f"Check sub commands", color=0xFF0000))
+        await ctx.respond(embed=hikari.Embed(title=f"Check subcommands", description=f"Check sub commands", color=0Xff500a))
     
     except Exception as e:
         logger.fatal("Exception occured in %s.unset_custom_message method invoked for server: %s", file_prefix, ctx.guild_id,exc_info=1)
@@ -140,7 +140,7 @@ async def unset_custom_message_for_story(ctx:lightbulb.SlashContext) -> None:
 
         if result.IsSuccess:
             msg_description= msgs["custom:msg:unset:story:success"].format(f"{story_url}")
-            await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{msg_description}", color=0xFF0000))
+            await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{msg_description}", color=0Xff500a))
 
         else:
             logger.error("Error occured in %s.unset_custom_message_for_story for server: %s, story: %s, error: %s", file_prefix, ctx.guild_id, ctx.options.url, result.ResultInfo)
@@ -180,7 +180,7 @@ async def unset_custom_message_for_author(ctx:lightbulb.SlashContext) -> None:
 
         if result.IsSuccess:
             msg_description= msgs["custom:msg:unset:story:success"].format(f"{story_url}")
-            await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{msg_description}", color=0xFF0000))
+            await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{msg_description}", color=0Xff500a))
 
         else:
             logger.error("Error occured in %s.unset_custom_message_for_author for server: %s, author: %s, error: %s", file_prefix, ctx.guild_id, ctx.options.url, result.ResultInfo)
@@ -228,10 +228,10 @@ async def check_custom_messages(ctx: lightbulb.SlashContext) -> None:
 
             if category:
                 if category.lower() == Category.Story.value:
-                    await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:msgs']}", description=f"{msgs['story:custom:msgs']}\n{story_return_msg}", color=0xFF0000))
+                    await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:msgs']}", description=f"{msgs['story:custom:msgs']}\n{story_return_msg}", color=0Xff500a))
                 
                 elif category.lower() == Category.Announcements.value:
-                    await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:msgs']}", description=f"{msgs['author:custom:msgs']}\n{author_return_msg}", color=0xFF0000))
+                    await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:msgs']}", description=f"{msgs['author:custom:msgs']}\n{author_return_msg}", color=0Xff500a))
 
             else:
                 if story_return_msg:
@@ -240,7 +240,7 @@ async def check_custom_messages(ctx: lightbulb.SlashContext) -> None:
                 if author_return_msg:
                     msg_description= msg_description + msgs['author:custom:msgs'] + "\n" + author_return_msg
 
-                await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:msgs']}", description=f"{msg_description}", color=0xFF0000))
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:msgs']}", description=f"{msg_description}", color=0Xff500a))
 
         else:
             logger.error("Error occured in %s.check_custom_messages method for server: %s, category: %s, error: %s", file_prefix, guildId, category, result.ResultInfo)
