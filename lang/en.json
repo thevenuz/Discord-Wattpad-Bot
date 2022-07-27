@@ -60,7 +60,11 @@
     "custom:msg:set:story:success" : "Your custom message for this story has been succesfulyy set. The custom message **{0}** will be used for all the updates from story {1} from now on.",
     "custom:msg:set:author:success" : "Your custom message for this Author's announcements has been succesfulyy set. The custom message **{0}** will be used for all the updates from author {1} from now on.",
 
+    "custom:msg:set:story:category:success" : "Your custom message for the story category has been succesfully set. This message will be used while sharing all new chapter updates for stories(only for the stories for which a specific custom msg has not been set).",
+    "custom:msg:set:author:category:success" : "Your custom message for the announcement category has been succesfully set. This message will be used while sharing all the announcements(only for the announcements for which a specific custom msg has not been set).",
+
     "custom:msg:unset:story:success" : "Your custom message for the story {0} has been deleted. The bot will use the default message while sharing updates for this story from now on.",
+    "custom:msg:unset:author:success" : "Your custom message for the announcement from author {0} has been deleted. The bot will use the default message while sharing updates for this announcement from now on.",
 
     "custom:msgs" : "Your Custom Messages",
     "story:custom:msgs" : "Story Custom Messages:",

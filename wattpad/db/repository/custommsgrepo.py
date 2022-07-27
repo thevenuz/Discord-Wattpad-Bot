@@ -95,7 +95,7 @@ class CustomMsgrepo:
             self.logger.fatal("Exception occured in %s.get_custom_msg_id_from_author_id method invoked for author id: %s, isactive: %s", self.file_prefix, authorid, isactive,exc_info=1)
             raise e
 
-    async def get_custom_msgs_from_server_id(self, serverid:str, isactive:bool=1, type:str="a") -> List[CustomMsg]:
+    async def get_custom_msgs_from_server_id(self, serverid:str, isactive:bool=1, type= "s") -> List[CustomMsg]:
         try:
             self.logger.info("%s.get_custom_msgs_from_server_id method invoked for server id: %s, is active: %s, type: %s", self.file_prefix, serverid, isactive, type)
 
@@ -127,7 +127,7 @@ class CustomMsgrepo:
             
         
         except Exception as e:
-            self.logger.fatal("Exception occured in %s.get_custom_msgs_from_server_id method invoked for server id: %s, is active: %s, type: %s", self.file_prefix, serverid, isactive, type,exc_info=1)
+            self.logger.fatal("Exception occured in %s.get_custom_msgs_from_server_id method invoked for server id: %s, is active: %s, type: %s", self.file_prefix, serverid, isactive, type, exc_info=1)
             return None
         
     async def get_custom_msg_from_story_id(self, storyid:str, isactive:bool=1) -> str:
@@ -194,7 +194,45 @@ class CustomMsgrepo:
             self.logger.fatal("Exception occured in %s.get_custom_msg_from_author_id method invoked for author id: %s, is active: %s", self.file_prefix, authorid, isactive, exc_info=1)
             return None
 
+    async def get_custom_msg_for_category(self, serverid: str, type: str= "s", isactive: bool=1) -> CustomMsg:
+        try:
+            self.logger.info("%s.get_custom_msg_for_category method invoked for server id: %s, type: %s, is active: %s", self.file_prefix, serverid, type, isactive)
 
+            sql="""SELECT * FROM 
+                    CUSTOMMSGS
+                    WHERE
+                    ServerId=:ServerId
+                    Type=:Type
+                    AND
+                    IsActive=:IsActive
+                    AND
+                    StoryId=:StoryId
+                    AND
+                    AuthorId=:AuthorId
+                """
+
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.execute(sql,[serverid, type, isactive, "", ""])
+                    conn.commit()
+                    
+                    db_result=curs.fetchall()
+
+                    if db_result:
+                        custom_msg_data=list(db_result)
+                        column_names=list(map(lambda x: x.lower(), [d[0] for d in curs.description]))
+            
+            if db_result and custom_msg_data:
+                result= await self.map.map_custom_msg_records_list(custom_msg_data, column_names)
+
+                return result[0]
+
+            return None
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.get_custom_msg_for_category method invoked for server id: %s, type: %s, is active: %s", self.file_prefix, serverid, type, isactive,exc_info=1)
+            raise e
+        
     #endregion
 
     #region update
@@ -273,4 +311,28 @@ class CustomMsgrepo:
             self.logger.fatal("Exception occured in %s.update_custom_msg_by_story_id method invoked for storyid: %s, msg: %s", self.file_prefix, storyid, msg, exc_info=1)
             raise e
 
+    async def update_custom_msg_by_msg_id(self, msgid: str, msg:str, isactive:bool=1) -> bool:
+        try:
+            self.logger.info("%s.update_custom_msg_by_msg_id method invoked for msg id: %s,  msg: %s", self.file_prefix, msgid, msg)
+
+            sql="""UPDATE CUSTOMMSGS
+                    SET
+                    Message=:Message
+                    WHERE
+                    MsgId=:MsgId
+                    AND
+                    IsActive=:IsActive
+                """
+
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.execute(sql,[msg, msgid, isactive])
+                    conn.commit()
+            
+            return True
+
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.update_custom_msg_by_msg_id method invoked for msg id: %s, msg: %s", self.file_prefix, msgid, msg, exc_info=1)
+            raise e
     #endregion

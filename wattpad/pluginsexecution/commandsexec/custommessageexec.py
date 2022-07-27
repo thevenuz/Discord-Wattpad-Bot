@@ -23,9 +23,17 @@ class CustomMessageExec:
         self.customMsgRepo= CustomMsgrepo()
         self.prefix= "wattpad.com"
 
-    async def set_custom_message_for_story(self, guildid: str, storyurl:str, message:str) -> ResultCustomChannelSet:
+    async def set_custom_message_for_story(self, guildid: str, storyurl:str= "", message:str="") -> ResultCustomChannelSet:
         try:
             self.logger.info("%s.set_custom_message_for_story method invoked for server: %s, story: %s, msg: %s", self.file_prefix, guildid, storyurl, message)
+
+            if not storyurl:
+                category_result= await self.__set_custom_message_for_category(guildid, message, isstory=True, isauthor=False)
+
+                if category_result.IsSuccess:
+                    return Result(True, "Success")
+                
+                return Result(False, category_result.ResultInfo)
 
             story_urls= []       
 
@@ -58,6 +66,14 @@ class CustomMessageExec:
     async def set_custom_message_for_author(self, guildid: str, authorurl:str, message:str) -> ResultCustomChannelSet:
         try:
             self.logger.info("%s.set_custom_message_for_author method invoked for server: %s, author: %s, msg: %s", self.file_prefix, guildid, authorurl, message)
+            
+            if not authorurl:
+                category_result= await self.__set_custom_message_for_category(guildid, message, isstory=False, isauthor=True)
+
+                if category_result.IsSuccess:
+                    return Result(True, "Success")
+                
+                return Result(False, category_result.ResultInfo)
 
             author_urls= []         
 
@@ -365,7 +381,69 @@ class CustomMessageExec:
             self.logger.fatal("Exception occured in %s.__set_custom_message method invoked for server: %s, url: %s, msg: %s, is story: %s, is author: %s", self.file_prefix, guildid, url, message, isstory, isauthor,exc_info=1)
             raise e
         
+    async def __set_custom_message_for_category(self, guildid: str, message: str, isstory: bool = True, isauthor: bool = False) -> Result:
+        try:
+            self.logger.info("%s.__set_custom_message_for_category method invoked for server: %s, msg: %s, is story: %s", self.file_prefix, guildid, message, isstory)
+            
+            #get server id for this server
+            serverid= await self.serverRepo.get_serverid_from_server(guildid)
 
+            if serverid:
+                if isauthor:
+                    #check if there is a custom msg for this server
+                    existing_custom_msg= await self.customMsgRepo.get_custom_msg_for_category(serverid, "a", 1)
+
+                    if existing_custom_msg.Message:
+                        #update the existing custom msg
+                        update_result= await self.customMsgRepo.update_custom_msg_by_msg_id(existing_custom_msg.MsgId, message)
+
+                        if update_result:
+                                return Result(True, "success")
+                        else:
+                            return Result(False, "Error while updating the custom msg data")
+
+                    else:
+                        #insert custom msg data in to table
+                        custommsg= CustomMsg(Type="a", Message=message, StoryId="", AuthorId="", ServerId=serverid, IsActive=1)
+
+                        result= await self.customMsgRepo.insert_custom_msg_data(custommsg)
+
+                        if result:
+                            return Result(True, "success")
+                        else:
+                            return Result(False, "Error while inserting the custom msg data")
+
+                else:
+                    #check if there is a custom msg for this server
+                    existing_custom_msg= await self.customMsgRepo.get_custom_msg_for_category(serverid, "s", 1)
+
+                    if existing_custom_msg.Message:
+                        #update the existing custom msg
+                        update_result= await self.customMsgRepo.update_custom_msg_by_msg_id(existing_custom_msg.MsgId, message)
+
+                        if update_result:
+                                return Result(True, "success")
+                        else:
+                            return Result(False, "Error while updating the custom msg data")
+
+                    else:
+                        #insert custom msg data in to table
+                        custommsg= CustomMsg(Type="s", Message=message, StoryId="", AuthorId="", ServerId=serverid, IsActive=1)
+
+                        result= await self.customMsgRepo.insert_custom_msg_data(custommsg)
+
+                        if result:
+                            return Result(True, "success")
+                        else:
+                            return Result(False, "Error while inserting the custom msg data")
+
+            else:
+                return Result(False, "No server id found for the server")
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.__set_custom_message_for_category method invoked for server: %s, msg: %s, is story: %s", self.file_prefix, guildid, message, isstory,exc_info=1)
+            raise e
+        
 
      #region misc methods
     async def __get_story_url_from_title(self, title:str, server:str) -> List[str]:
