@@ -234,6 +234,11 @@ class CustomMessageExec:
                                     story_custom_msg= CheckCustomMsgStory(story, msg.Message)
 
                                     story_custom_msgs.append(deepcopy(story_custom_msg))
+
+                            elif not msg.AuthorId and msg.Type.lower() == CustomMsgType.Story.value.lower():
+                                story_category_msg= CheckCustomMsgStory("Story Category:", msg.Message)
+
+                                story_custom_msgs.append(deepcopy(story_category_msg))
                             
                         if not story_custom_msgs:
                             isempty= True
@@ -248,6 +253,11 @@ class CustomMessageExec:
                                     author_custom_msg= CheckCustomMsgAuthor(author, msg.Message)
 
                                     author_custom_msgs.append(deepcopy(author_custom_msg))
+
+                            elif not msg.StoryId and msg.Type.lower() == CustomMsgType.Author.value.lower():
+                                author_category_msg= CheckCustomMsgStory("Announcement Category:", msg.Message)
+
+                                author_custom_msgs.append(deepcopy(author_category_msg))
                             
                         if not story_custom_msgs and not author_custom_msgs:
                             isempty= True
