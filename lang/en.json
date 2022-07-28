@@ -66,6 +66,9 @@
     "custom:msg:unset:story:success" : "Your custom message for the story {0} has been deleted. The bot will use the default message while sharing updates for this story from now on.",
     "custom:msg:unset:author:success" : "Your custom message for the announcement from author {0} has been deleted. The bot will use the default message while sharing updates for this announcement from now on.",
 
+    "custom:msg:unset:story:category:success" : "Your custom message for the story category has been succesfully unset. The bot will use the default message or story specific custom messages while sharing updates from now on.",
+    "custom:msg:unset:author:category:success" : "Your custom message for the announcements category has been succesfully unset. The bot will use the default message or author specific custom messages while sharing updates from now on.",
+
     "custom:msgs" : "Your Custom Messages",
     "story:custom:msgs" : "Story Custom Messages:",
     "author:custom:msgs" : "Author Custom Messages:",

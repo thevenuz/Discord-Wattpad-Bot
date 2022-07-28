@@ -107,6 +107,18 @@ class CustomMessageExec:
         try:
             self.logger.info("%s.unset_custom_message_for_story method invoked for server: %s, story: %s", self.file_prefix, guildid, storyurl)
 
+            if not storyurl:
+                category_result= await self.__unset_custom_message_for_category(guildid, isstory= True, isauthor= False)
+
+                if category_result.IsSuccess:
+                    return ResultCustomChannelSet(True, "success")
+
+                elif category_result.Notfound:
+                    return ResultCustomChannelUnset(False, "Custom msg not found for the story category", Notfound= True)
+
+                return ResultCustomChannelUnset(False, "Unknown Error", UnknownError= True)
+
+
             story_urls= []     
 
             if self.prefix not in storyurl:
@@ -141,6 +153,17 @@ class CustomMessageExec:
     async def unset_custom_message_for_author(self, guildid: str, authorurl:str) -> ResultCustomChannelUnset:
         try:
             self.logger.info("%s.author method invoked for server: %s, author: %s", self.file_prefix, guildid, authorurl)
+
+            if not authorurl:
+                category_result= await self.__unset_custom_message_for_category(guildid, isstory= False, isauthor= True)
+
+                if category_result.IsSuccess:
+                    return ResultCustomChannelSet(True, "success")
+
+                elif category_result.Notfound:
+                    return ResultCustomChannelUnset(False, "Custom msg not found for the author category", Notfound= True)
+
+                return ResultCustomChannelUnset(False, "Unknown Error", UnknownError= True)
 
             author_urls= []       
 
@@ -444,6 +467,49 @@ class CustomMessageExec:
             self.logger.fatal("Exception occured in %s.__set_custom_message_for_category method invoked for server: %s, msg: %s, is story: %s", self.file_prefix, guildid, message, isstory,exc_info=1)
             raise e
         
+    async def __unset_custom_message_for_category(self, guildid: str, isstory: bool= True, isauthor: bool= True) -> ResultCustomChannelUnset:
+        try:
+            self.logger.info("%s.__unset_custom_message_for_category method invoked for server: %s, is story: %s", self.file_prefix, guildid, isstory)
+
+            serverid= await self.serverRepo.get_serverid_from_server(guildid)
+
+            if serverid:
+                if isauthor:
+                    existing_custom_msg= await self.customMsgRepo.get_custom_msg_for_category(serverid, "a", 1)
+
+                    if existing_custom_msg:
+                        result= await self.customMsgRepo.delete_custom_msg_by_id(existing_custom_msg.MsgId)
+
+                        if result:
+                            return ResultCustomChannelUnset(True, "Success")
+
+                        return ResultCustomChannelUnset(False, "Error while deleting custom msg", UnknownError= True)
+
+                    else:
+                        return ResultCustomChannelUnset(False, "Custom message not found for author category", Notfound= True)
+
+                else:
+                    existing_custom_msg= await self.customMsgRepo.get_custom_msg_for_category(serverid, "s", 1)
+
+                    if existing_custom_msg:
+                        result= await self.customMsgRepo.delete_custom_msg_by_id(existing_custom_msg.MsgId)
+
+                        if result:
+                            return ResultCustomChannelUnset(True, "Success")
+
+                        return ResultCustomChannelUnset(False, "Error while deleting custom msg", UnknownError= True)
+
+                    else:
+                        return ResultCustomChannelUnset(False, "Custom message not found for story category", Notfound= True)
+
+            else:
+                return ResultCustomChannelUnset(False, "Error in getting server id")
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.__unset_custom_message_for_category method invoked for server: %s, is story: %s", self.file_prefix, guildid, isstory,exc_info=1)
+            raise e
+        
+
 
      #region misc methods
     async def __get_story_url_from_title(self, title:str, server:str) -> List[str]:
