@@ -347,7 +347,34 @@ class AuthorRepo:
             self.logger.fatal("Exception occured in %s.get_active_stories method invoked", self.file_prefix,exc_info=1)
             return None
 
-    
+    async def get_server_id_from_authorid(self, authorid: str, isactive: bool=1) -> str:
+        try:
+            self.logger.info("%s.get_server_id_from_authorid method invoked for author id: %s, is active: %s", self.file_prefix, authorid, isactive)
+
+            sql="""SELECT ServerId FROM
+                    AUTHORS
+                    WHERE
+                    AuthorId=:AuthorId 
+                    AND
+                    IsActive=:IsActive
+                """
+            
+            with cx_Oracle.connect(self.connection_string) as conn:
+                with conn.cursor() as curs:
+                    curs.prefetchrows = 2
+                    curs.arraysize = 1
+
+                    curs.execute(sql,[authorid, isactive])
+                    conn.commit()
+
+                    result=curs.fetchone()
+
+            if result:
+                return result[0]
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.get_server_id_from_authorid method invoked for author id: %s, is active: %s", self.file_prefix, authorid, isactive,exc_info=1)
+            raise e
     #endregion
 
 

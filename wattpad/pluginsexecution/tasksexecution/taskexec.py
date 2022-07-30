@@ -133,6 +133,13 @@ class TaskExec:
                 #check if there are any custom msgs
                 custom_msg= await self.customMsgRepo.get_custom_msg_from_story_id(story.StoryId, 1)
 
+                if not custom_msg:
+                    #check if there are any category level custom msgs set
+                    serverid= await self.storyRepo.get_server_id_from_storyid(story.StoryId, 1)
+                    if serverid:
+                        custom_msg= await self.customMsgRepo.get_custom_msg_for_category(serverid, "a", 1)
+
+
                 if custom_msg:
                     msg= custom_msg
 
@@ -183,6 +190,12 @@ class TaskExec:
 
                 #check if there are any custom msgs
                 custom_msg= await self.customMsgRepo.get_custom_msg_from_author_id(author.AuthorId, 1)
+
+                if not custom_msg:
+                    #check if there are any category level custom msg
+                    serverid= await self.authorRepo.get_server_id_from_authorid(author.AuthorId, 1)
+                    if serverid:
+                        custom_msg= await self.customMsgRepo.get_custom_msg_for_category(serverid, "a", 1)
 
                 if custom_msg:
                     msg= custom_msg
