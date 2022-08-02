@@ -1,22 +1,25 @@
 # Discord Wattpad Bot
 
-A Discord bot to fetch the latest chapters of your wattpad stories and share them in your Discord server whenever a new chapter of your story is published.
+A Discord Bot that can share new chapter notifications from your favorite wattpad stories and new announcement notifications from your favorite wattpad authors.
 
-### Features
-* New chapters links will be shared in the Discord servers within 2 mins of publishing the chapter.
-* Can check multiple stories for new chapters.
+### Features:
+* New chapter links will be shared in your server as soon as the author publishes a new chapter in a story you're following.
+* New Announcement content will be shared in your server as soon as the author you're following makes an announcement on Wattpad.
 
 ### How it works?
-* There is nothing special about this bot, all of it's features are very simple basic things that a Discord bot is expected to do. The only thing that's different and speciality
-of this bot is it's ability to fetch the new published chapters.
-* There is no official Public API available from Wattpad to get these details, so the only other choice we have and I used is to scrape the Wattpad website for getting the required details.
-* The wattapd scraper I used in this application just checks the wattapd stories and gets the lastest chapter's published time.
-* Then I just trigger my wattapd scraper every two minutes using Tasks in Lightbulb library and the rest is just sending this link to the servers.
+* All the bot's features are very basic things that all the Discord bots are capable of. The only different and unique feature of this bot is to check for new chapters and announcements of wattpad automatically.
 
-### The Code...
-I know that my code is trash and I might have over complicated things. But in my defence I was learning python when I'm writing this bot. No, actually I'm still learning. I started
- this bot to learn python though after some time I focused more on completing the bot than learning python. But please don't hesitate to criticize the code, I want to know what mistakes I've 
- done, so go ahead.
- 
- 
+* As there is no official public API available from Wattpad, this bot makes use of web scraping to get the necessary details of the stories and announcements.
+
+### How to use the Bot?
+The steps are more detailed in the [top.gg page](https://top.gg/bot/929384339840585799)
+* The first step is setting up a default channel so that the bot knows in which channel the updates need to be posted. This can be done by using **/set-channel < channel >** command.
+* Use **/follow-story < storyurl >** command to follow stories.
+* Use **/follow-author < author-profile-url >** command to follow authors.
+* And you're done, the bot will automatically shares the updates from the story and author you followed in the channel that's been set.
+* You can find the other commands using **/help** command.
+
+### About the Code...
+The code is still a mess, but it's organized mess compared to the previous version.
+
 ### Built using Hikari and Hikari-Lightbulb libraries
