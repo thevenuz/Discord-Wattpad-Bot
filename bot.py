@@ -39,7 +39,7 @@ async def msg(event):
 
 #region get new chapter task
 #task for fetching new chapters, checks every 2 mins
-@tasks.task(m=4, auto_start=True)
+@tasks.task(m=10, auto_start=True)
 async def getnewchapter():
     try:
         logger.info("getnewchapter task started")
@@ -57,7 +57,7 @@ async def getnewchapter():
 
         for guild,story in stories.items():
             for sty in story:
-                if sty:
+                if sty and "url" in sty:
                     storyURL=sty["url"]
                     lastchecked=sty['lastupdated']
                     logger.info('Cheking for a new story of %s',storyURL)
@@ -130,7 +130,7 @@ async def getnewchapter():
 
 #region get new announcement task
 #task for fetching new announcements from authors
-@tasks.task(m=3,auto_start=True)
+@tasks.task(m=10,auto_start=True)
 async def get_announcement():
     try:
         logger.info("get_announcement task started")
@@ -147,7 +147,7 @@ async def get_announcement():
 
         for guild, author in authors.items():
             for auth in author:
-                if auth:
+                if auth and "url" in auth:
                     profile=auth['url']
                     lastchecked=auth['lastupdated']
                     author_name=auth['url'].split('/user/')[1].replace('-',' ')

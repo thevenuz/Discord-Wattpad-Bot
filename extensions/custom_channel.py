@@ -92,27 +92,28 @@ async def set_custom_channel(ctx:lightbulb.SlashContext):
 
                         else:
                             for item in items:
-                                if "CustomChannel" in item:
-                                    if url==item["url"]:
+                                # if "CustomChannel" in item:
+                                if url==item["url"]:
+                                    
+                                    item["CustomChannel"]=str(channel_id)
+
+                                    if isAuthor:
+                                        update_authors=await jhelper.write_to_json("authors.json",records)
+                                        response_msg=f"All the updates from the author: {url} will be sent in channel <#{channel_id}>"
+                                    elif isStory:
+                                        update_authors=await jhelper.write_to_json("stories.json",records)
+                                        response_msg=f"All the updates from the story: {url} will be sent in channel <#{channel_id}>"
+
+                                    if update_authors:
+                                        em=hikari.Embed(title="Success!!",description=response_msg,color=0Xff500a)
                                         
-                                        item["CustomChannel"]=str(channel_id)
+                                        await ctx.respond(embed=em)
 
-                                        if isAuthor:
-                                            update_authors=await jhelper.write_to_json("authors.json",records)
-                                            response_msg=f"All the updates from the author: {url} will be sent in channel <#{channel_id}>"
-                                        elif isStory:
-                                            update_authors=await jhelper.write_to_json("stories.json",records)
-                                            response_msg=f"All the updates from the story: {url} will be sent in channel <#{channel_id}>"
-
-                                        if update_authors:
-                                            em=hikari.Embed(title="Success!!",description=response_msg,color=0Xff500a)
-                                            
-                                            await ctx.respond(embed=em)
-
-                                        else:
-                                            emContent='Uh-oh, something is not right. Please check `/check-custom-channels` to see if the custom channel has been setup properly.'
-                                            emErr=hikari.Embed(title=f'🛑 Error:',description=f'{emContent}',color=0xFF0000)
-                                            await ctx.respond(embed=emErr) 
+                                    else:
+                                        emContent='Uh-oh, something is not right. Please check `/check-custom-channels` to see if the custom channel has been setup properly.'
+                                        emErr=hikari.Embed(title=f'🛑 Error:',description=f'{emContent}',color=0xFF0000)
+                                        await ctx.respond(embed=emErr) 
+                                    
                                                                     
         elif not found and count<1:
             if isStory:
