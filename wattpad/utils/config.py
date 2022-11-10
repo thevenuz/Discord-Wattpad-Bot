@@ -1,4 +1,6 @@
 from wattpad.logger.baselogger import BaseLogger
+from wattpad.models.settings import Settings
+from wattpad.utils.jsonutil import JsonUtil
 from typing import Dict
 import aiofiles
 import json
@@ -9,12 +11,17 @@ class Config:
         self.logger = BaseLogger().loggger_init()
 
     async def get_messages(self, language: str = "en") -> Dict:
+        """
+            get message responses from json file
+        """
         try:
             self.logger.info("%s.get_messages method invoked for language: %s", self.file_prefix, language)
 
-            filepath="lang/en.json" #TODO: make this dynamic
+            jsonUtil = JsonUtil()
 
-            async with aiofiles.open(filepath, mode="r") as f:
+            filePath = jsonUtil.get_file_path("lang", f'{language}.json')
+
+            async with aiofiles.open(filePath, mode="r") as f:
                 result = json.loads(await f.read())
 
             return result
@@ -22,3 +29,22 @@ class Config:
         except Exception as e:
             self.logger.fatal("Exception occured in %s.get_messages method for language: %s", self.file_prefix, language, exc_info=1)
             raise e
+
+    def load_settings(self) -> Dict:
+        try:
+            self.logger.info("%s.load_settings method invoked", self.file_prefix)
+
+            with open("config/settings.json") as f:
+                result = json.load(f)
+
+            settings = Settings(result)
+
+            return settings
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.load_settings method", self.file_prefix, exc_info=1)
+            raise e
+        
+
+
+# Config.load_settings()
