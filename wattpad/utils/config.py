@@ -30,6 +30,22 @@ class Config:
             self.logger.fatal("Exception occured in %s.get_messages method for language: %s", self.file_prefix, language, exc_info=1)
             raise e
 
+    async def get_language(self, guildId: str) -> str:
+        """
+            gets language of the server
+        """
+        try:
+            self.logger.info("%s.get_language method invoked for server: %s", self.file_prefix, guildId)
+
+            #TODO: implement this later
+
+            return "en"
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.get_language method for server: %s", self.file_prefix, guildId, exc_info=1)
+            raise e
+        
+
     def load_settings(self) -> Dict:
         try:
             self.logger.info("%s.load_settings method invoked", self.file_prefix)
