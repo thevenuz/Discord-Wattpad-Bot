@@ -5,12 +5,12 @@ import re
 
 class WattpadUtil:
     def __init__(self) -> None:
-        self.file_prefix = "wattpad.utils.wattpadutil"
+        self.filePrefix = "wattpad.utils.wattpadutil"
         self.logger = BaseLogger().loggger_init()
 
     async def validate_author_url(self, url: str) -> ResultValidateUrl:
         try:
-            self.logger.info("%s.validate_author_url method invoked for url: %s", self.file_prefix, url)
+            self.logger.info("%s.validate_author_url method invoked for url: %s", self.filePrefix, url)
 
             validUrl = False
 
@@ -31,28 +31,41 @@ class WattpadUtil:
 
         
         except Exception as e:
-            self.logger.fatal("Exception occured in %s.validate_author_url method", self.file_prefix, exc_info=1)
+            self.logger.fatal("Exception occured in %s.validate_author_url method", self.filePrefix, exc_info=1)
             raise e
 
     async def get_actual_author_url(self, authorUrl: str) -> str:
         try:
-            self.logger.info("%s.get_actual_author_url method invoked for author: %s", self.file_prefix, authorUrl)
+            self.logger.info("%s.get_actual_author_url method invoked for author: %s", self.filePrefix, authorUrl)
 
             # get the url by removing utm tags
             if "utm" in authorUrl:
                 actual_author_url = await self.__get_author_url_from_utm(authorUrl)
                 return actual_author_url
 
-            self.logger.error("%s.get_actual_author_url method - URL: %s is inavalid but doesn't contain utm", self.file_prefix, authorUrl)
+            self.logger.error("%s.get_actual_author_url method - URL: %s is inavalid but doesn't contain utm", self.filePrefix, authorUrl)
             return authorUrl
 
         except Exception as e:
-            self.logger.fatal("Exception occured in %s.get_actual_author_url method invoked for author: %s", self.file_prefix, authorUrl, exc_info=1)
+            self.logger.fatal("Exception occured in %s.get_actual_author_url method invoked for author: %s", self.filePrefix, authorUrl, exc_info=1)
             raise e
+
+    async def get_author_name(self, url: str) -> str:
+        try:
+            self.logger.info("%s.get_author_name method invoked", self.filePrefix)
+
+            authorName = url.split('/user/')[1].replace('-', ' ')
+
+            return authorName
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.get_author_name method", self.filePrefix, exc_info=1)
+            raise e
+        
 
     async def __make_request_to_url(self, url:str) -> str:
         try:
-            self.logger.info("%s.__make_request_to_url method invoked for url: %s", self.file_prefix, url)
+            self.logger.info("%s.__make_request_to_url method invoked for url: %s", self.filePrefix, url)
 
             
             async with aiohttp.ClientSession() as session:
@@ -62,16 +75,16 @@ class WattpadUtil:
             return response.status
 
         except Exception as e:
-            self.logger.fatal("Exception occured in %s.__make_request_to_url method invoked for url: %s", self.file_prefix, url, exc_info=1)
+            self.logger.fatal("Exception occured in %s.__make_request_to_url method invoked for url: %s", self.filePrefix, url, exc_info=1)
             return 0
 
     async def __get_author_url_from_utm(self, authorUrl: str) -> str:
         try:
-            self.logger.info("%s.__get_author_url_from_utm method invoked for author: %s", self.file_prefix, authorUrl)
+            self.logger.info("%s.__get_author_url_from_utm method invoked for author: %s", self.filePrefix, authorUrl)
 
             actual_author_url = authorUrl.split("?")[0]
             return actual_author_url
 
         except Exception as e:
-            self.logger.fatal("Exception occured in %s.__get_author_url_from_utm method for author: %s", self.file_prefix, authorUrl, exc_info=1)
+            self.logger.fatal("Exception occured in %s.__get_author_url_from_utm method for author: %s", self.filePrefix, authorUrl, exc_info=1)
             raise e

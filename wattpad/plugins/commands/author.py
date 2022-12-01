@@ -7,7 +7,7 @@ from wattpad.pluginsimpl.commands.authorimpl import AuthorImpl
 
 plugin = lightbulb.Plugin("AuthorPlugin")
 
-file_prefix = "wattpad.plugins.commands.author"
+filePrefix = "wattpad.plugins.commands.author"
 
 logger = BaseLogger().loggger_init()
 
@@ -19,7 +19,7 @@ logger = BaseLogger().loggger_init()
 @lightbulb.implements(lightbulb.SlashCommand)
 async def follow_author(ctx: lightbulb.SlashContext) -> None:
     try:
-        logger.info("%s.follow_author method invoked for author: %s, server: %s", file_prefix, ctx.options.authorprofileurl, ctx.guild_id)
+        logger.info("%s.follow_author method invoked for author: %s, server: %s", filePrefix, ctx.options.authorprofileurl, ctx.guild_id)
 
         profileUrl = ctx.options.authorprofileurl
         guildId = str(ctx.guild_id)
@@ -32,8 +32,22 @@ async def follow_author(ctx: lightbulb.SlashContext) -> None:
         #call implementation
         result = await AuthorImpl().follow_author(guildId, profileUrl)
 
+        if result.IsSuccess:
+            if result.AlreadyFollowing:
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['error']}", description=f"{msgs['already:following:author']}", color=0xFF0000))
+            
+            else:
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{msgs['follow:author:success']}", color=0Xff500a))
+
+        else:
+            if result.InvalidUrl:
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['invalid:url']}", description=f"{msgs['invalid:author:url']}", color=0xFF0000))
+
+            else:
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['unknown:error']}", description=f"{msgs['unknown:error:msg']}", color=0xFF0000))
+
     except Exception as e:
-        logger.fatal("Exception occured in %s.follow_author method for author: %s, server: %s", file_prefix, ctx.options.authorprofileurl, ctx.guild_id, exc_info=1)
+        logger.fatal("Exception occured in %s.follow_author method for author: %s, server: %s", filePrefix, ctx.options.authorprofileurl, ctx.guild_id, exc_info=1)
         raise e
 
 

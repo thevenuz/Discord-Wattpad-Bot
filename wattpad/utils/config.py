@@ -7,7 +7,7 @@ import json
 
 class Config:
     def __init__(self) -> None:
-        self.file_prefix = "wattpad.utils.config"
+        self.filePrefix = "wattpad.utils.config"
         self.logger = BaseLogger().loggger_init()
 
     async def get_messages(self, language: str = "en") -> Dict:
@@ -15,7 +15,7 @@ class Config:
             get message responses from json file
         """
         try:
-            self.logger.info("%s.get_messages method invoked for language: %s", self.file_prefix, language)
+            self.logger.info("%s.get_messages method invoked for language: %s", self.filePrefix, language)
 
             jsonUtil = JsonUtil()
 
@@ -27,7 +27,7 @@ class Config:
             return result
 
         except Exception as e:
-            self.logger.fatal("Exception occured in %s.get_messages method for language: %s", self.file_prefix, language, exc_info=1)
+            self.logger.fatal("Exception occured in %s.get_messages method for language: %s", self.filePrefix, language, exc_info=1)
             raise e
 
     async def get_language(self, guildId: str) -> str:
@@ -35,20 +35,20 @@ class Config:
             gets language of the server
         """
         try:
-            self.logger.info("%s.get_language method invoked for server: %s", self.file_prefix, guildId)
+            self.logger.info("%s.get_language method invoked for server: %s", self.filePrefix, guildId)
 
             #TODO: implement this later
 
             return "en"
         
         except Exception as e:
-            self.logger.fatal("Exception occured in %s.get_language method for server: %s", self.file_prefix, guildId, exc_info=1)
+            self.logger.fatal("Exception occured in %s.get_language method for server: %s", self.filePrefix, guildId, exc_info=1)
             raise e
         
 
     def load_settings(self) -> Dict:
         try:
-            self.logger.info("%s.load_settings method invoked", self.file_prefix)
+            self.logger.info("%s.load_settings method invoked", self.filePrefix)
 
             with open("config/settings.json") as f:
                 result = json.load(f)
@@ -58,7 +58,7 @@ class Config:
             return settings
         
         except Exception as e:
-            self.logger.fatal("Exception occured in %s.load_settings method", self.file_prefix, exc_info=1)
+            self.logger.fatal("Exception occured in %s.load_settings method", self.filePrefix, exc_info=1)
             raise e
         
 
