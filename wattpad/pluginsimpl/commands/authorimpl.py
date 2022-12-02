@@ -2,7 +2,7 @@ from wattpad.logger.baselogger import BaseLogger
 from wattpad.utils.wattpadutil import WattpadUtil
 from wattpad.utils.jsonutil import JsonUtil
 from wattpad.utils.datautil import DataUtil
-from wattpad.models.result import ResultFollow, ResultUnfollow
+from wattpad.models.result import ResultFollow, ResultUnfollow, ResultCheckAuthors
 from wattpad.models.author import Authors, Author
 from datetime import datetime
 
@@ -68,7 +68,7 @@ class AuthorImpl:
                             #append new author data to existing data
                             author.append(authorData)
                         
-
+            #update the author data to json file
             result = await dataUtil.update_authors(authors)
 
             if result:
@@ -110,7 +110,14 @@ class AuthorImpl:
                             if profileUrl == rec["url"]:
                                 author.remove(rec)
 
-                                return ResultUnfollow(True, "Author unfollowed")
+                                #update the authors data to json file
+                                result = await dataUtil.update_authors(authors)
+
+                                if result:
+                                    return ResultUnfollow(True, "Author unfollowed")
+
+                                self.logger.error("%s.unfollow_author method: unknown error occured when updating authors", self.filePrefix)
+                                return ResultUnfollow(False, "Unknown error", UnknownError= True)
 
                     else:
                         #no author found with the url
@@ -121,4 +128,18 @@ class AuthorImpl:
         except Exception as e:
             self.logger.fatal("Exception occured in %s.unfollow_author method for server: %s, author: %s", self.filePrefix, guildId, url, exc_info=1)
             raise e 
+        
+    async def check_authors(self, guildId: str) -> ResultCheckAuthors:
+        try:
+            self.logger.info("%s.check_authors method invoked for server: %s", self.filePrefix, guildId)
+
+            authors = DataUtil().get_authors()
+
+            authors = list(filter(lambda guilds: guildId in guilds, authors))
+
+            return ResultCheckAuthors(True, "check authors sucsess", Data = authors)
+
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.check_authors method for server: %s", self.filePrefix, guildId, exc_info=1)
+            raise e
         

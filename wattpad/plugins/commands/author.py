@@ -2,6 +2,7 @@ import lightbulb
 import hikari
 from wattpad.logger.baselogger import BaseLogger
 from wattpad.utils.config import Config
+from wattpad.utils.msgutil import MsgUtil
 from wattpad.pluginsimpl.commands.authorimpl import AuthorImpl
 
 
@@ -85,6 +86,39 @@ async def unfollow_author(ctx: lightbulb.SlashContext) -> None:
     
     except Exception as e:
         logger.fatal("Exception occured in %s.unfollow_author method invoked for server: %s, author: %s", filePrefix, ctx.guild_id, ctx.options.authorprofileurl ,exc_info=1)
+        raise e
+    
+
+@plugin.command
+@lightbulb.command("check-authors","Check the author's you're following in this server", auto_defer=True)
+@lightbulb.implements(lightbulb.SlashCommand)
+async def check_authors(ctx: lightbulb.SlashContext) -> None:
+    try:
+        logger.info("%s.check_authors method invoked for server: %s", filePrefix, ctx.guild_id)
+
+        guildId = str(ctx.guild_id)
+
+        config = Config()
+
+        language = await config.get_language(guildId)
+        msgs = await config.get_messages(language)
+
+        #call implementation
+        result = await AuthorImpl().check_authors(guildId)
+
+        if result.IsSuccess:
+            if result.Data:
+                response = await MsgUtil().build_check_authors_msg(result.Data)
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['check:authors:following']}", description=f"{response}", color=0Xff500a))
+                
+            else:
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['empty']}", description=f"{msgs['check:authors:empty']}", color=0xFF0000))
+
+        else:
+            await ctx.respond(embed=hikari.Embed(title=f"{msgs['unknown:error']}", description=f"{msgs['unknown:error:msg']}", color=0xFF0000))
+    
+    except Exception as e:
+        logger.fatal("Exception occured in %s.check_authors method for server: %s", filePrefix, ctx.guild_id, exc_info=1)
         raise e
     
 
