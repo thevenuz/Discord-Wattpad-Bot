@@ -2,7 +2,7 @@ from wattpad.logger.baselogger import BaseLogger
 from wattpad.utils.wattpadutil import WattpadUtil
 from wattpad.utils.jsonutil import JsonUtil
 from wattpad.utils.datautil import DataUtil
-from wattpad.models.result import ResultFollow
+from wattpad.models.result import ResultFollow, ResultUnfollow
 from wattpad.models.author import Authors, Author
 from datetime import datetime
 
@@ -79,4 +79,46 @@ class AuthorImpl:
         except Exception as e:
             self.logger.fatal("Exception occured in %s.follow_author method for server: %s, author: %s", self.filePrefix, guildId, url, exc_info=1)
             raise e
+        
+    async def unfollow_author(self, guildId:str, url: str) -> ResultUnfollow:
+        try:
+            self.logger.info("%s.unfollow_author method invoked for server: %s, author: %s", self.filePrefix, guildId, url)
+
+            isAuthorName = False
+            dataUtil = DataUtil()
+            profileUrl = url
+
+            if "/user/" not in url:
+                isAuthorName = True
+
+            #get authors
+            authors = await dataUtil.get_authors()
+
+            for guild, author in authors:
+                if guild == guildId:
+                    #get url if entered input is author name
+                    if isAuthorName:
+                        if any(url in (foundurl := rec["url"]) for rec in author):
+                            profileUrl = foundurl
+
+                        else:
+                            #url with the author name bot found
+                            return ResultUnfollow(False, "Url with Author name not found", AuthorNameNotFound= True)
+
+                    if any(profileUrl == rec["url"] for rec in author):
+                        for rec in author:
+                            if profileUrl == rec["url"]:
+                                author.remove(rec)
+
+                                return ResultUnfollow(True, "Author unfollowed")
+
+                    else:
+                        #no author found with the url
+                        return ResultUnfollow(False, "Author not found", AuthorNotFound= True)
+                    
+            return ResultUnfollow(False, "Unknown error", UnknownError= True)
+
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.unfollow_author method for server: %s, author: %s", self.filePrefix, guildId, url, exc_info=1)
+            raise e 
         
