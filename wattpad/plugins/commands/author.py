@@ -108,9 +108,9 @@ async def check_authors(ctx: lightbulb.SlashContext) -> None:
 
         if result.IsSuccess:
             if result.Data:
-                response = await MsgUtil().build_check_authors_msg(result.Data)
+                response = await MsgUtil().build_check_authors_msg(result.Data[0])
                 await ctx.respond(embed=hikari.Embed(title=f"{msgs['check:authors:following']}", description=f"{response}", color=0Xff500a))
-                
+
             else:
                 await ctx.respond(embed=hikari.Embed(title=f"{msgs['empty']}", description=f"{msgs['check:authors:empty']}", color=0xFF0000))
 

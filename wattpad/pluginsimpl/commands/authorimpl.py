@@ -1,9 +1,7 @@
 from wattpad.logger.baselogger import BaseLogger
 from wattpad.utils.wattpadutil import WattpadUtil
-from wattpad.utils.jsonutil import JsonUtil
 from wattpad.utils.datautil import DataUtil
 from wattpad.models.result import ResultFollow, ResultUnfollow, ResultCheckAuthors
-from wattpad.models.author import Authors, Author
 from datetime import datetime
 
 class AuthorImpl:
@@ -58,7 +56,7 @@ class AuthorImpl:
 
             else:
                 for guild, author in authors:
-                    if guild == guild:
+                    if guild == guildId:
                         if any(authorUrl == data["url"] for data in author):
 
                             #Already following the author in the server
@@ -133,11 +131,11 @@ class AuthorImpl:
         try:
             self.logger.info("%s.check_authors method invoked for server: %s", self.filePrefix, guildId)
 
-            authors = DataUtil().get_authors()
+            authors = await DataUtil().get_authors()
 
-            authors = list(filter(lambda guilds: guildId in guilds, authors))
+            filteredAuthors = [author for guild, author in authors.items() if guild == guildId]
 
-            return ResultCheckAuthors(True, "check authors sucsess", Data = authors)
+            return ResultCheckAuthors(True, "check authors sucsess", Data= filteredAuthors)
 
         except Exception as e:
             self.logger.fatal("Exception occured in %s.check_authors method for server: %s", self.filePrefix, guildId, exc_info=1)
