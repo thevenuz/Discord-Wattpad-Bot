@@ -72,7 +72,7 @@ class AuthorImpl:
             if result:
                 return ResultFollow(True, "Author follow success", AlreadyFollowing= False, AuthorName= authorName)
 
-            return ResultFollow(UnknownError= True)
+            return ResultFollow(False, "Unknown error", UnknownError= True)
 
         except Exception as e:
             self.logger.fatal("Exception occured in %s.follow_author method for server: %s, author: %s", self.filePrefix, guildId, url, exc_info=1)

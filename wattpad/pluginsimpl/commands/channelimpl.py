@@ -1,5 +1,5 @@
 from wattpad.logger.baselogger import BaseLogger
-from wattpad.models.result import Result, ResultSetChannel
+from wattpad.models.result import ResultSetChannel, ResultUnsetChannel
 from wattpad.utils.datautil import DataUtil
 
 class ChannelImpl:
@@ -19,7 +19,7 @@ class ChannelImpl:
 
             if not channels or guildId not in channels:
                 channels[guildId] = channelData
-                ResultSetChannel(True, "channel set success")
+                return ResultSetChannel(True, "channel set success")
 
             else:
                 filteredChannels = dict(filter(lambda x: x[0] == guildId, channels.items()))
@@ -27,15 +27,39 @@ class ChannelImpl:
                 for guild, channel in filteredChannels:
                     if channelId in channel:
                         #channel already exists
-                        ResultSetChannel(True, "Channel already exists", AlreadyExists= True)
+                        return ResultSetChannel(True, "Channel already exists", AlreadyExists= True)
                     else:
                         #return success
                         channels[guildId] = channelData
-                        ResultSetChannel(True, "channel set success")
+                        return ResultSetChannel(True, "channel set success")
 
-            ResultSetChannel(False, "channel set success", UnknownError= True)
+            return ResultSetChannel(False, "channel set success", UnknownError= True)
 
         except Exception as e:
             self.logger.fatal("Exception occured in %s.set_channel method invoked for server: %s, channel: %s", self.filePrefix, guildId, channelId, exc_info=1)
+            raise e
+        
+    async def unset_channel(self, guildId: str) -> ResultUnsetChannel:
+        try:
+            self.logger.info("%s.unset_channel method invoked for server: %s", self.filePrefix, guildId)
+
+            #get channels
+            channels = await DataUtil().get_channels()
+
+            filteredChannels = dict(filter(lambda x: x[0] == guildId, channels.items()))
+
+            if not filteredChannels:
+                return ResultUnsetChannel(False, "No channel set for the guild", NoChannel= True)
+
+            else:
+                for guild in filteredChannels.keys():
+                    if guild == guildId:
+                        channels[guildId] = []
+                        return ResultUnsetChannel(True, "channel unset for the guild")
+
+            return ResultUnsetChannel(True, "unknown error", UnknownError= True)
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.unset_channel method invoked for server: %s", self.filePrefix, guildId, exc_info=1)
             raise e
         

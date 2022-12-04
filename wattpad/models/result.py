@@ -45,3 +45,7 @@ class ResultPermissionsCheck(Result):
 class ResultSetChannel(Result):
     AlreadyExists: bool = False
 
+@dataclass
+class ResultUnsetChannel(Result):
+    NoChannel: bool = False
+
