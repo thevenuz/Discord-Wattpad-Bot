@@ -35,4 +35,19 @@ class MsgUtil:
         except Exception as e:
             self.logger.fatal("Exception occured in %s.build_check_stories_msg method", self.filePrefix, exc_info=1)
             raise e
+
+    async def build_check_channels_msg(self, channels: List) -> str:
+        try:
+            self.logger.info("%s.build_check_channels_msg method invoked", self.filePrefix)
+
+            response = ""
+
+            for index, channel in enumerate(channels):
+                response= f"{response}{index + 1}. #{channel}\n"
+
+            return response
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.build_check_channels_msg method", self.filePrefix, exc_info=1)
+            raise e
         
