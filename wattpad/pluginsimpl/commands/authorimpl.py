@@ -92,7 +92,10 @@ class AuthorImpl:
             #get authors
             authors = await dataUtil.get_authors()
 
-            for guild, author in authors:
+            #filter the authors of the particular guild
+            filteredAuthors = dict(filter(lambda x: x[0] == guildId, authors.items()))
+
+            for guild, author in filteredAuthors:
                 if guild == guildId:
                     #get url if entered input is author name
                     if isAuthorName:

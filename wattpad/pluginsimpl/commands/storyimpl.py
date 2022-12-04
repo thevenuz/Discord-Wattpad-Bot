@@ -1,5 +1,5 @@
 from wattpad.logger.baselogger import BaseLogger
-from wattpad.models.result import Result, ResultFollow
+from wattpad.models.result import ResultFollow, ResultUnfollow
 from wattpad.utils.wattpadutil import WattpadUtil
 from wattpad.utils.datautil import DataUtil
 from datetime import datetime
@@ -9,7 +9,7 @@ class StoryImpl:
         self.filePrefix= "wattpad.pluginsimpl.commands.storyimpl"
         self.logger= BaseLogger().loggger_init()
 
-    async def follow_story(self, guildId: str, url: str) -> Result:
+    async def follow_story(self, guildId: str, url: str) -> ResultFollow:
         try:
             self.logger.info("%s.follow_story method invoked for story: %s", self.filePrefix, url)
 
@@ -78,3 +78,56 @@ class StoryImpl:
             self.logger.fatal("Exception occured in %s.follow_story method for story: %s", self.filePrefix, url, exc_info=1)
             raise e
         
+    async def unfollow_story(self, guildId: str, url: str) -> ResultUnfollow:
+        try:
+            self.logger.info("%s.unfollow_story method invoked for server: %s, story: %s", self.filePrefix, guildId, url)
+
+            isStoryName = False
+            dataUtil = DataUtil()
+            storyUrl = url
+        
+            if "/story/" not in url:
+                isStoryName = True
+
+            #get stories
+            stories = await dataUtil.get_stories()
+
+            #filter the stories of the particular guild
+            filteredStories = dict(filter(lambda x: x[0] == guildId, stories.items()))
+
+            for guild, story in filteredStories:
+                if guild == guildId:
+                    #get url if entered input is story name
+                    if isStoryName:
+                        if any(url in (foundurl := rec["url"]) for rec in story):
+                            storyUrl = foundurl
+
+                        else:
+                            #url with the story name not found
+                            return ResultUnfollow(False, "Url with Story name not found", StoryNameNotFound= True)
+
+                    if any(storyUrl == rec["url"] for rec in story):
+                        for rec in story:
+                            if storyUrl == rec["url"]:
+                                story.remove(rec)
+
+                                #update the stories data to json file
+                                result = await dataUtil.update_stories(stories)
+
+                                if result:
+                                    return ResultUnfollow(True, "Story unfollowed")
+
+                                self.logger.error("%s.unfollow_story method: unknown error occured when updating stories", self.filePrefix)
+                                return ResultUnfollow(False, "Unknown error", UnknownError= True)
+
+                    else:
+                        #no story found with the url
+                        return ResultUnfollow(False, "Story not found", StoryNotFound= True)
+
+                return ResultUnfollow(False, "Unknown error", UnknownError= True)
+            
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.unfollow_story methodfor server: %s, story: %s", self.filePrefix, guildId, url, exc_info=1)
+            raise e
+        
+    
