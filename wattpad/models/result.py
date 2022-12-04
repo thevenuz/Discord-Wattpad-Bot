@@ -49,3 +49,9 @@ class ResultSetChannel(Result):
 class ResultUnsetChannel(Result):
     NoChannel: bool = False
 
+@dataclass
+class ResultSetCustomChannel(Result):
+    NoStoryNameFound: bool = False
+    NoStoryFound: bool = False
+    MultipleStoriesFound: bool = False
+    StoryName: str =""

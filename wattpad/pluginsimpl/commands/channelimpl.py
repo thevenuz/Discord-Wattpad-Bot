@@ -11,15 +11,21 @@ class ChannelImpl:
         try:
             self.logger.info("%s.set_channel method invoked for server: %s, channel: %s", self.filePrefix, guildId, channelId)
 
+            dataUtil = DataUtil()
+
             #get channels
-            channels = await DataUtil().get_channels()
+            channels = await dataUtil.get_channels()
 
             #prepare the channel data
             channelData = [channelId]
 
             if not channels or guildId not in channels:
                 channels[guildId] = channelData
-                return ResultSetChannel(True, "channel set success")
+                result = await dataUtil.update_channels(channels)
+                if result:
+                    return ResultSetChannel(True, "channel set success")
+                else:
+                    return ResultSetChannel(False, "channel set success", UnknownError= True)
 
             else:
                 filteredChannels = dict(filter(lambda x: x[0] == guildId, channels.items()))
@@ -31,7 +37,11 @@ class ChannelImpl:
                     else:
                         #return success
                         channels[guildId] = channelData
-                        return ResultSetChannel(True, "channel set success")
+                        result = await dataUtil.update_channels(channels)
+                        if result:
+                            return ResultSetChannel(True, "channel set success")
+                        else:
+                            return ResultSetChannel(False, "channel set success", UnknownError= True)
 
             return ResultSetChannel(False, "channel set success", UnknownError= True)
 
@@ -43,8 +53,10 @@ class ChannelImpl:
         try:
             self.logger.info("%s.unset_channel method invoked for server: %s", self.filePrefix, guildId)
 
+            dataUtil = DataUtil()
+
             #get channels
-            channels = await DataUtil().get_channels()
+            channels = await dataUtil.get_channels()
 
             filteredChannels = dict(filter(lambda x: x[0] == guildId, channels.items()))
 
@@ -55,7 +67,11 @@ class ChannelImpl:
                 for guild in filteredChannels.keys():
                     if guild == guildId:
                         channels[guildId] = []
-                        return ResultUnsetChannel(True, "channel unset for the guild")
+                        result = await dataUtil.update_channels(channels)
+                        if result:
+                            return ResultUnsetChannel(True, "channel unset for the guild")
+                        else:
+                            return ResultUnsetChannel(True, "unknown error", UnknownError= True)
 
             return ResultUnsetChannel(True, "unknown error", UnknownError= True)
         
@@ -73,7 +89,7 @@ class ChannelImpl:
             filteredChannels =  [channel for guild, channel in channels.items() if guild == guildId]
 
             return ResultCheck(True, "check channels success", Data= filteredChannels)
-            
+
         except Exception as e:
             self.logger.fatal("Exception occured in %s.check_channels method for server: %s", self.file_prefix, guildId,exc_info=1)
             raise e

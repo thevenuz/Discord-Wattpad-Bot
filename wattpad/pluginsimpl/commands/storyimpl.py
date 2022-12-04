@@ -111,6 +111,9 @@ class StoryImpl:
                             if storyUrl == rec["url"]:
                                 story.remove(rec)
 
+                                #update the original sories json data
+                                stories[guildId] = story
+
                                 #update the stories data to json file
                                 result = await dataUtil.update_stories(stories)
 

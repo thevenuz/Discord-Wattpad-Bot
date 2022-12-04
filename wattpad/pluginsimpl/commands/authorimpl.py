@@ -111,6 +111,9 @@ class AuthorImpl:
                             if profileUrl == rec["url"]:
                                 author.remove(rec)
 
+                                #update the original json result
+                                authors[guildId] = author
+
                                 #update the authors data to json file
                                 result = await dataUtil.update_authors(authors)
 
