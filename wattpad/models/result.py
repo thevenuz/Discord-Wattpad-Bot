@@ -35,3 +35,13 @@ class ResultNewUpdate(Result):
     NewUpdate: str = ""
     UpdatedDate: datetime = datetime.utcnow()
 
+@dataclass
+class ResultPermissionsCheck(Result):
+    HasReadPerms: bool= False
+    HasSendPerms: bool= False
+    HasEmbedPerms: bool= False
+
+@dataclass
+class ResultSetChannel(Result):
+    AlreadyExists: bool = False
+
