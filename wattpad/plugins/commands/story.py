@@ -2,6 +2,7 @@ import lightbulb
 import hikari
 from wattpad.logger.baselogger import BaseLogger
 from wattpad.utils.config import Config
+from wattpad.utils.msgutil import MsgUtil
 from wattpad.pluginsimpl.commands.storyimpl import StoryImpl
 
 plugin = lightbulb.Plugin("StoryPlugin")
@@ -85,6 +86,38 @@ async def unfollow_story(ctx: lightbulb.SlashContext) -> None:
 
     except Exception as e:
         logger.fatal("Exception occured in %s.unfollow_story method for story: %s, server: %s", filePrefix, ctx.options.storyurl, ctx.guild_id, exc_info=1)
+        raise e
+    
+@plugin.command
+@lightbulb.command("check-stories","check the stories that you are following in this server", auto_defer=True)
+@lightbulb.implements(lightbulb.SlashCommand)
+async def check_stories(ctx: lightbulb.SlashContext) -> None:
+    try:
+        logger.info("%s.check_stories method invoked for server: %s", filePrefix, ctx.guild_id)
+
+        guildId= str(ctx.guild_id)
+
+        config = Config()
+
+        language = await config.get_language(guildId)
+        msgs = await config.get_messages(language)
+
+        #call implementation
+        result = await StoryImpl().check_stories(guildId)
+
+        if result.IsSuccess:
+            if result.Data:
+                response = await MsgUtil().build_check_authors_msg(result.Data[0])
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['check:stories:following']}", description=f"{response}", color=0Xff500a))
+
+            else:
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['empty']}", description=f"{msgs['check:stories:empty']}", color=0xFF0000))
+
+        else:
+            await ctx.respond(embed=hikari.Embed(title=f"{msgs['unknown:error']}", description=f"{msgs['unknown:error:msg']}", color=0xFF0000))
+
+    except Exception as e:
+        logger.fatal("Exception occured in %s.check_stories method invoked for server: %s", filePrefix, ctx.guild_id, exc_info=1)
         raise e
     
 

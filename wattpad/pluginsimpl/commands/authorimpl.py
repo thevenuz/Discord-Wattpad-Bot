@@ -1,7 +1,7 @@
 from wattpad.logger.baselogger import BaseLogger
 from wattpad.utils.wattpadutil import WattpadUtil
 from wattpad.utils.datautil import DataUtil
-from wattpad.models.result import ResultFollow, ResultUnfollow, ResultCheckAuthors
+from wattpad.models.result import ResultFollow, ResultUnfollow, ResultCheck
 from datetime import datetime
 
 class AuthorImpl:
@@ -130,7 +130,7 @@ class AuthorImpl:
             self.logger.fatal("Exception occured in %s.unfollow_author method for server: %s, author: %s", self.filePrefix, guildId, url, exc_info=1)
             raise e 
         
-    async def check_authors(self, guildId: str) -> ResultCheckAuthors:
+    async def check_authors(self, guildId: str) -> ResultCheck:
         try:
             self.logger.info("%s.check_authors method invoked for server: %s", self.filePrefix, guildId)
 
@@ -138,7 +138,7 @@ class AuthorImpl:
 
             filteredAuthors = [author for guild, author in authors.items() if guild == guildId]
 
-            return ResultCheckAuthors(True, "check authors sucsess", Data= filteredAuthors)
+            return ResultCheck(True, "check authors sucsess", Data= filteredAuthors)
 
         except Exception as e:
             self.logger.fatal("Exception occured in %s.check_authors method for server: %s", self.filePrefix, guildId, exc_info=1)

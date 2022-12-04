@@ -27,7 +27,7 @@ class ResultUnfollow(Result):
     StoryNameNotFound: bool = False
 
 @dataclass
-class ResultCheckAuthors(Result):
+class ResultCheck(Result):
     Data: List = field(default_factory = list)
 
 @dataclass

@@ -20,4 +20,19 @@ class MsgUtil:
         except Exception as e:
             self.logger.fatal("Exception occured in %s.build_check_authors_msg method", self.filePrefix, exc_info=1)
             raise e
+
+    async def build_check_stories_msg(self, stories: List) -> str:
+        try:
+            self.logger.info("%s.build_check_stories_msg method invoked", self.filePrefix)
+
+            response = ""
+
+            for index, story in enumerate(stories):
+                response= f"{response}{index + 1}. {story['url']}\n"
+
+            return response
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.build_check_stories_msg method", self.filePrefix, exc_info=1)
+            raise e
         

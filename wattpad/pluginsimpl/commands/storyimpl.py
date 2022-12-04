@@ -1,5 +1,5 @@
 from wattpad.logger.baselogger import BaseLogger
-from wattpad.models.result import ResultFollow, ResultUnfollow
+from wattpad.models.result import ResultFollow, ResultUnfollow, ResultCheck
 from wattpad.utils.wattpadutil import WattpadUtil
 from wattpad.utils.datautil import DataUtil
 from datetime import datetime
@@ -130,4 +130,18 @@ class StoryImpl:
             self.logger.fatal("Exception occured in %s.unfollow_story methodfor server: %s, story: %s", self.filePrefix, guildId, url, exc_info=1)
             raise e
         
-    
+    async def check_stories(self, guildId: str) -> ResultCheck:
+        try:
+            self.logger.info("%s.check_stories method invoked for server: %s", self.filePrefix, guildId)
+
+            #get stories
+            stories = await DataUtil().get_stories()
+
+            filteredStories = [story for guild, story in stories.items() if guild == guildId]
+
+            return ResultCheck(True, "check stories success", Data= filteredStories)
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.check_stories method invoked for server: %s", self.file_prefix, guildId, exc_info=1)
+            raise e
+        
