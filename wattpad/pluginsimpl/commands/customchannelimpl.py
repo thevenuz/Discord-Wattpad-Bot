@@ -32,7 +32,7 @@ class CustomChannelImpl:
 
             else:
                 if len(storyUrls) > 1:
-                    return ResultSetCustomChannel(False, "No story found with the title", MultipleStoriesFound= True)
+                    return ResultSetCustomChannel(False, "Mutliple stories found with this name", MultipleStoriesFound= True)
 
                 else:
                     for guild, storylist in filteredStories:
@@ -58,5 +58,55 @@ class CustomChannelImpl:
         
         except Exception as e:
             self.logger.fatal("Exception occured in %s.set_custom_channel_for_story method invokedfor server: %s, channel: %s, story url: %s", self.filePrefix, guildId, channelId, url, exc_info=1)
+            raise e
+        
+    async def set_custom_channel_for_author(self, guildId: str, channelId: str, url: str) -> ResultSetCustomChannel:
+        try:
+            self.logger.info("%s.set_custom_channel_for_author method invoked for server: %s, channel: %s, author url: %s", self.filePrefix, guildId, channelId, url)
+
+            dataUtil = DataUtil()
+            authorUrls = []
+
+            #get authors
+            authors = await dataUtil.get_authors()
+
+            filteredAuthors = dict(filter(lambda x: x[0] == guildId, authors.items()))
+
+            if self.filePrefix not in url:
+                authorUrls = [author["url"] for author in filteredAuthors[guildId] if self.prefix in author["url"]]
+
+            else:
+                authorUrls.append(url)
+
+            if not authorUrls:
+                return ResultSetCustomChannel(False, "No Author found with the name", NoAuthorNameFound= True)
+
+            else:
+                if len(authorUrls) > 1:
+                    return ResultSetCustomChannel(False, "Mutliple Authors found with this name", MultipleAuthorsFound= True)
+
+                else:
+                    for guild, authorList in filteredAuthors:
+                        for author in authorList:
+                            if authorUrls[0] == author["url"]:
+                                author["CustomChannel"] = channelId
+
+                                #update the orginal authors json data
+                                authors[guildId] = author
+
+                                result = await dataUtil.update_stories(authors)
+
+                                authorName = await WattpadUtil().get_author_name(url)
+
+                                if result:
+                                    return ResultSetCustomChannel(True, "custom channel set success", AuthorName= authorName)
+
+                                else:
+                                    return ResultSetCustomChannel(False, "Error occured while updating Authors", UnknownError= True)
+
+
+                    
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.set_custom_channel_for_author method invokedfor server: %s, channel: %s, author url: %s", self.filePrefix, guildId, channelId, url, exc_info=1)
             raise e
         
