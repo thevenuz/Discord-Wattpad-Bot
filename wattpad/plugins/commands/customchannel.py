@@ -60,8 +60,11 @@ async def set_custom_channel_for_story(ctx: lightbulb.SlashContext) -> None:
             else:
                 logger.error("error occured in %s.set_custom_channel_for_story for server: %s, channel: %s, story: %s", filePrefix, guildId, channelId, storyUrl)
 
-                if result.NoStoryFound:
+                if result.NoStoryNameFound:
                     await ctx.respond(embed=hikari.Embed(title=f"{msgs['error']}", description=f"{msgs['invalid:title']}", color=0xFF0000))
+
+                elif result.NoStoryFound:
+                    await ctx.respond(embed=hikari.Embed(title=f"{msgs['error']}", description=f"{msgs['unfollow:story:not:following']}", color=0xFF0000))
 
                 elif result.MultipleStoriesFound:
                     await ctx.respond(embed=hikari.Embed(title=f"{msgs['error']}", description=f"{msgs['story:multiple:title']}", color=0xFF0000))
@@ -131,6 +134,9 @@ async def set_custom_channel_for_author(ctx: lightbulb.SlashContext) -> None:
                 if result.NoAuthorNameFound:
                     await ctx.respond(embed=hikari.Embed(title=f"{msgs['error']}", description=f"{msgs['invalid:title']}", color=0xFF0000))
 
+                elif result.NoAuthorFound:
+                    await ctx.respond(embed=hikari.Embed(title=f"{msgs['error']}", description=f"{msgs['unfollow:author:not:following']}", color=0xFF0000))
+
                 elif result.MultipleAuthorsFound:
                     await ctx.respond(embed=hikari.Embed(title=f"{msgs['error']}", description=f"{msgs['author:multiple:title']}", color=0xFF0000))
 
@@ -142,3 +148,58 @@ async def set_custom_channel_for_author(ctx: lightbulb.SlashContext) -> None:
         logger.fatal("Exception occured in %s.set_custom_channel_for_author method invoked for server: %s, channel: %s, url: %s", filePrefix, ctx.guild_id, ctx.options.channel.id, ctx.options.url,exc_info=1)
         raise e
     
+
+@plugin.command()
+@lightbulb.command("unset-custom-channel","Unset a custom channel for bot to send updates for particular stories/announcements", auto_defer=True)
+@lightbulb.implements(lightbulb.SlashCommandGroup)
+async def unset_custom_channel(ctx:lightbulb.SlashContext) -> None:
+    try:
+        logger.info("%s.unset_custom_channel method invoked for server: %s", filePrefix, ctx.guild_id)
+
+        #code should not hit this
+        await ctx.respond(embed=hikari.Embed(title=f"Check subcommands", description=f"Check sub commands", color=0xFF0000))
+    
+    except Exception as e:
+        logger.fatal("Exception occured in %s.unset_custom_channel method invoked for server: %s", filePrefix, ctx.guild_id,exc_info=1)
+        raise e
+
+
+@unset_custom_channel.child
+@lightbulb.add_checks(lightbulb.checks.has_role_permissions(hikari.Permissions.ADMINISTRATOR)|lightbulb.checks.has_role_permissions(hikari.Permissions.MODERATE_MEMBERS)|lightbulb.checks.has_role_permissions(hikari.Permissions.MANAGE_CHANNELS)|lightbulb.owner_only)
+@lightbulb.option("url","Mention the title/URL of the story",str, required=True)
+@lightbulb.option("channel","Select the channel which you want to remove as a custom channel.",
+required=True,
+type=hikari.TextableGuildChannel,
+channel_types=[hikari.ChannelType.GUILD_TEXT,hikari.ChannelType.GUILD_NEWS]
+)
+@lightbulb.command("for-story","unset a custom channel for stories in which the bot shares the updates", auto_defer=True)
+@lightbulb.implements(lightbulb.SlashSubCommand)
+async def unset_custom_channel_for_story(ctx:lightbulb.SlashContext) -> None:
+    try:
+        logger.info("%s.unset_custom_channel_for_story method invoked for server: %s, channel: %s, url: %s", filePrefix, ctx.guild_id, ctx.options.channel.id, ctx.options.url)
+
+        guildId= str(ctx.guild_id)
+        channelId= ctx.options.channel.id
+        storyUrl= ctx.options.url
+
+        config = Config()
+
+        language = await config.get_language(guildId)
+        msgs = await config.get_messages(language)
+
+        #call the implementation
+        result = await CustomChannelImpl().unset_custom_channel_for_story(guildId, channelId, storyUrl)
+
+        if result.IsSuccess:
+            response = msgs['unset:custom:channel:story:success'].format(f"{channelId}", f"{storyUrl}")
+            await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{response}", color=0Xff500a))
+
+        else:
+            logger.error("Error in %s.unset_custom_channel_for_story method for server: %s, channel: %s, story: %s, error: %s", filePrefix, guildId, channelId, storyUrl, result.ResultInfo)
+
+            if result.NoStoryNameFound:
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['error']}", description=f"{msgs['invalid:title']}", color=0xFF0000))
+
+    except Exception as e:
+        logger.fatal("Exception occured in %s.unset_custom_channel_for_story method invoked for server: %s, channel: %s, url: %s", filePrefix, ctx.guild_id, ctx.options.channel.id, ctx.options.url, exc_info=1)
+        raise e

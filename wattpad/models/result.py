@@ -59,3 +59,14 @@ class ResultSetCustomChannel(Result):
     NoAuthorFound: bool = False
     MultipleAuthorsFound: bool = False
     AuthorName: str = ""
+
+@dataclass
+class ResultUnsetCustomChannel(Result):
+    NoStoryNameFound: bool = False
+    NoStoryFound: bool = False
+    MultipleStoriesFound: bool = False
+    StoryName: str =""
+    NoAuthorNameFound: bool = False
+    NoAuthorFound: bool = False
+    MultipleAuthorsFound: bool = False
+    AuthorName: str = ""
