@@ -1,0 +1,185 @@
+{
+    "success" : "Success!",
+    "error" : "Error!",
+    "invalid:url" : "Error. Invalid URL.",
+    "unknown:error" : "Unknown error.",
+    "empty" : "So Empty!",
+    "perms:error" : "Permissions error!",
+    "channel:not:set" : "No channel set!",
+
+    "channel:no:read:perms" : "The bot doesn't have the VIEWCHANNEL permissions for the selected channel. Please give the bot VIEWCHANNEL permissions for the channel and try the command again.",
+    "channel:no:sendandembed:perms" : "The bot doesn't have the SENDMESSAGES and EMBEDLINKS permissions for the selected channel. Please give the bot SENDMESSAGES and EMBEDLINKS permissions for the channel and try the command again.",
+    "channel:no:send:perms" : "The bot doesn't have the SENDMESSAGES permissions for the selected channel. Please give the bot SENDMESSAGES permissions for the channel and try the command again.",
+    "channel:no:embed:perms" : "The bot doesn't have the EMBEDLINKS permissions for the selected channel. Please give the bot EMBEDLINKS permissions for the channel and try the command again.",
+
+    "follow:story:success" : "You have succesfully followed this story. The bot will post new chapter updates for this story.",
+    "invalid:story:url" : "There is something wrong with the story URL you entered. Please check if this is the correct URL and try again.",
+    "already:following:story" : "You're already following this story in this server, no need to follow the same story twice. Use `/check-stories` command to check the stories you're already following.",
+    "unknown:error:msg" : "Some unknown error has occured while running this command. Please try using the command again, if the issue still persists contact the dev.",
+
+    "unfollow:story:success" : "You have succesfully unfollowed this story. The bot will not post new chapter updates for this story from now on.",
+    "invalid:title" : "There is something wrong with the title you've entered. Please try using the command again with full url.",
+    "unfollow:story:not:following" : "You are not following this story in this server. Please use `/check-stories` command to see the stories you're following in this server.",
+    "story:multiple:title" : "You are following multiple stories that has this title. Please try the command again with full URL.",
+    "author:multiple:title" : "You are following multiple authors that has this title. Please try the command again with full URL.",
+
+    "check:stories:following" : "The stories you're following in this server:",
+    "check:stories:empty" : "You're not following any stories in this server currently. Use `/follow-story` command to follow a new story.",
+
+    "follow:author:success" : "You have succesfully followed this author. The bot will post the new announcement updates from this author.",
+    "invalid:author:url" : "There is something wrong with the author profile URL you entered. Please check if this is the correct URL and try again.",
+    "already:following:author" : "You're already following this author in this server, no need to follow the same author twice. Use `/check-authors` command to check the authors you're already following.",
+
+    "unfollow:author:success" : "You have succesfully unfollowed this author. The bot will not post new announcement updates for this author from now on.",
+    "unfollow:author:not:following" : "You are not following this author in this server. Please use `/check-authors` command to see the authors you're following in this server",
+
+    "check:authors:following" : "The authors you're following in this server:",
+    "check:authors:empty" : "You're not following any authors in this server currently. Use `/follow-author` command to follow a new author.",
+
+    "set:channel:success" : "Your channel has been succesfully set. All the updates from the stories and authors will be shared in the channel <#{0}>",
+    "channel:unset:success" : "Your channel has been succesfully unset. The bot will not send any updates in this channel from now on.",
+    "channel:not:set:msg" : "No channel has been setup for receiving updates in this channel. Use `/set-channel` to configure a channel to receive updates.",
+
+    "check:channels:title" : "The channels that are setup to receive updates from the bot:",
+    "check:channels:empty" : "You haven't set up any channels in this server to receive updates from the bot. Use `/set-channel` to set one.",
+
+    "custom:channel:success" : "Custom channel is set succesfully",
+    "custom:channel:story:success" : "All the updates from story {0} will be shared in the channel <#{1}> from now on.",
+    "custom:channel:author:success" : "All the announcements from author {0} will be shared in the channel <#{1}> from now on.",
+
+    "unset:custom:channel:story:success" : "Channel <#{0}> is removed as custom channel for story {1}.",
+    "custom:channel:not:set:story" : "No custom channel has been setup for this story. Use the command `/check-custom-channels` to see the custom channels that are already setup.",
+    "unset:custom:channel:author:success" : "Channel <#{0}> is removed as custom channel for announcements from author {1}.",
+    "custom:channel:not:set:author" : "No custom channel has been setup for this author's announcements. Use the command `/check-custom-channels` to see the custom channels that are already setup.",
+
+    "custom:channels" : "Your Custom Channels",
+    "story:custom:channels" : "Story Custom Channels:",
+    "author:custom:channels" : "Author Custom Channels:",
+    "custom:channels:not:set" : "No custom channels have been setup in this server yet. Use `/set-custom-channel` command to setup a custom channel.",
+    "custom:channels:not:set:story" : "No custom channels for stories have been setup in this server yet. Use `/set-custom-channel` command to setup a custom channel.",
+    "custom:channels:not:set:announcements" : "No custom channels for announcements have been setup in this server yet. Use `/set-custom-channel` command to setup a custom channel.",
+
+    "custom:msg:set:story:success" : "Your custom message for this story has been succesfulyy set. The custom message **{0}** will be used for all the updates from story {1} from now on.",
+    "custom:msg:set:author:success" : "Your custom message for this Author's announcements has been succesfulyy set. The custom message **{0}** will be used for all the updates from author {1} from now on.",
+
+    "custom:msg:set:story:category:success" : "Your custom message for the story category has been succesfully set. This message will be used while sharing all new chapter updates for stories(only for the stories for which a specific custom msg has not been set).",
+    "custom:msg:set:author:category:success" : "Your custom message for the announcement category has been succesfully set. This message will be used while sharing all the announcements(only for the announcements for which a specific custom msg has not been set).",
+
+    "custom:msg:unset:story:success" : "Your custom message for the story {0} has been deleted. The bot will use the default message while sharing updates for this story from now on.",
+    "custom:msg:unset:author:success" : "Your custom message for the announcement from author {0} has been deleted. The bot will use the default message while sharing updates for this announcement from now on.",
+
+    "custom:msg:unset:story:category:success" : "Your custom message for the story category has been succesfully unset. The bot will use the default message or story specific custom messages while sharing updates from now on.",
+    "custom:msg:unset:author:category:success" : "Your custom message for the announcements category has been succesfully unset. The bot will use the default message or author specific custom messages while sharing updates from now on.",
+
+    "custom:msgs" : "Your Custom Messages",
+    "story:custom:msgs" : "Story Custom Messages:",
+    "author:custom:msgs" : "Author Custom Messages:",
+    "custom:msgs:not:set" : "No custom Messages have been setup in this server yet. Use `/set-custom-message` command to set a new custom message.",
+
+    "new:chapter:msg" : "**New chapter from {0}**",
+    "new:announcement:msg" : "**New announcement from {0}**",
+
+    "help:about:title" : "About the Bot",
+    "help:about" : "The bot can automatically share the chapter links of the stories that you're following as soon as a new chapter is published.\nThe bot can share the announcements when an author you're following makes a new announcement.\n",
+
+    "help:setup:title" : "Steps for setting up the bot",
+    "help:setup" : "The first step in the setup is to setup a channel where bot can share the updates. To set this channel, use `/set-channel` command.\nAfter setting a channel you can follow the stories and authors you like by using `/follow-story` and `/follow-author` commands and the bot will share the updates automatically whenever there is an update from the story or author.",
+
+    "help:channel:title" : "CHANNEL COMMANDS",
+    "set:channel" : "Use this command to set a channel in which the bot can share all the story and announcement updates by default.\n",
+    "set:channel:ex" : "> Command: `/set-channel #channel`\n",
+
+    "unset:channel" : "Use this command to unset the default channel. The bot can't share any updates if the channel is unset.\n",
+    "unset:channel:ex" : "> Command: `/unset-channel #channel`\n",
+
+    "check:channels" : "Use this command to check in which channel the bot's currently sharing the updates.\n",
+    "check:channels:ex" : "> Command: `/check-channels`\n",
+
+    "help:story:title" : "STORY COMMANDS",
+    "follow:story" : "Use this command to follow a story. Use the proper URL of the story when following a story. After following, the bot will share new chapter updates from the story you followed.\n",
+    "follow:story:ex" : "> Command: `/follow-story <url of the story>`\n**Example: /follow-story https://www.wattpad.com/story/266544533-the-true-elites**\n",
+
+    "unfollow:story" : "Use this command to unfollow a story you're already following. After unfollowing, you won't receive new chapter updates from the story.\n",
+    "unfollow:story:ex" : "> Command: `/unfollow-story <url of the story>`\n**Example: /unfollow-story https://www.wattpad.com/story/266544533-the-true-elites**\n",
+
+    "check:stories" : "Use this command to check all the stories you're following in your server.\n",
+    "check:stories:ex" : "> Command: `/check-stories`\n",
+
+    "help:author:title" : "AUTHOR COMMANDS",
+    "follow:author" : "Use this command to follow an author. Use the proper URL of the author's profile when following an author. After following, the bot will share new announcements from the author you followed.\n",
+    "follow:author:ex" : "> Command: `/follow-author <url of the story>`\n**Example: /follow-author https://www.wattpad.com/user/testuserwp**\n",
+
+    "unfollow:author" : "Use this command to unfollow an author you're already following. After unfollowing, you won't receive new announcement updates from the author.\n",
+    "unfollow:author:ex" : "> Command: `/unfollow-author <url of the author>`\n**Example: /unfollow-author https://www.wattpad.com/user/testuserwp**\n",
+
+    "check:authors" : "Use this command to check all the authors you're following in your server.\n",
+    "check:authors:ex" : "> Command: `/check-authors`\n",
+
+    "help:custom:channel:title" : "CUSTOM CHANNEL COMMANDS",
+    "set:custom:channel:story" : "Use this command to set a custom channel for a particular story. When you set a custom channel for a story, the bot will share updates for this story in the custom channel instead of the default channel.\n",
+    "set:custom:channel:story:ex" : "> Command: `/set-custom-channel for-story <#channel> <title/URL of the story>`\n",
+    
+    "set:custom:channel:author" : "Use this command to set a custom channel for a particular author's announcements. When you set a custom channel for an author, the bot will share updates from this author in the custom channel instead of the default channel.\n",
+    "set:custom:channel:author:ex" : "> Command: `/set-custom-channel for-author <#channel> <title/URL of the author>`\n",
+
+    "unset:custom:channel:story" : "Use this command to unset a custom channel for a particular story. After unsetting the custom channel, the bot will share updates for this story in the default channel if it's set.\n",
+    "unset:custom:channel:story:ex" : "> Command: `/unset-custom-channel for-story <#channel> <title/URL of the story>`\n",
+    
+    "unset:custom:channel:author" : "Use this command to unset a custom channel for a particular author. After unsetting the custom channel, the bot will share updates from this author in the default channel if it's set.\n",
+    "unset:custom:channel:author:ex" : "> Command: `/unset-custom-channel for-author <#channel> <title/URL of the author>`\n",
+
+    "check:custom:channels" : "Use this command to check the custom channels that have been already setup in your server. Use the category `story` or `announcement` to see the custom channels related to only that category.\n",
+    "check:custom:channels:ex" : "> command: `/check-custom-channels <category: story/announcement>`\n",
+
+    "help:custom:msg:title" : "CUSTOM MESSAGE COMMANDS",
+    "set:custom:msg:story" : "Use this command to set a custom message for a particular story. When you set a custom message for a story, the bot will use this message as title when sharing new chapter updates from this story.\n",
+    "set:custom:msg:story:ex" : "> Command: `/set-custom-message for-story <message> <title/URL of the story>`\n",
+    
+    "set:custom:msg:author" : "Use this command to set a custom message for a particular author. When you set a custom message for an author, the bot will use this message as title when sharing announcements from this author.\n",
+    "set:custom:msg:author:ex" : "> Command: `/set-custom-message for-author <message> <title/URL of the author>`\n",
+
+    "unset:custom:msg:story" : "Use this command to unset the custom message for a particular story. After unsetting the custom message, the bot will use the default message while sharing new chapter updates for this story.\n",
+    "unset:custom:msg:story:ex" : "> Command: `/unset-custom-message for-story  <title/URL of the story>`\n",
+    
+    "unset:custom:msg:author" : "Use this command to unset a custom message for a particular author. After unsetting the custom channel, the bot will use the default message while sharing new announcements from this author.\n",
+    "unset:custom:msg:author:ex" : "> Command: `/unset-custom-message for-author  <title/URL of the author>`\n",
+
+    "check:custom:msgs" : "Use this command to check the custom messages that have been already setup in your server. Use the category `story` or `announcement` to see the custom messages related to only that category.\n",
+    "check:custom:msgs:ex" : "> command: `/check-custom-messages <category: story/announcement>`\n",
+
+    "help:title" : "HELP",
+    "help:desc" : "Use the command `/help <category>` to get help about specific category with more details. You can use setup/channel/story/author/about/custom message/custom channel as category.\n",
+    "help:note:title" : "NOTE:",
+    "help:note" : "All set, unset, follow and unfollow commands can be used only by members with ADMINISTRATOR/MODERATE MEMBERS/MANAGE CHANNELS permissions. check commands can be used by anyone.\n",
+
+    "help:follow:story" : "Follow a story to get updates from the story.",
+    "help:unfollow:story" : "Unfollow a story you're already following.",
+    "help:check:stories" : "Check the stories you're following",
+
+    "help:follow:author" : "Follow an author to get announcement updates from the author.",
+    "help:unfollow:author" : "Unfollow an author you're already following.",
+    "help:check:authors" : "Check the authors you're following",
+
+    "help:set:channel" : "Set a channel in which bot will share updates.",
+    "help:unset:channel" : "Unset an already set channel for updates.",
+    "help:check:channels" : "Check the channel in which bot is sharing updates.", 
+
+    "help:set:custom:channel:story" : "Set a custom channel for sharing updates related to particular story.",
+    "help:set:custom:channel:author" : "Set a custom channel for sharing updates related to particular author.",
+    "help:unset:custom:channel:story" : "Unset a custom channel for story.",
+    "help:unset:custom:channel:author" : "Unset a custom channel for author.",
+    "help:check:custom:channels" : "Check custom channels that are already set.",
+
+    "help:set:custom:msg:story" : "Set a custom message for a particular story.",
+    "help:set:custom:msg:author" : "Set a custom message for a particular author announcements.",
+    "help:unset:custom:msg:story" : "Unset a custom message for story.",
+    "help:unset:custom:msg:author" : "Unset a custom message for author.",
+    "help:check:custom:msgs" : "Check custom messages that are already set.",
+
+    "error:missing:perms" : "You do not have required permission to run this command. You need to have either ADMINISTRATOR or MODERATEMEMBERS or MANAGECHANNELS permission to use this command.",
+    "error:check:failure" : "You are not authorized to use this command! You need to have either ADMINISTRATOR or MODERATEMEMBERS or MANAGECHANNELS permission to use this command.",
+    "error:bot:missing:perms" : "Bot doesn't have required permissions.",
+    "error:invalid:command" : "Uh-oh. Something's wrong, You used an invalid command.",
+    "error:unknown" : "Uh-oh! Some unknown error occured. The developer has messed up somewhere!"
+
+}

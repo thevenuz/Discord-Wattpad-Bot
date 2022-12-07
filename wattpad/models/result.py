@@ -70,3 +70,9 @@ class ResultUnsetCustomChannel(Result):
     NoAuthorFound: bool = False
     MultipleAuthorsFound: bool = False
     AuthorName: str = ""
+
+@dataclass
+class ResultCheckCustomChannel(Result):
+    StoryMsg: str = ""
+    AuthorMsg: str = ""
+    IsEmpty: bool = False

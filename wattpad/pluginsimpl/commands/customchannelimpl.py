@@ -1,7 +1,8 @@
 from wattpad.logger.baselogger import BaseLogger
-from wattpad.models.result import ResultSetCustomChannel, ResultUnsetCustomChannel
+from wattpad.models.result import ResultSetCustomChannel, ResultUnsetCustomChannel, ResultCheckCustomChannel
 from wattpad.utils.datautil import DataUtil
 from wattpad.utils.wattpadutil import WattpadUtil
+from wattpad.utils.msgutil import MsgUtil
 
 class CustomChannelImpl:
     def __init__(self) -> None:
@@ -222,4 +223,71 @@ class CustomChannelImpl:
             self.logger.fatal("Exception occured in %s.unset_custom_channel_for_author method invoked for server: %s, channel: %s, author: %s", self.filePrefix, guildId, channelId, url, exc_info=1)
             raise e
         
+    async def check_custom_channels(self, guildId: str, category: str = "") -> ResultCheckCustomChannel:
+        try:
+            self.logger.info("%s.check_custom_channels method invoked for server: %s, category: %s", self.filePrefix, guildId, category)
+
+            isauthor=False
+            isstory=False
+            isStoryEmpty= False
+            isAuthorEmpty= False
+
+            dataUtil = DataUtil()
+            msgUtil = MsgUtil()
+
+            if category:
+                if category.lower() == "story":
+                    isstory = True
+                elif category.lower() == "announcements":
+                    isauthor = True
+                else:
+                    isauthor= True
+                    isstory= True
+
+            else:
+                isauthor= True
+                isstory= True
+
+            if isstory:
+                #get stories
+                stories = await dataUtil.get_stories()
+
+                guildStories = dict(filter(lambda x: x[0] == guildId, stories.items()))
+
+                customChannelStories = [story for story in guildStories[guildId] if story["CustomChannel"]]
+
+                storyMsgResult = await msgUtil.build_check_custom_channel_msg(customChannelStories, isStory= True)
+
+                if not storyMsgResult:
+                    isStoryEmpty = True
+
+            if isauthor:
+                #get authors
+                authors = await dataUtil.get_authors()
+
+                guildAuthors = dict(filter(lambda x: x[0] == guildId, authors.items()))
+
+                customChannelStories = [author for author in guildAuthors[guildId] if author["CustomChannel"]]
+
+                authorMsgResult = await msgUtil.build_check_custom_channel_msg(customChannelStories, isAuthor= True)
+
+                if not authorMsgResult:
+                    isAuthorEmpty = True
+
+            if isStoryEmpty and isAuthorEmpty:
+                return ResultCheckCustomChannel(False, "No custom channels set", IsEmpty= True)
+
+            if isauthor and isAuthorEmpty:
+                return ResultCheckCustomChannel(False, "No custom channels set for Author", IsEmpty= True)
+
+            if isstory and isStoryEmpty:
+                return ResultCheckCustomChannel(False, "No custom channels set for stories", IsEmpty= True)
+
+
+            return ResultCheckCustomChannel(True, "check custom channel success", AuthorMsg= authorMsgResult, StoryMsg= storyMsgResult)
+
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.check_custom_channels method invoked for server: %s, category: %s", self.filePrefix, guildId, category,exc_info=1)
+            raise e
         
+    

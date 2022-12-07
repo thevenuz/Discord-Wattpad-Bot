@@ -51,3 +51,26 @@ class MsgUtil:
             self.logger.fatal("Exception occured in %s.build_check_channels_msg method", self.filePrefix, exc_info=1)
             raise e
         
+    async def build_check_custom_channel_msg(self, data: List, isAuthor: bool = False, isStory: bool = False) -> str:
+        try:
+            self.logger.info("%s.build_check_custom_channel_msg method invoked", self.filePrefix)
+
+            response = ""
+            newLine = "\n"
+
+            if isAuthor:
+                response = "ANNOUNCEMENTS:\n"
+            
+            else:
+                response = "STORIES:\n"
+
+            for index, record in enumerate(data):
+                response = f"{response}{index+1}. <#{record['CustomChannel']}> : {record['url']}{newLine}"
+
+
+            return response
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.build_check_custom_channel_msg method", self.filePrefix, exc_info=1)
+            raise e
+        

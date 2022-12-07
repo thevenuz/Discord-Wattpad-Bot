@@ -262,3 +262,61 @@ async def unset_custom_channel_for_author(ctx:lightbulb.SlashContext) -> None:
         logger.fatal("Exception occured in %s.unset_custom_channel_for_author method invoked for server: %s, channel: %s, url: %s", filePrefix, ctx.guild_id, ctx.options.channel.id, ctx.options.url,exc_info=1)
         raise e
     
+@plugin.command
+@lightbulb.option("category","Select whether you want to check story/author custom channels",str, choices=("story", "announcements"), required=False)
+@lightbulb.command("check-custom-channels", "Check the custom channels for stories and author updates", auto_defer=True)
+@lightbulb.implements(lightbulb.SlashCommand)
+async def check_custom_channels(ctx: lightbulb.SlashContext) -> None:
+    try:
+        logger.info("%s.check_custom_channels method invoked for server: %s, category: %s", filePrefix, ctx.guild_id, ctx.options.category)
+
+        guildId= str(ctx.guild_id)
+        category= str(ctx.options.category)
+        msg_description=""
+        story_return_msg=""
+        author_return_msg=""
+
+        config = Config()
+
+        language = await config.get_language(guildId)
+        msgs = await config.get_messages(language)
+
+        #call the implementation
+        result = await CustomChannelImpl().check_custom_channels(guildId, category)
+
+        if result.IsSuccess:
+            if category:
+                if category.lower() == "story":
+                    await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:channels']}", description=f"{msgs['story:custom:channels']}\n{result.StoryMsg}", color=0Xff500a))
+
+                else:
+                    await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:channels']}", description=f"{msgs['author:custom:channels']}\n{result.AuthorMsg}", color=0Xff500a))
+            
+            else:
+                if result.StoryMsg:
+                    msg_description= msgs['story:custom:channels'] + "\n" +result.StoryMsg + "\n\n"
+                
+                if result.AuthorMsg:
+                    msg_description= f"{msg_description}{msgs['author:custom:channels']}" + "\n" + result.AuthorMsg
+                
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:channels']}", description=f"{msg_description}", color=0Xff500a))
+
+        else:
+            if result.IsEmpty:
+                if category:
+                    if category.lower() == "story":
+                        await ctx.respond(embed=hikari.Embed(title=f"{msgs['error']}", description=f"{msgs['custom:channels:not:set:story']}", color=0xFF0000))
+
+                    else:
+                        await ctx.respond(embed=hikari.Embed(title=f"{msgs['error']}", description=f"{msgs['custom:channels:not:set:announcements']}", color=0xFF0000))
+
+                else:
+                    await ctx.respond(embed=hikari.Embed(title=f"{msgs['error']}", description=f"{msgs['custom:channels:not:set']}", color=0xFF0000))
+
+            else:
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['unknown:error']}", description=f"{msgs['unknown:error:msg']}", color=0xFF0000))
+    
+    except Exception as e:
+        logger.fatal("Exception occured in %s.check_custom_channels method invoked for server: %s, category: %s", filePrefix, ctx.guild_id, ctx.options.category, exc_info=1)
+        raise e
+    
