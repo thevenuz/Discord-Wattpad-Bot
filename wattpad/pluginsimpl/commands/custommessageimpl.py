@@ -1,7 +1,8 @@
 from wattpad.logger.baselogger import BaseLogger
-from wattpad.models.result import Result, ResultSetCustomChannel, ResultUnsetCustomChannel
+from wattpad.models.result import Result, ResultSetCustomChannel, ResultUnsetCustomChannel, ResultCheckCustomChannel
 from wattpad.utils.datautil import DataUtil
 from wattpad.utils.wattpadutil import WattpadUtil
+from wattpad.utils.msgutil import MsgUtil
 
 class CustomMessageImpl:
     def __init__(self) -> None:
@@ -303,5 +304,72 @@ class CustomMessageImpl:
         
         except Exception as e:
             self.logger.fatal("Exception occured in %s.author method invoked for server: %s, author: %s", self.filePrefix, guildId, url, exc_info=1)
+            raise e
+        
+    async def check_custom_messages(self, guildId:str, category:str) -> ResultCheckCustomChannel:
+        try:
+            self.logger.info("%s.check_custom_messages method invoked for server: %s, category: %s", self.filePrefix, guildId, category)
+
+            isauthor=False
+            isstory=False
+            isStoryEmpty= False
+            isAuthorEmpty= False
+
+            dataUtil = DataUtil()
+            msgUtil = MsgUtil()
+
+            if category:
+                if category.lower() == "story":
+                    isstory = True
+                elif category.lower() == "announcements":
+                    isauthor = True
+                else:
+                    isauthor= True
+                    isstory= True
+
+            else:
+                isauthor= True
+                isstory= True
+
+            if isstory:
+                #get stories
+                stories = await dataUtil.get_stories()
+
+                guildStories = dict(filter(lambda x: x[0] == guildId, stories.items()))
+
+                customMsgStories = [story for story in guildStories[guildId] if story["CustomMsg"]]
+
+                storyMsgResult = await msgUtil.build_check_custom_messages_msg(customMsgStories, isStory= True)
+
+                if not storyMsgResult:
+                    isStoryEmpty = True
+
+            if isauthor:
+                #get authors
+                authors = await dataUtil.get_authors()
+
+                guildAuthors = dict(filter(lambda x: x[0] == guildId, authors.items()))
+
+                customMsgStories = [author for author in guildAuthors[guildId] if author["CustomMsg"]]
+
+                authorMsgResult = await msgUtil.build_check_custom_messages_msg(customMsgStories, isAuthor= True)
+
+                if not authorMsgResult:
+                    isAuthorEmpty = True
+
+            if isStoryEmpty and isAuthorEmpty:
+                return ResultCheckCustomChannel(False, "No custom msgs set", IsEmpty= True)
+
+            if isauthor and isAuthorEmpty:
+                return ResultCheckCustomChannel(False, "No custom msgs set for Author", IsEmpty= True)
+
+            if isstory and isStoryEmpty:
+                return ResultCheckCustomChannel(False, "No custom msgs set for stories", IsEmpty= True)
+
+
+            return ResultCheckCustomChannel(True, "check custom msgs success", AuthorMsg= authorMsgResult, StoryMsg= storyMsgResult)
+
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.check_custom_messages method invoked for server: %s, category: %s", self.filePrefix, guildId, category, exc_info=1)
             raise e
         
