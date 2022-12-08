@@ -120,3 +120,65 @@ async def set_custom_message_for_author(ctx:lightbulb.SlashContext) -> None:
         logger.fatal("Exception occured in %s.set_custom_message_for_author method invoked for server: %s, author: %s, msg: %s", filePrefix, ctx.guild_id, ctx.options.url, ctx.options.message,exc_info=1)
         raise e
     
+@plugin.command()
+@lightbulb.command("unset-custom-message","unset a custom message that's been setup before",auto_defer=True)
+@lightbulb.implements(lightbulb.SlashCommandGroup)
+async def unset_custom_message(ctx:lightbulb.SlashContext) -> None:
+    try:
+        logger.info("%s.unset_custom_message method invoked for server: %s", filePrefix, ctx.guild_id)
+
+        #code should not hit this
+        await ctx.respond(embed=hikari.Embed(title=f"Check subcommands", description=f"Check sub commands", color=0Xff500a))
+    
+    except Exception as e:
+        logger.fatal("Exception occured in %s.unset_custom_message method invoked for server: %s", filePrefix, ctx.guild_id,exc_info=1)
+        raise e
+
+@unset_custom_message.child
+@lightbulb.add_checks(lightbulb.checks.has_role_permissions(hikari.Permissions.ADMINISTRATOR)|lightbulb.checks.has_role_permissions(hikari.Permissions.MODERATE_MEMBERS)|lightbulb.checks.has_role_permissions(hikari.Permissions.MANAGE_CHANNELS)|lightbulb.owner_only)
+@lightbulb.option("url", "Mention the title/URL of the story", str)
+@lightbulb.command("for-story","set a custom messages for a particular story", auto_defer=True)
+@lightbulb.implements(lightbulb.SlashSubCommand)
+async def unset_custom_message_for_story(ctx:lightbulb.SlashContext) -> None:
+    try:
+        logger.info("%s.unset_custom_message_for_story method invoked for server: %s, story: %s", filePrefix, ctx.guild_id, ctx.options.url)
+
+        guildId= str(ctx.guild_id)
+        storyUrl= ctx.options.url
+
+        config = Config()
+
+        language = await config.get_language(guildId)
+        msgs = await config.get_messages(language)
+
+        #call the implementation
+        result = await CustomMessageImpl().unset_custom_message_for_story(guildId, storyUrl)
+
+        if result.IsSuccess:
+            if storyUrl:
+                response = msgs["custom:msg:unset:story:success"].format(f"{storyUrl}")
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{response}", color=0Xff500a))
+
+            else:
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{msgs['custom:msg:unset:story:category:success']}", color=0xFF0000))
+
+        else:
+            logger.error("Error occured in %s.unset_custom_message_for_story for server: %s, story: %s, error: %s", filePrefix, ctx.guild_id, ctx.options.url, result.ResultInfo)
+
+            if result.NoStoryNameFound:
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['error']}", description=f"{msgs['invalid:title']}", color=0xFF0000))
+
+            elif result.NoStoryFound:
+                    await ctx.respond(embed=hikari.Embed(title=f"{msgs['error']}", description=f"{msgs['unfollow:story:not:following']}", color=0xFF0000))
+            
+            elif result.MultipleStoriesFound:
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['error']}", description=f"{msgs['story:multiple:title']}", color=0xFF0000))
+
+            else:
+                await ctx.respond(embed=hikari.Embed(title=f"{msgs['unknown:error']}", description=f"{msgs['unknown:error:msg']}", color=0xFF0000))
+
+    
+    except Exception as e:
+        logger.fatal("Exception occured in %s.unset_custom_message_for_story method invoked for server: %s, story: %s", filePrefix, ctx.guild_id, ctx.options.url,exc_info=1)
+        raise e
+    
