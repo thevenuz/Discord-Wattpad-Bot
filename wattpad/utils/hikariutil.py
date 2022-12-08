@@ -40,6 +40,6 @@ class HikariUtil:
             return ResultPermissionsCheck(False, "No perissions were found")
         
         except Exception as e:
-            self.logger.fatal("Exception occured in %s.check_channel_permissions method invoked for server: %s, channel: %s", self.file_prefix, ctx.guild_id, channelId,exc_info=1)
+            self.logger.fatal("Exception occured in %s.check_channel_permissions method invoked for server: %s, channel: %s", self.filePrefix, ctx.guild_id, channelId,exc_info=1)
             raise e
         

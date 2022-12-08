@@ -4,7 +4,7 @@ from datetime import datetime
 
 class BaseLogger:
     def __init__(self) -> None:
-        self.file_prefix="wattpad.logger.baselogger"
+        self.filePrefix="wattpad.logger.baselogger"
 
     def loggger_init(self):
         try:

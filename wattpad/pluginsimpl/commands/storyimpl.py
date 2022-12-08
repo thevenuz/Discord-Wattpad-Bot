@@ -145,6 +145,6 @@ class StoryImpl:
             return ResultCheck(True, "check stories success", Data= filteredStories)
         
         except Exception as e:
-            self.logger.fatal("Exception occured in %s.check_stories method invoked for server: %s", self.file_prefix, guildId, exc_info=1)
+            self.logger.fatal("Exception occured in %s.check_stories method invoked for server: %s", self.filePrefix, guildId, exc_info=1)
             raise e
         

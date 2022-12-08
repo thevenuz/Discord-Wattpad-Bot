@@ -117,7 +117,7 @@ class WattpadUtil:
 
     async def get_story_title_from_url(self, url:str) -> str:
         try:
-            self.logger.info("%s.get_story_title_from_url method invoked for story: %s", self.file_prefix, url)
+            self.logger.info("%s.get_story_title_from_url method invoked for story: %s", self.filePrefix, url)
 
             if "utm" in url:
                 url = await self.__get_story_url_from_utm(url)
@@ -129,7 +129,7 @@ class WattpadUtil:
             return title
             
         except Exception as e:
-            self.logger.fatal("Exception occured in %s.get_story_title_from_url method invoked for story: %s", self.file_prefix, url,exc_info=1)
+            self.logger.fatal("Exception occured in %s.get_story_title_from_url method invoked for story: %s", self.filePrefix, url,exc_info=1)
             raise e
 
     async def __make_request_to_url(self, url:str) -> str:
@@ -159,7 +159,7 @@ class WattpadUtil:
     
     async def __get_story_url_from_utm(self, url:str) -> str:
         try:
-            self.logger.info("%s.__get_story_url_from_utm method invoked for story: %s", self.file_prefix, url)
+            self.logger.info("%s.__get_story_url_from_utm method invoked for story: %s", self.filePrefix, url)
 
             try:
                 async with aiohttp.ClientSession() as session:
@@ -167,7 +167,7 @@ class WattpadUtil:
                         r = await response.text()
 
             except Exception as e:
-                self.logger.error("Exception occured %s.__get_story_url_from_utm while sending request to the chapter URL: %s", self.file_prefix, url,exc_info=1)
+                self.logger.error("Exception occured %s.__get_story_url_from_utm while sending request to the chapter URL: %s", self.filePrefix, url,exc_info=1)
                 return url
 
             if response.status == 200:
@@ -182,12 +182,12 @@ class WattpadUtil:
             return url
         
         except Exception as e:
-            self.logger.fatal("Exception occured in %s.__get_story_url_from_utm method invoked for story: %s", self.file_prefix, url,exc_info=1)
+            self.logger.fatal("Exception occured in %s.__get_story_url_from_utm method invoked for story: %s", self.filePrefix, url,exc_info=1)
             raise e
         
     async def __get_story_url_from_chapter(self, url:str) -> str:
         try:
-            self.logger.info("%s.__get_story_url_from_chapter method invoked for entered story url: %s", self.file_prefix, url)
+            self.logger.info("%s.__get_story_url_from_chapter method invoked for entered story url: %s", self.filePrefix, url)
 
             domain = "https://www.wattpad.com"
             try:
@@ -196,7 +196,7 @@ class WattpadUtil:
                         r = await response.text()
 
             except:
-                self.logger.error("Exception occured in %s.__get_story_url_from_chapter while sending request to the chapter URL: %s", self.file_prefix, url,exc_info=1)
+                self.logger.error("Exception occured in %s.__get_story_url_from_chapter while sending request to the chapter URL: %s", self.filePrefix, url,exc_info=1)
                 return url
 
             if response.status == 200:
@@ -215,6 +215,6 @@ class WattpadUtil:
             return url
 
         except Exception as e:
-            self.logger.fatal("Exception occured in %s.__get_story_url_from_chapter method invoked for entered story url: %s", self.file_prefix, url,exc_info=1)
+            self.logger.fatal("Exception occured in %s.__get_story_url_from_chapter method invoked for entered story url: %s", self.filePrefix, url,exc_info=1)
             raise e
         
