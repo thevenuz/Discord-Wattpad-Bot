@@ -39,6 +39,7 @@ class EventImpl:
         
         except Exception as e:
             self.logger.fatal("Exception occured in %s.guild_join_event method invoked for server: %s", self.filePrefix, guildId,exc_info=1)
+            pass
 
     async def guild_leave_event(self, guildId: str) -> bool:
         try:
@@ -68,7 +69,7 @@ class EventImpl:
             if guildId in channels:
                 del channels[guildId]
                 channelResult = await dataUtil.update_channels(channels)
-                
+
                 if not channelResult:
                     self.logger("Error occured in %s.guild_join_event when updating channels for server: %s", self.filePrefix, guildId)
 
@@ -77,5 +78,5 @@ class EventImpl:
         
         except Exception as e:
             self.logger.fatal("Exception occured in %s.guild_join_event method invoked for server: %s", self.filePrefix, guildId, exc_info=1)
-            raise e
+            pass
         
