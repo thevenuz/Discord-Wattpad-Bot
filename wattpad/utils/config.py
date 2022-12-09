@@ -46,7 +46,7 @@ class Config:
             raise e
         
 
-    def load_settings(self) -> Dict:
+    def load_settings(self) -> Settings:
         try:
             self.logger.info("%s.load_settings method invoked", self.filePrefix)
 
