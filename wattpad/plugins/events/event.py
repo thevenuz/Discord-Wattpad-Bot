@@ -32,7 +32,31 @@ async def guild_join_event(event: hikari.GuildJoinEvent):
     except Exception as e:
         logger.fatal("Exception occured in %s.guild_join_event method invoked for server: %s", filePrefix, event.guild_id,exc_info=1)
         raise e
-        
+
+
+@plugin.listener(hikari.GuildLeaveEvent)
+async def guild_leave_event(event: hikari.GuildLeaveEvent):
+    try:
+        logger.info("%s.guild_leave_event method invoked for server: %s", filePrefix, event.guild_id)
+
+        guildId= str(event.guild_id)
+        settings= Config().load_settings()
+
+        #call the impl
+        result= await EventImpl.guild_leave_event(guildId)
+
+        if result:
+            if settings.PublicLogChannel:
+                publicLeftMsg = f"Bot left a new server: {event.old_guild.name}"
+                await plugin.bot.rest.create_message(settings.PublicLogChannel, publicLeftMsg)
+
+            if settings.LogChannel:
+                privateLeftmsg = f"Bot left a new server: {event.old_guild.name}, Id: {event.guild_id}"
+                await plugin.bot.rest.create_message(settings.LogChannel, privateLeftmsg)
+    
+    except Exception as e:
+        logger.fatal("Exception occured in %s.guild_leave_event method for server: %s", filePrefix, event.guild_id, exc_info=1)
+        raise e        
 
 def load(bot):
     bot.add_plugin(plugin)
