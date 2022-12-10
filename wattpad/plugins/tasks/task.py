@@ -15,7 +15,7 @@ async def get_new_chapters() -> None:
     try:
         logger.info("%s.get_new_chapters method invoked", filePrefix)
 
-        #call the exec
+        #call the impl
         result= await TaskImpl().get_new_chapters(plugin)
 
         logger.info("get_new_chapters task ended")
@@ -24,3 +24,21 @@ async def get_new_chapters() -> None:
         logger.fatal("Exception occured in %s.get_new_chapters method", filePrefix, exc_info=1)
         raise e
     
+@tasks.task(m=10, auto_start=True, max_consecutive_failures=100)
+async def get_new_announcements() -> None:
+    try:
+        logger.info("%s.get_new_announcements method invoked", filePrefix)
+
+        #call the impl
+        result= await TaskImpl().get_new_announcements(plugin)
+
+        logger.info("get_new_announcements task ended")
+    
+    except Exception as e:
+        logger.fatal("Exception occured in %s.get_new_announcements method", filePrefix, exc_info=1)
+
+def load(bot):
+    bot.add_plugin(plugin)
+
+def unload(bot):
+    bot.remove_plugin(plugin)
