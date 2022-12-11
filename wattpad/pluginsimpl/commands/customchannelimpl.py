@@ -40,7 +40,7 @@ class CustomChannelImpl:
                     return ResultSetCustomChannel(False, "Mutliple stories found with this name", MultipleStoriesFound= True)
 
                 else:
-                    for guild, storylist in filteredStories:
+                    for guild, storylist in filteredStories.items():
                         for story in storylist:
                             if storyUrls[0] == story["url"]:
                                 story["CustomChannel"] = channelId
@@ -95,7 +95,7 @@ class CustomChannelImpl:
                     return ResultSetCustomChannel(False, "Mutliple Authors found with this name", MultipleAuthorsFound= True)
 
                 else:
-                    for guild, authorList in filteredAuthors:
+                    for guild, authorList in filteredAuthors.items():
                         for author in authorList:
                             if authorUrls[0] == author["url"]:
                                 author["CustomChannel"] = channelId
@@ -132,7 +132,7 @@ class CustomChannelImpl:
             filteredStories = dict(filter(lambda x: x[0] == guildId, stories.items()))
 
             if self.filePrefix not in url:
-                storyUrls = [story["url"] for story in filteredStories[guildId] if self.prefix in story["url"]]
+                storyUrls = [story["url"] for story in filteredStories[guildId] if url in story["url"]]
 
             else:
                 storyUrls.append(url)
@@ -148,7 +148,7 @@ class CustomChannelImpl:
                     return ResultUnsetCustomChannel(False, "Mutliple stories found with this name", MultipleStoriesFound= True)
 
                 else:
-                    for guild, storylist in filteredStories:
+                    for guild, storylist in filteredStories.items():
                         for story in storylist:
                             if storyUrls[0] == story["url"]:
                                 story["CustomChannel"] = ""
@@ -184,7 +184,7 @@ class CustomChannelImpl:
             filteredAuthors = dict(filter(lambda x: x[0] == guildId, authors.items()))
 
             if self.filePrefix not in url:
-                authorUrls = [author["url"] for author in filteredAuthors[guildId] if self.prefix in author["url"]]
+                authorUrls = [author["url"] for author in filteredAuthors[guildId] if url in author["url"]]
 
             else:
                 authorUrls.append(url)
@@ -201,7 +201,7 @@ class CustomChannelImpl:
                     return ResultSetCustomChannel(False, "Mutliple Authors found with this name", MultipleAuthorsFound= True)
 
                 else:
-                    for guild, authorList in filteredAuthors:
+                    for guild, authorList in filteredAuthors.items():
                         for author in authorList:
                             if authorUrls[0] == author["url"]:
                                 author["CustomChannel"] = ""

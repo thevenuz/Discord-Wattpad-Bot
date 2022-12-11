@@ -55,7 +55,7 @@ class AuthorImpl:
                 ]
 
             else:
-                for guild, author in authors:
+                for guild, author in authors.items():
                     if guild == guildId:
                         if any(authorUrl == data["url"] for data in author):
 
@@ -95,7 +95,14 @@ class AuthorImpl:
             #filter the authors of the particular guild
             filteredAuthors = dict(filter(lambda x: x[0] == guildId, authors.items()))
 
-            for guild, author in filteredAuthors:
+            #get authors in the list with that name
+            if isAuthorName:
+                authorsWithName = [author["url"] for author in filteredAuthors[guildId] if url in author["url"]]
+
+                if len(authorsWithName) > 1:
+                    return ResultUnfollow(False, "Multiple authors found", MultipleAuthorsFound= True)
+
+            for guild, author in filteredAuthors.items():
                 if guild == guildId:
                     #get url if entered input is author name
                     if isAuthorName:

@@ -19,7 +19,7 @@ class Config:
 
             jsonUtil = JsonUtil()
 
-            filePath = jsonUtil.get_file_path("lang", f'{language}.json')
+            filePath = await jsonUtil.get_file_path("lang", f'{language}.json')
 
             async with aiofiles.open(filePath, mode="r") as f:
                 result = json.loads(await f.read())

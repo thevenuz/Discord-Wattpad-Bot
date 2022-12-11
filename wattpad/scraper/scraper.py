@@ -28,7 +28,7 @@ class Scraper:
                 current_date_time= datetime.utcnow()
 
                 if not lastchecked:
-                    lastchecked=current_date_time - timedelta(minutes=10)
+                    lastchecked = current_date_time - timedelta(minutes=10)
 
                 soup=BeautifulSoup(r,'html.parser')
 

@@ -285,3 +285,9 @@ async def check_custom_messages(ctx: lightbulb.SlashContext) -> None:
         logger.fatal("Exception occured in %s.check_custom_messages method invoked for server: %s, category: %s", filePrefix, ctx.guild_id, ctx.options.category, exc_info=1)
         raise e
     
+def load(bot):
+    bot.add_plugin(plugin)
+
+
+def unload(bot):
+    bot.remove_plugin(plugin)

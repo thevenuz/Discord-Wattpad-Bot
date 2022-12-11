@@ -21,6 +21,8 @@ class TaskImpl:
             wattpadUtil = WattpadUtil()
             channel = ""
             msg = ""
+            customChannel = ""
+            customMsg = ""
 
             #load stories
             stories = await dataUtil.get_stories()
@@ -98,6 +100,8 @@ class TaskImpl:
             wattpadUtil = WattpadUtil()
             channel = ""
             msg = ""
+            customChannel = ""
+            customMsg = ""
 
             #load authors
             authors = await dataUtil.get_authors()

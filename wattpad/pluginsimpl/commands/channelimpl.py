@@ -30,7 +30,7 @@ class ChannelImpl:
             else:
                 filteredChannels = dict(filter(lambda x: x[0] == guildId, channels.items()))
 
-                for guild, channel in filteredChannels:
+                for guild, channel in filteredChannels.items():
                     if channelId in channel:
                         #channel already exists
                         return ResultSetChannel(True, "Channel already exists", AlreadyExists= True)

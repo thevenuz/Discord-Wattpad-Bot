@@ -80,6 +80,9 @@ async def unfollow_author(ctx: lightbulb.SlashContext) -> None:
         elif result.AuthorNameNotFound:
             await ctx.respond(embed=hikari.Embed(title=f"{msgs['error']}", description=f"{msgs['invalid:title']}", color=0xFF0000))
 
+        elif result.MultipleAuthorsFound:
+            await ctx.respond(embed=hikari.Embed(title=f"{msgs['error']}", description=f"{msgs['author:multiple:title']}", color=0xFF0000))
+
         else:
             await ctx.respond(embed=hikari.Embed(title=f"{msgs['unknown:error']}", description=f"{msgs['unknown:error:msg']}", color=0xFF0000))
 
@@ -107,7 +110,7 @@ async def check_authors(ctx: lightbulb.SlashContext) -> None:
         result = await AuthorImpl().check_authors(guildId)
 
         if result.IsSuccess:
-            if result.Data:
+            if result.Data and result.Data[0]:
                 response = await MsgUtil().build_check_authors_msg(result.Data[0])
                 await ctx.respond(embed=hikari.Embed(title=f"{msgs['check:authors:following']}", description=f"{response}", color=0Xff500a))
 

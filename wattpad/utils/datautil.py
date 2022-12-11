@@ -13,7 +13,7 @@ class DataUtil:
         try:
             self.logger.info("%s.get_authors method invoked", self.filePrefix)
 
-            authors = await JsonUtil().read_from_json("config", "authors.json")
+            authors = await JsonUtil().read_from_json("data", "authors.json")
 
             return authors
         
@@ -25,7 +25,7 @@ class DataUtil:
         try:
             self.logger.info("%s.get_stories method invoked", self.filePrefix)
 
-            stories = await JsonUtil().read_from_json("config", "stories.json")
+            stories = await JsonUtil().read_from_json("data", "stories.json")
 
             return stories
         
@@ -37,7 +37,7 @@ class DataUtil:
         try:
             self.logger.info("%s.get_channels method invoked", self.filePrefix)
 
-            channels = await JsonUtil().read_from_json("config", "channels.json")
+            channels = await JsonUtil().read_from_json("data", "channels.json")
 
             return channels
         
@@ -49,7 +49,7 @@ class DataUtil:
         try:
             self.logger.info("%s.get_messages method invoked", self.filePrefix)
 
-            channels = await JsonUtil().read_from_json("config", "messages.json")
+            channels = await JsonUtil().read_from_json("data", "messages.json")
 
             return channels
         
@@ -63,7 +63,7 @@ class DataUtil:
         try:
             self.logger.info("%s.update_authors method invoked", self.filePrefix)
 
-            result = await JsonUtil().write_to_json("config", "authors.json", authors)
+            result = await JsonUtil().write_to_json("data", "authors.json", authors)
 
             if result:
                 return True
@@ -78,7 +78,7 @@ class DataUtil:
         try:
             self.logger.info("%s.update_stories method invoked", self.filePrefix)
 
-            result = await JsonUtil().write_to_json("config", "stories.json", stories)
+            result = await JsonUtil().write_to_json("data", "stories.json", stories)
 
             if result:
                 return True
@@ -93,7 +93,7 @@ class DataUtil:
         try:
             self.logger.info("%s.update_channels method invoked", self.filePrefix)
 
-            result = await JsonUtil().write_to_json("config", "channels.json", channels)
+            result = await JsonUtil().write_to_json("data", "channels.json", channels)
 
             if result:
                 return True
@@ -108,7 +108,7 @@ class DataUtil:
         try:
             self.logger.info("%s.update_messages method invoked", self.filePrefix)
 
-            result = await JsonUtil().write_to_json("config", "messages.json", messages)
+            result = await JsonUtil().write_to_json("data", "messages.json", messages)
 
             if result:
                 return True

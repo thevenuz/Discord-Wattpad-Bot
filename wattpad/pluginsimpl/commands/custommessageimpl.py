@@ -43,7 +43,7 @@ class CustomMessageImpl:
                         return ResultSetCustomChannel(False, "Mutliple stories found with this name", MultipleStoriesFound= True)
 
                     else:
-                        for guild, storylist in filteredStories:
+                        for guild, storylist in filteredStories.items():
                             for story in storylist:
                                 if storyUrls[0] == story["url"]:
                                     story["CustomMsg"] = message
@@ -96,10 +96,10 @@ class CustomMessageImpl:
                 #load authors
                 authors = await dataUtil.get_authors()
 
-                filterredAuthors = dict(filter(lambda x: x[0] == guildId, authors.items()))
+                filteredAuthors = dict(filter(lambda x: x[0] == guildId, authors.items()))
 
                 if self.filePrefix not in url:
-                    authorUrls = [author["url"] for author in filterredAuthors[guildId] if self.prefix in author["url"]]
+                    authorUrls = [author["url"] for author in filteredAuthors[guildId] if self.prefix in author["url"]]
 
                 else:
                     authorUrls.append(url)
@@ -117,7 +117,7 @@ class CustomMessageImpl:
                         return ResultSetCustomChannel(False, "Mutliple stories found with this name", MultipleAuthorsFound= True)
 
                     else:
-                        for guild, authorlist in filterredAuthors:
+                        for guild, authorlist in filteredAuthors.items():
                             for author in authorlist:
                                 if authorUrls[0] == author["url"]:
                                     author["CustomMsg"] = message
@@ -191,7 +191,7 @@ class CustomMessageImpl:
                         return ResultUnsetCustomChannel(False, "Mutliple stories found with this name", MultipleStoriesFound= True)
 
                     else:
-                        for guild, storylist in filteredStories:
+                        for guild, storylist in filteredStories.items():
                             for story in storylist:
                                 if storyUrls[0] == story["url"]:
                                     story["CustomMsg"] = ""
@@ -244,10 +244,10 @@ class CustomMessageImpl:
                 #load authors
                 authors = await dataUtil.get_authors()
 
-                filterredAuthors = dict(filter(lambda x: x[0] == guildId, authors.items()))
+                filteredAuthors = dict(filter(lambda x: x[0] == guildId, authors.items()))
 
                 if self.filePrefix not in url:
-                    authorUrls = [author["url"] for author in filterredAuthors[guildId] if self.prefix in author["url"]]
+                    authorUrls = [author["url"] for author in filteredAuthors[guildId] if self.prefix in author["url"]]
 
                 else:
                     authorUrls.append(url)
@@ -265,7 +265,7 @@ class CustomMessageImpl:
                         return ResultSetCustomChannel(False, "Mutliple stories found with this name", MultipleAuthorsFound= True)
 
                     else:
-                        for guild, authorlist in filterredAuthors:
+                        for guild, authorlist in filteredAuthors.items():
                             for author in authorlist:
                                 if authorUrls[0] == author["url"]:
                                     author["CustomMsg"] = ""

@@ -43,7 +43,7 @@ class MsgUtil:
             response = ""
 
             for index, channel in enumerate(channels):
-                response= f"{response}{index + 1}. #{channel}\n"
+                response= f"{response}{index + 1}. <#{channel}>\n"
 
             return response
         

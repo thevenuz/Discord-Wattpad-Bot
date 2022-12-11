@@ -55,7 +55,7 @@ class StoryImpl:
                 ]
             
             else:
-                for guild, story in stories:
+                for guild, story in stories.items():
                     if guild == guildId:
                         if any(storyUrl == data["url"] for data in story):
 
@@ -95,7 +95,14 @@ class StoryImpl:
             #filter the stories of the particular guild
             filteredStories = dict(filter(lambda x: x[0] == guildId, stories.items()))
 
-            for guild, story in filteredStories:
+            #get stories in the list with that name
+            if isStoryName:
+                storiesWithName = [story["url"] for story in filteredStories[guildId] if url in story["url"]]
+
+                if len(storiesWithName) > 1:
+                    return ResultUnfollow(False, "Multiple stories found", MultipleStoriesFound= True)
+
+            for guild, story in filteredStories.items():
                 if guild == guildId:
                     #get url if entered input is story name
                     if isStoryName:

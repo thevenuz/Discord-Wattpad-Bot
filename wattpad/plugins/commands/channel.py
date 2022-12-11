@@ -109,7 +109,7 @@ async def check_channels(ctx: lightbulb.SlashContext) -> None:
         result = await ChannelImpl().check_channels(guildId)
 
         if result.IsSuccess:
-            if result.Data:
+            if result.Data and result.Data[0]:
                 response = await MsgUtil().build_check_channels_msg(result.Data[0])
                 await ctx.respond(embed=hikari.Embed(title=f"{msgs['check:channels:title']}", description=f"{response}", color=0Xff500a))
 
@@ -123,3 +123,9 @@ async def check_channels(ctx: lightbulb.SlashContext) -> None:
         logger.fatal("Exception occured in %s.check_channels method invoked for server: %s", filePrefix, ctx.guild_id, exc_info=1)
         raise e
     
+def load(bot):
+    bot.add_plugin(plugin)
+
+
+def unload(bot):
+    bot.remove_plugin(plugin)

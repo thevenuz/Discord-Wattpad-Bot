@@ -23,8 +23,10 @@ class ResultFollow(ResultValidateUrl):
 class ResultUnfollow(Result):
     AuthorNotFound: bool = False
     AuthorNameNotFound: bool = False
+    MultipleAuthorsFound: bool = False
     StoryNotFound: bool = False
     StoryNameNotFound: bool = False
+    MultipleStoriesFound: bool = False
 
 @dataclass
 class ResultCheck(Result):
