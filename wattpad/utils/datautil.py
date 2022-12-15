@@ -1,6 +1,5 @@
 from wattpad.logger.baselogger import BaseLogger
 from wattpad.utils.jsonutil import JsonUtil
-from wattpad.models.author import Authors
 from typing import Dict
 
 class DataUtil:
