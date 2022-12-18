@@ -77,4 +77,6 @@ class ResultUnsetCustomChannel(Result):
 class ResultCheckCustomChannel(Result):
     StoryMsg: str = ""
     AuthorMsg: str = ""
+    StoryCategoryMsg: str = ""
+    AuthorCategoryMsg: str = ""
     IsEmpty: bool = False

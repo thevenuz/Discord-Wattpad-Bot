@@ -16,6 +16,7 @@ class CustomMessageImpl:
 
             dataUtil = DataUtil()
             storyUrls = []
+            storyName = ""
 
             #if there is a url, custom msg needs to be setup for individual stories
             if url:
@@ -24,8 +25,8 @@ class CustomMessageImpl:
 
                 filteredStories = dict(filter(lambda x: x[0] == guildId, stories.items()))
 
-                if self.filePrefix not in url:
-                    storyUrls = [story["url"] for story in filteredStories[guildId] if self.prefix in story["url"]]
+                if self.prefix not in url:
+                    storyUrls = [story["url"] for story in filteredStories[guildId] if url in story["url"]]
 
                 else:
                     storyUrls.append(url)
@@ -49,11 +50,14 @@ class CustomMessageImpl:
                                     story["CustomMsg"] = message
 
                                     #update the orginal stories json data
-                                    stories[guildId] = story
+                                    stories[guildId] = storylist
 
                                     result = await dataUtil.update_stories(stories)
 
-                                    storyName = await WattpadUtil().get_story_title_from_url(url)
+                                    if self.prefix in url:
+                                        storyName = await WattpadUtil().get_story_title_from_url(url)
+                                    else:
+                                        storyName = url
 
                                     if result:
                                         return ResultSetCustomChannel(True, "custom msg set success", StoryName= storyName)
@@ -66,11 +70,23 @@ class CustomMessageImpl:
                 #get messages
                 messages = await dataUtil.get_messages()
 
-                messages[guildId]["story"] = message
+                if guildId in messages:
+                    if "story" in messages[guildId]:
+                        messages[guildId]["story"] = message
+
+                    else:
+                        messages[guildId] = {
+                            "story" : message,
+                            "announcement" : ""
+                        }
+
+                else:
+                    messages[guildId] = {
+                        "story" : message,
+                        "announcement" : ""
+                    }
 
                 result = await dataUtil.update_messages(messages)
-
-                storyName = await WattpadUtil().get_story_title_from_url(url)
 
                 if result:
                     return ResultSetCustomChannel(True, "custom msg set success", StoryName= storyName)
@@ -90,6 +106,7 @@ class CustomMessageImpl:
 
             dataUtil = DataUtil()
             authorUrls = []
+            authorName = ""
 
             #if there is a url, custom msg needs to be setup for individual authors
             if url:
@@ -98,8 +115,8 @@ class CustomMessageImpl:
 
                 filteredAuthors = dict(filter(lambda x: x[0] == guildId, authors.items()))
 
-                if self.filePrefix not in url:
-                    authorUrls = [author["url"] for author in filteredAuthors[guildId] if self.prefix in author["url"]]
+                if self.prefix not in url:
+                    authorUrls = [author["url"] for author in filteredAuthors[guildId] if url in author["url"]]
 
                 else:
                     authorUrls.append(url)
@@ -123,11 +140,14 @@ class CustomMessageImpl:
                                     author["CustomMsg"] = message
 
                                     #update the orginal stories json data
-                                    authors[guildId] = author
+                                    authors[guildId] = authorlist
 
                                     result = await dataUtil.update_authors(authors)
 
-                                    authorName = await WattpadUtil().get_author_name(url)
+                                    if self.prefix in url:
+                                        authorName = await WattpadUtil().get_author_name(url)
+                                    else:
+                                        authorName = url
 
                                     if result:
                                         return ResultSetCustomChannel(True, "custom msg set success", AuthorName= authorName)
@@ -140,11 +160,23 @@ class CustomMessageImpl:
                 #get messages
                 messages = await dataUtil.get_messages()
 
-                messages[guildId]["announcement"] = message
+                if guildId in messages:
+                    if "announcement" in messages[guildId]:
+                        messages[guildId]["announcement"] = message
+
+                    else:
+                        messages[guildId] = {
+                            "story" : "",
+                            "announcement" : message
+                        }
+
+                else:
+                    messages[guildId] = {
+                        "story" : "",
+                        "announcement" : message
+                    }
 
                 result = await dataUtil.update_messages(messages)
-
-                authorName = await WattpadUtil().get_author_name(url)
 
                 if result:
                     return ResultSetCustomChannel(True, "custom msg set success", AuthorName= authorName)
@@ -164,6 +196,7 @@ class CustomMessageImpl:
 
             dataUtil = DataUtil()
             storyUrls = []
+            storyName = ""
 
             #if there is a url, custom msg needs to be setup for individual stories
             if url:
@@ -172,8 +205,8 @@ class CustomMessageImpl:
 
                 filteredStories = dict(filter(lambda x: x[0] == guildId, stories.items()))
 
-                if self.filePrefix not in url:
-                    storyUrls = [story["url"] for story in filteredStories[guildId] if self.prefix in story["url"]]
+                if self.prefix not in url:
+                    storyUrls = [story["url"] for story in filteredStories[guildId] if url in story["url"]]
 
                 else:
                     storyUrls.append(url)
@@ -197,11 +230,14 @@ class CustomMessageImpl:
                                     story["CustomMsg"] = ""
 
                                     #update the orginal stories json data
-                                    stories[guildId] = story
+                                    stories[guildId] = storylist
 
                                     result = await dataUtil.update_stories(stories)
 
-                                    storyName = await WattpadUtil().get_story_title_from_url(url)
+                                    if self.prefix in url:
+                                        storyName = await WattpadUtil().get_story_title_from_url(url)
+                                    else:
+                                        storyName = url
 
                                     if result:
                                         return ResultUnsetCustomChannel(True, "custom msg unset success", StoryName= storyName)
@@ -217,8 +253,6 @@ class CustomMessageImpl:
                 messages[guildId]["story"] = ""
 
                 result = await dataUtil.update_messages(messages)
-
-                storyName = await WattpadUtil().get_story_title_from_url(url)
 
                 if result:
                     return ResultUnsetCustomChannel(True, "custom msg unset success", StoryName= storyName)
@@ -238,6 +272,7 @@ class CustomMessageImpl:
 
             dataUtil = DataUtil()
             authorUrls = []
+            authorName = ""
 
             #if there is a url, custom msg needs to be setup for individual authors
             if url:
@@ -246,8 +281,8 @@ class CustomMessageImpl:
 
                 filteredAuthors = dict(filter(lambda x: x[0] == guildId, authors.items()))
 
-                if self.filePrefix not in url:
-                    authorUrls = [author["url"] for author in filteredAuthors[guildId] if self.prefix in author["url"]]
+                if self.prefix not in url:
+                    authorUrls = [author["url"] for author in filteredAuthors[guildId] if url in author["url"]]
 
                 else:
                     authorUrls.append(url)
@@ -270,12 +305,15 @@ class CustomMessageImpl:
                                 if authorUrls[0] == author["url"]:
                                     author["CustomMsg"] = ""
 
-                                    #update the orginal stories json data
-                                    authors[guildId] = author
+                                    #update the orginal authors json data
+                                    authors[guildId] = authorlist
 
                                     result = await dataUtil.update_authors(authors)
 
-                                    authorName = await WattpadUtil().get_author_name(url)
+                                    if self.prefix in url:
+                                        authorName = await WattpadUtil().get_author_name(url)
+                                    else:
+                                        authorName = url
 
                                     if result:
                                         return ResultSetCustomChannel(True, "custom msg unset success", AuthorName= authorName)
@@ -291,8 +329,6 @@ class CustomMessageImpl:
                 messages[guildId]["announcement"] = ""
 
                 result = await dataUtil.update_messages(messages)
-
-                authorName = await WattpadUtil().get_author_name(url)
 
                 if result:
                     return ResultSetCustomChannel(True, "custom msg unset success", AuthorName= authorName)
@@ -314,9 +350,15 @@ class CustomMessageImpl:
             isstory=False
             isStoryEmpty= False
             isAuthorEmpty= False
+            authorMsgResult = ""
+            storyMsgResult = ""
+            authorCategoryMsg = ""
+            storyCategoryMsg = ""
 
             dataUtil = DataUtil()
             msgUtil = MsgUtil()
+
+            messages = await dataUtil.get_messages()
 
             if category:
                 if category.lower() == "story":
@@ -334,10 +376,13 @@ class CustomMessageImpl:
             if isstory:
                 #get stories
                 stories = await dataUtil.get_stories()
-
+                
                 guildStories = dict(filter(lambda x: x[0] == guildId, stories.items()))
 
                 customMsgStories = [story for story in guildStories[guildId] if story["CustomMsg"]]
+                
+                if guildId in messages:
+                    storyCategoryMsg = messages[guildId]["story"]
 
                 storyMsgResult = await msgUtil.build_check_custom_messages_msg(customMsgStories, isStory= True)
 
@@ -352,6 +397,9 @@ class CustomMessageImpl:
 
                 customMsgStories = [author for author in guildAuthors[guildId] if author["CustomMsg"]]
 
+                if guildId in messages:
+                    authorCategoryMsg = messages[guildId]["announcement"]
+
                 authorMsgResult = await msgUtil.build_check_custom_messages_msg(customMsgStories, isAuthor= True)
 
                 if not authorMsgResult:
@@ -360,14 +408,14 @@ class CustomMessageImpl:
             if isStoryEmpty and isAuthorEmpty:
                 return ResultCheckCustomChannel(False, "No custom msgs set", IsEmpty= True)
 
-            if isauthor and isAuthorEmpty:
+            if isauthor and isAuthorEmpty and not isstory:
                 return ResultCheckCustomChannel(False, "No custom msgs set for Author", IsEmpty= True)
 
-            if isstory and isStoryEmpty:
+            if isstory and isStoryEmpty and not isauthor:
                 return ResultCheckCustomChannel(False, "No custom msgs set for stories", IsEmpty= True)
 
 
-            return ResultCheckCustomChannel(True, "check custom msgs success", AuthorMsg= authorMsgResult, StoryMsg= storyMsgResult)
+            return ResultCheckCustomChannel(True, "check custom msgs success", AuthorMsg= authorMsgResult, StoryMsg= storyMsgResult, AuthorCategoryMsg= authorCategoryMsg, StoryCategoryMsg= storyCategoryMsg)
 
         except Exception as e:
             self.logger.fatal("Exception occured in %s.check_custom_messages method invoked for server: %s, category: %s", self.filePrefix, guildId, category, exc_info=1)

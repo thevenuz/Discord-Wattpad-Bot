@@ -81,11 +81,11 @@ class MsgUtil:
             response = ""
             newLine = "\n"
 
-            if isAuthor:
-                response = "ANNOUNCEMENTS:\n"
+            # if isAuthor:
+            #     response = "ANNOUNCEMENTS:\n"
             
-            else:
-                response = "STORIES:\n"
+            # else:
+            #     response = "STORIES:\n"
 
             for index, record in enumerate(data):
                 response = f"{response}{index+1}. {record['url']} : {record['CustomMsg']}{newLine}"

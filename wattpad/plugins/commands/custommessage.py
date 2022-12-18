@@ -24,7 +24,7 @@ async def set_custom_message(ctx:lightbulb.SlashContext) -> None:
 
 @set_custom_message.child
 @lightbulb.add_checks(lightbulb.checks.has_role_permissions(hikari.Permissions.ADMINISTRATOR)|lightbulb.checks.has_role_permissions(hikari.Permissions.MODERATE_MEMBERS)|lightbulb.checks.has_role_permissions(hikari.Permissions.MANAGE_CHANNELS)|lightbulb.owner_only)
-@lightbulb.option("url","Mention the title/URL of the story",str)
+@lightbulb.option("url","Mention the title/URL of the story",str, required= False)
 @lightbulb.option("message","Your custom message for story updates",required=True)
 @lightbulb.command("for-story","set a custom messages for a particular story", auto_defer=True)
 @lightbulb.implements(lightbulb.SlashSubCommand)
@@ -73,9 +73,9 @@ async def set_custom_message_for_story(ctx:lightbulb.SlashContext) -> None:
     
 @set_custom_message.child
 @lightbulb.add_checks(lightbulb.checks.has_role_permissions(hikari.Permissions.ADMINISTRATOR)|lightbulb.checks.has_role_permissions(hikari.Permissions.MODERATE_MEMBERS)|lightbulb.checks.has_role_permissions(hikari.Permissions.MANAGE_CHANNELS)|lightbulb.owner_only)
-@lightbulb.option("url","Mention the title/URL of the Author",str)
+@lightbulb.option("url","Mention the title/URL of the Author", str, required= False)
 @lightbulb.option("message","Your custom message for author's announcements",required=True)
-@lightbulb.command("for-announcements","set a custom messages for a particular author's announcements", auto_defer=True)
+@lightbulb.command("for-announcement","set a custom messages for a particular author's announcements", auto_defer=True)
 @lightbulb.implements(lightbulb.SlashSubCommand)
 async def set_custom_message_for_author(ctx:lightbulb.SlashContext) -> None:
     try:
@@ -136,7 +136,7 @@ async def unset_custom_message(ctx:lightbulb.SlashContext) -> None:
 
 @unset_custom_message.child
 @lightbulb.add_checks(lightbulb.checks.has_role_permissions(hikari.Permissions.ADMINISTRATOR)|lightbulb.checks.has_role_permissions(hikari.Permissions.MODERATE_MEMBERS)|lightbulb.checks.has_role_permissions(hikari.Permissions.MANAGE_CHANNELS)|lightbulb.owner_only)
-@lightbulb.option("url", "Mention the title/URL of the story", str)
+@lightbulb.option("url", "Mention the title/URL of the story", str, required= False)
 @lightbulb.command("for-story","set a custom messages for a particular story", auto_defer=True)
 @lightbulb.implements(lightbulb.SlashSubCommand)
 async def unset_custom_message_for_story(ctx:lightbulb.SlashContext) -> None:
@@ -184,7 +184,7 @@ async def unset_custom_message_for_story(ctx:lightbulb.SlashContext) -> None:
     
 @unset_custom_message.child
 @lightbulb.add_checks(lightbulb.checks.has_role_permissions(hikari.Permissions.ADMINISTRATOR)|lightbulb.checks.has_role_permissions(hikari.Permissions.MODERATE_MEMBERS)|lightbulb.checks.has_role_permissions(hikari.Permissions.MANAGE_CHANNELS)|lightbulb.owner_only)
-@lightbulb.option("url","Mention the title/URL of the story",str)
+@lightbulb.option("url","Mention the title/URL of the story",str, required= False)
 @lightbulb.command("for-announcement","set a custom messages for a particular story", auto_defer=True)
 @lightbulb.implements(lightbulb.SlashSubCommand)
 async def unset_custom_message_for_author(ctx:lightbulb.SlashContext) -> None:
@@ -200,7 +200,7 @@ async def unset_custom_message_for_author(ctx:lightbulb.SlashContext) -> None:
         msgs = await config.get_messages(language)
 
         #call the implementation
-        result = await CustomMessageImpl().unset_custom_message_for_story(guildId, authorUrl)
+        result = await CustomMessageImpl().unset_custom_message_for_author(guildId, authorUrl)
 
         if result.IsSuccess:
             if authorUrl:
@@ -238,7 +238,8 @@ async def check_custom_messages(ctx: lightbulb.SlashContext) -> None:
         logger.info("%s.check_custom_messages method invoked for server: %s, category: %s", filePrefix, ctx.guild_id, ctx.options.category)
 
         guildId= str(ctx.guild_id)
-        category= str(ctx.options.category)
+        category= ctx.options.category
+        msg_description = ""
 
         config = Config()
 
@@ -251,16 +252,28 @@ async def check_custom_messages(ctx: lightbulb.SlashContext) -> None:
         if result.IsSuccess:
             if category:
                 if category.lower() == "story":
-                    await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:msgs']}", description=f"{msgs['story:custom:msgs']}\n{result.StoryMsg}", color=0Xff500a))
+                    if result.StoryCategoryMsg:
+                        msg_description = f"For Story Category: {result.StoryCategoryMsg}\n\n"
+                        
+                    await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:msgs']}", description=f"{msg_description}\n{msgs['story:custom:msgs']}\n{result.StoryMsg}", color=0Xff500a))
 
                 else:
-                    await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:msgs']}", description=f"{msgs['author:custom:msgs']}\n{result.AuthorMsg}", color=0Xff500a))
+                    if result.AuthorCategoryMsg:
+                        msg_description = f"For Announcement Category: {result.AuthorCategoryMsg}\n\n"
+
+                    await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:msgs']}", description=f"{msg_description}\n{msgs['author:custom:msgs']}\n{result.AuthorMsg}", color=0Xff500a))
             
             else:
                 if result.StoryMsg:
-                    msg_description= msgs['story:custom:msgs'] + "\n" +result.StoryMsg + "\n\n"
+                    if result.StoryCategoryMsg:
+                        msg_description = f"For Story Category: {result.StoryCategoryMsg}\n\n"
+
+                    msg_description= msg_description + msgs['story:custom:msgs'] + "\n" +result.StoryMsg + "\n\n"
                 
                 if result.AuthorMsg:
+                    if result.AuthorCategoryMsg:
+                        msg_description = f"{msg_description}For Announcement Category: {result.AuthorCategoryMsg}\n\n"
+
                     msg_description= f"{msg_description}{msgs['author:custom:msgs']}" + "\n" + result.AuthorMsg
                 
                 await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:msgs']}", description=f"{msg_description}", color=0Xff500a))
@@ -272,7 +285,7 @@ async def check_custom_messages(ctx: lightbulb.SlashContext) -> None:
                         await ctx.respond(embed=hikari.Embed(title=f"{msgs['error']}", description=f"{msgs['custom:msgs:not:set:story']}", color=0xFF0000))
 
                     else:
-                        await ctx.respond(embed=hikari.Embed(title=f"{msgs['error']}", description=f"{msgs['custom:msgs:not:set:announcements']}", color=0xFF0000))
+                        await ctx.respond(embed=hikari.Embed(title=f"{msgs['error']}", description=f"{msgs['custom:msgs:not:set:announcement']}", color=0xFF0000))
 
                 else:
                     await ctx.respond(embed=hikari.Embed(title=f"{msgs['error']}", description=f"{msgs['custom:msgs:not:set']}", color=0xFF0000))
