@@ -100,7 +100,7 @@ required=True,
 type=hikari.TextableGuildChannel,
 channel_types=[hikari.ChannelType.GUILD_TEXT,hikari.ChannelType.GUILD_NEWS]
 )
-@lightbulb.command("for-author","set a custom channel for authors in which the bot shares the updates", auto_defer=True)
+@lightbulb.command("for-announcement","set a custom channel for author announcements in which the bot shares the updates", auto_defer=True)
 @lightbulb.implements(lightbulb.SlashSubCommand)
 async def set_custom_channel_for_author(ctx: lightbulb.SlashContext) -> None:
     try:
@@ -163,23 +163,16 @@ async def unset_custom_channel(ctx:lightbulb.SlashContext) -> None:
         logger.fatal("Exception occured in %s.unset_custom_channel method invoked for server: %s", filePrefix, ctx.guild_id,exc_info=1)
         raise e
 
-
 @unset_custom_channel.child
 @lightbulb.add_checks(lightbulb.checks.has_role_permissions(hikari.Permissions.ADMINISTRATOR)|lightbulb.checks.has_role_permissions(hikari.Permissions.MODERATE_MEMBERS)|lightbulb.checks.has_role_permissions(hikari.Permissions.MANAGE_CHANNELS)|lightbulb.owner_only)
 @lightbulb.option("url","Mention the title/URL of the story",str, required=True)
-@lightbulb.option("channel","Select the channel which you want to remove as a custom channel.",
-required=True,
-type=hikari.TextableGuildChannel,
-channel_types=[hikari.ChannelType.GUILD_TEXT,hikari.ChannelType.GUILD_NEWS]
-)
 @lightbulb.command("for-story","unset a custom channel for stories in which the bot shares the updates", auto_defer=True)
 @lightbulb.implements(lightbulb.SlashSubCommand)
 async def unset_custom_channel_for_story(ctx:lightbulb.SlashContext) -> None:
     try:
-        logger.info("%s.unset_custom_channel_for_story method invoked for server: %s, channel: %s, url: %s", filePrefix, ctx.guild_id, ctx.options.channel.id, ctx.options.url)
+        logger.info("%s.unset_custom_channel_for_story method invoked for server: %s, url: %s", filePrefix, ctx.guild_id, ctx.options.url)
 
         guildId= str(ctx.guild_id)
-        channelId= ctx.options.channel.id
         storyUrl= ctx.options.url
 
         config = Config()
@@ -188,14 +181,14 @@ async def unset_custom_channel_for_story(ctx:lightbulb.SlashContext) -> None:
         msgs = await config.get_messages(language)
 
         #call the implementation
-        result = await CustomChannelImpl().unset_custom_channel_for_story(guildId, channelId, storyUrl)
+        result = await CustomChannelImpl().unset_custom_channel_for_story(guildId, storyUrl)
 
         if result.IsSuccess:
-            response = msgs['unset:custom:channel:story:success'].format(f"{channelId}", f"{storyUrl}")
+            response = msgs['unset:custom:channel:story:success'].format(f"{result.ChannelId}", f"{storyUrl}")
             await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{response}", color=0Xff500a))
 
         else:
-            logger.error("Error in %s.unset_custom_channel_for_story method for server: %s, channel: %s, story: %s, error: %s", filePrefix, guildId, channelId, storyUrl, result.ResultInfo)
+            logger.error("Error in %s.unset_custom_channel_for_story method for server: %s, story: %s, error: %s", filePrefix, guildId, storyUrl, result.ResultInfo)
 
             if result.NoStoryNameFound:
                 await ctx.respond(embed=hikari.Embed(title=f"{msgs['error']}", description=f"{msgs['invalid:title']}", color=0xFF0000))
@@ -210,25 +203,19 @@ async def unset_custom_channel_for_story(ctx:lightbulb.SlashContext) -> None:
                 await ctx.respond(embed=hikari.Embed(title=f"{msgs['unknown:error']}", description=f"{msgs['unknown:error:msg']}", color=0xFF0000))
 
     except Exception as e:
-        logger.fatal("Exception occured in %s.unset_custom_channel_for_story method invoked for server: %s, channel: %s, url: %s", filePrefix, ctx.guild_id, ctx.options.channel.id, ctx.options.url, exc_info=1)
+        logger.fatal("Exception occured in %s.unset_custom_channel_for_story method invoked for server: %s, url: %s", filePrefix, ctx.guild_id, ctx.options.url, exc_info=1)
         raise e
 
 @unset_custom_channel.child
 @lightbulb.add_checks(lightbulb.checks.has_role_permissions(hikari.Permissions.ADMINISTRATOR)|lightbulb.checks.has_role_permissions(hikari.Permissions.MODERATE_MEMBERS)|lightbulb.checks.has_role_permissions(hikari.Permissions.MANAGE_CHANNELS)|lightbulb.owner_only)
 @lightbulb.option("url","Mention the title/URL of the story",str, required=True)
-@lightbulb.option("channel","Select the channel which you want to remove as a custom channel.",
-required=True,
-type=hikari.TextableGuildChannel,
-channel_types=[hikari.ChannelType.GUILD_TEXT,hikari.ChannelType.GUILD_NEWS]
-)
-@lightbulb.command("for-author","unset a custom channel for author in which the bot shares the updates", auto_defer=True)
+@lightbulb.command("for-announcement","unset a custom channel for author announcements in which the bot shares the updates", auto_defer=True)
 @lightbulb.implements(lightbulb.SlashSubCommand)
 async def unset_custom_channel_for_author(ctx:lightbulb.SlashContext) -> None:
     try:
-        logger.info("%s.unset_custom_channel_for_author method invoked for server: %s, channel: %s, url: %s", filePrefix, ctx.guild_id, ctx.options.channel.id, ctx.options.url)
+        logger.info("%s.unset_custom_channel_for_author method invoked for server: %s, url: %s", filePrefix, ctx.guild_id, ctx.options.url)
 
         guildId= str(ctx.guild_id)
-        channelId= ctx.options.channel.id
         storyUrl= ctx.options.url
 
         config = Config()
@@ -237,14 +224,14 @@ async def unset_custom_channel_for_author(ctx:lightbulb.SlashContext) -> None:
         msgs = await config.get_messages(language)
 
         #call the implementation
-        result = await CustomChannelImpl().unset_custom_channel_for_author(guildId, channelId, storyUrl)
+        result = await CustomChannelImpl().unset_custom_channel_for_author(guildId, storyUrl)
         
         if result.IsSuccess:
-            response = msgs['unset:custom:channel:author:success'].format(f"{channelId}", f"{storyUrl}")
+            response = msgs['unset:custom:channel:author:success'].format(f"{result.ChannelId}", f"{storyUrl}")
             await ctx.respond(embed=hikari.Embed(title=f"{msgs['success']}", description=f"{response}", color=0Xff500a))
 
         else:
-            logger.error("Error in %s.unset_custom_channel_for_author method for server: %s, channel: %s, story: %s, error: %s", filePrefix, guildId, channelId, storyUrl, result.ResultInfo)
+            logger.error("Error in %s.unset_custom_channel_for_author method for server: %s, story: %s, error: %s", filePrefix, guildId, storyUrl, result.ResultInfo)
 
             if result.NoStoryNameFound:
                 await ctx.respond(embed=hikari.Embed(title=f"{msgs['error']}", description=f"{msgs['invalid:title']}", color=0xFF0000))
@@ -259,7 +246,7 @@ async def unset_custom_channel_for_author(ctx:lightbulb.SlashContext) -> None:
                 await ctx.respond(embed=hikari.Embed(title=f"{msgs['unknown:error']}", description=f"{msgs['unknown:error:msg']}", color=0xFF0000))
     
     except Exception as e:
-        logger.fatal("Exception occured in %s.unset_custom_channel_for_author method invoked for server: %s, channel: %s, url: %s", filePrefix, ctx.guild_id, ctx.options.channel.id, ctx.options.url,exc_info=1)
+        logger.fatal("Exception occured in %s.unset_custom_channel_for_author method invoked for server: %s, url: %s", filePrefix, ctx.guild_id, ctx.options.url,exc_info=1)
         raise e
     
 @plugin.command
@@ -271,7 +258,7 @@ async def check_custom_channels(ctx: lightbulb.SlashContext) -> None:
         logger.info("%s.check_custom_channels method invoked for server: %s, category: %s", filePrefix, ctx.guild_id, ctx.options.category)
 
         guildId= str(ctx.guild_id)
-        category= str(ctx.options.category)
+        category= ctx.options.category
 
         config = Config()
 

@@ -72,6 +72,7 @@ class ResultUnsetCustomChannel(Result):
     NoAuthorFound: bool = False
     MultipleAuthorsFound: bool = False
     AuthorName: str = ""
+    ChannelId: int = 0
 
 @dataclass
 class ResultCheckCustomChannel(Result):
