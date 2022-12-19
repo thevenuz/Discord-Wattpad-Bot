@@ -4,7 +4,7 @@ from lightbulb.ext import tasks
 from wattpad.logger.baselogger import BaseLogger
 from wattpad.pluginsimpl.tasks.taskimpl import TaskImpl
 
-plugin = lightbulb.Plugin("TaskPlugin")
+plugin = lightbulb.Plugin("TaskPlugin", include_datastore= True)
 
 filePrefix = "wattpad.plugins.tasks.task"
 logger = BaseLogger().loggger_init()
@@ -16,9 +16,12 @@ async def get_new_chapters() -> None:
         logger.info("%s.get_new_chapters method invoked", filePrefix)
 
         #call the impl
-        result= await TaskImpl().get_new_chapters(plugin)
+        result = await TaskImpl().get_new_chapters(plugin)
 
-        logger.info("get_new_chapters task ended")
+        if not result:
+            logger.fatal("Some error occured in %s.get_new_chapters", filePrefix)
+
+        logger.info("%s.get_new_chapters task ended", filePrefix)
     
     except Exception as e:
         logger.fatal("Exception occured in %s.get_new_chapters method", filePrefix, exc_info=1)
@@ -30,7 +33,10 @@ async def get_new_announcements() -> None:
         logger.info("%s.get_new_announcements method invoked", filePrefix)
 
         #call the impl
-        result= await TaskImpl().get_new_announcements(plugin)
+        result = await TaskImpl().get_new_announcements(plugin)
+
+        if not result:
+            logger.fatal("Some error occured in %s.get_new_announcements", filePrefix)
 
         logger.info("get_new_announcements task ended")
     

@@ -1,8 +1,9 @@
-import hikari
 import lightbulb
+import hikari
 from wattpad.logger.baselogger import BaseLogger
 from wattpad.utils.datautil import DataUtil
 from wattpad.utils.wattpadutil import WattpadUtil
+from wattpad.utils.hikariutil import HikariUtil
 from wattpad.scraper.scraper import Scraper
 from wattpad.utils.config import Config
 
@@ -23,6 +24,7 @@ class TaskImpl:
             msg = ""
             customChannel = ""
             customMsg = ""
+            hasSendPerms = False
 
             #load stories
             stories = await dataUtil.get_stories()
@@ -30,65 +32,80 @@ class TaskImpl:
             filteredStories = {guild: story for guild, story in stories.items() if story}
 
             for guild, storyList in filteredStories.items():
-                nonEmptyStories = [rec for rec in storyList if rec["url"]]
+                try:
+                    nonEmptyStories = [rec for rec in storyList if rec["url"]]
 
-                for storyRec in nonEmptyStories[0]:
-                    #check if any custom channels are set for this story
-                    if "CustomChannel" in storyRec:
-                        customChannel = storyRec["CustomChannel"]
-                        channel = customChannel
+                    for storyRec in nonEmptyStories:
+                        #check if any custom channels are set for this story
+                        if "CustomChannel" in storyRec:
+                            customChannel = storyRec["CustomChannel"]
+                            channel = customChannel
 
-                    if not customChannel:
-                        #load channels
-                        channels = await dataUtil.get_channels()
-                        defaultChannel = channels[guild][0]
+                        if not customChannel:
+                            #load channels
+                            channels = await dataUtil.get_channels()
 
-                        channel = defaultChannel
+                            if guild in channels and channels[guild]:
+                                defaultChannel = channels[guild][0]
 
-                    #check for updates of the story only if there is a channel setup for updates
-                    if channel:
-                        #check for the chapter update for story
-                        update = await scraper.get_new_chapter(storyRec["url"], storyRec["lastupdated"])
+                                channel = defaultChannel
 
-                        if update.IsSuccess:
-                            #check if any custom msg were set for this story
-                            if "CustomMsg" in storyRec:
-                                customMsg = storyRec["CustomMsg"]
-                                msg = customMsg
+                        #check for updates of the story only if there is a channel setup for updates
+                        if channel:
+                            #check if the bot has send msg perms in this channel
+                            hasSendPerms = await self.__has_send_perms(plugin, guild, channel)
 
-                            #if no custom msgs set get default msg
-                            if not customMsg:
-                                language = await config.get_language(guild)
-                                msgs = await config.get_messages(language)
+                            if hasSendPerms:
+                                #check for the chapter update for story
+                                update = await scraper.get_new_chapter(storyRec["url"], storyRec["lastupdated"])
 
-                                msg = msgs['new:chapter:msg']
+                                if update.IsSuccess:
+                                    #check if any custom msg were set for this story
+                                    if "CustomMsg" in storyRec:
+                                        customMsg = storyRec["CustomMsg"]
+                                        msg = customMsg
 
-                            
-                            #get story title
-                            title = await wattpadUtil.get_story_title_from_url(storyRec["url"])
+                                    #if no custom msgs set get default msg
+                                    if not customMsg:
+                                        language = await config.get_language(guild)
+                                        msgs = await config.get_messages(language)
 
-                            response = msg.format(f"{title}")
-                            response= response + "\n" + update.NewUpdate
+                                        msg = msgs['new:chapter:msg']
 
-                            await plugin.bot.rest.create_message(channel, response)
+                                    
+                                    #get story title
+                                    title = await wattpadUtil.get_story_title_from_url(storyRec["url"])
 
-                            #update lastupdated in stories
-                            for eachStory in stories[guild]:
-                                if eachStory["url"] == storyRec["url"]:
-                                    eachStory["lastupdated"] = update.UpdatedDate
+                                    response = msg.format(f"{title}")
+                                    response= response + "\n" + update.NewUpdate
 
-                                    updateResult = await dataUtil.update_stories(stories)
+                                    await plugin.bot.rest.create_message(channel, response)
 
-                                    if not updateResult:
-                                        self.logger.error("%s.get_new_chapters Error while updating stories for server: %s, story: %s", self.filePrefix, guild, storyRec["url"])
+                                    #update lastupdated in stories
+                                    for eachStory in stories[guild]:
+                                        if eachStory["url"] == storyRec["url"]:
+                                            eachStory["lastupdated"] = update.UpdatedDate.strftime("%Y-%m-%d %H:%M:%S")
 
+                                            updateResult = await dataUtil.update_stories(stories)
 
-                    else:
-                        self.logger.error("Error: no channel for updates is setup for server: %s, story: %s", guild, storyRec["url"])
+                                            if not updateResult:
+                                                self.logger.error("%s.get_new_chapters Error while updating stories for server: %s, story: %s", self.filePrefix, guild, storyRec["url"])
+
+                            else:
+                                self.logger.error("Error %s.get_new_chapters method: no send permissions for channel: %s, server: %s, story: %s", self.filePrefix, channel, guild, storyRec["url"])
+
+                        else:
+                            self.logger.error("Error %s.get_new_chapters: no channel for updates is setup for server: %s, story: %s", self.filePrefix, guild, storyRec["url"])
+                
+                except Exception as e:
+                    self.logger.error("Error occured in %s.get_new_chapters method", self.filePrefix, exc_info=1)
+                    pass
+
+            return True
         
         except Exception as e:
             self.logger.fatal("Exception occured in %s.get_new_chapters method", self.filePrefix, exc_info=1)
-            pass
+            return False
 
     async def get_new_announcements(self, plugin: lightbulb.Plugin) -> None:
         try:
@@ -109,62 +126,98 @@ class TaskImpl:
             filteredAuthors = {guild: author for guild, author in authors.items() if author}
 
             for guild, authorList in filteredAuthors.items():
-                nonEmptyAuthors = [rec for rec in authorList if rec["url"]]
+                try:
+                    nonEmptyAuthors = [rec for rec in authorList if rec["url"]]
 
-                for authorRec in nonEmptyAuthors[0]:
-                    #check if any custom channels are set for this author
-                    if "CustomChannel" in authorRec:
-                        customChannel = authorRec["CustomChannel"]
-                        channel = customChannel
+                    for authorRec in nonEmptyAuthors:
+                        #check if any custom channels are set for this author
+                        if "CustomChannel" in authorRec:
+                            customChannel = authorRec["CustomChannel"]
+                            channel = customChannel
 
-                    if not customChannel:
-                        #load channels
-                        channels = await dataUtil.get_channels()
-                        defaultChannel = channels[guild][0]
+                        if not customChannel:
+                            #load channels
+                            channels = await dataUtil.get_channels()
+                            if guild in channels:
+                                defaultChannel = channels[guild][0]
 
-                        channel = defaultChannel
+                                channel = defaultChannel
 
-                    #check for updates of the author only if there is a channel setup for updates
-                    if channel:
-                        #check for the announcement update for author
-                        update = await scraper.get_new_announcement(authorRec["url"], authorRec["lastupdated"])
+                        #check for updates of the author only if there is a channel setup for updates
+                        if channel:
+                            #check if the bot has send msg perms in this channel
+                            hasSendPerms = await self.__has_send_perms(plugin, guild, channel)
 
-                        if update.IsSuccess:
-                            #check if any custom msg were set for this author
-                            if "CustomMsg" in authorRec:
-                                customMsg = authorRec["CustomMsg"]
-                                msg = customMsg
+                            if hasSendPerms:
+                                #check for the announcement update for author
+                                update = await scraper.get_new_announcement(authorRec["url"], authorRec["lastupdated"])
 
-                            #if no custom msgs set get default msg
-                            if not customMsg:
-                                language = await config.get_language(guild)
-                                msgs = await config.get_messages(language)
+                                if update.IsSuccess:
+                                    #check if any custom msg were set for this author
+                                    if "CustomMsg" in authorRec:
+                                        customMsg = authorRec["CustomMsg"]
+                                        msg = customMsg
 
-                                msg = msgs['new:announcement:msg']
+                                    #if no custom msgs set get default msg
+                                    if not customMsg:
+                                        language = await config.get_language(guild)
+                                        msgs = await config.get_messages(language)
 
-                            #get story title
-                            title = await wattpadUtil.get_author_name(authorRec["url"])
+                                        msg = msgs['new:announcement:msg']
 
-                            response = msg.format(f"{title}")
-                            response= response + "\n" + update.NewUpdate
+                                    #get story title
+                                    title = await wattpadUtil.get_author_name(authorRec["url"])
 
-                            await plugin.bot.rest.create_message(channel, response)
+                                    response = msg.format(f"{title}")
+                                    response= response + "\n" + update.NewUpdate
 
-                            #update lastupdated in authors
-                            for eachAuthor in authors[guild]:
-                                if eachAuthor["url"] == authorRec["url"]:
-                                    eachAuthor["lastupdated"] = update.UpdatedDate
+                                    await plugin.bot.rest.create_message(channel, response)
 
-                                    updateResult = await dataUtil.update_authors(authors)
+                                    #update lastupdated in authors
+                                    for eachAuthor in authors[guild]:
+                                        if eachAuthor["url"] == authorRec["url"]:
+                                            eachAuthor["lastupdated"] = update.UpdatedDate.strftime("%Y-%m-%d %H:%M:%S")
 
-                                    if not updateResult:
-                                        self.logger.error("%s.get_new_chapters Error while updating authors for server: %s, author: %s", self.filePrefix, guild, authorRec["url"])
+                                            updateResult = await dataUtil.update_authors(authors)
 
-                    else:
-                        self.logger.error("Error: no channel for updates is setup for server: %s, author: %s", guild, authorRec["url"])
+                                            if not updateResult:
+                                                self.logger.error("%s.get_new_chapters Error while updating authors for server: %s, author: %s", self.filePrefix, guild, authorRec["url"])
+
+                            else:
+                                self.logger.error("Error in %s.get_new_announcements method: no send permissions for channel: %s, server: %s, author: %s", self.filePrefix, channel, guild, authorRec["url"])
+                        else:
+                            self.logger.error("Error in %s.get_new_announcements method: no channel for updates is setup for server: %s, author: %s", self.filePrefix, guild, authorRec["url"])
+
+                except Exception as e:
+                    self.logger.error("Error occured in %s.get_new_announcements method", self.filePrefix, exc_info=1)
+                    pass
+
+            return True
 
         except Exception as e:
-            self.logger.fatal("Exception occured in %s.get_new_announcements method invoked", self.filePrefix, exc_info=1)
-            raise e
+            self.logger.fatal("Exception occured in %s.get_new_announcements invoked", self.filePrefix, exc_info=1)
+            return False
         
+    async def __has_send_perms(self, plugin: lightbulb.Plugin, guild: str, channel: str) -> bool:
+        try:
+            self.logger.info("%s.__has_send_perms method invoked for channel: %s", self.filePrefix, channel)
+
+            try:
+                channelobj= await plugin.bot.rest.fetch_channel(channel)
+                bot_member= plugin.bot.cache.get_member(guild, plugin.bot.get_me())
+
+                perms= lightbulb.utils.permissions_in(channelobj, bot_member)
+
+                if perms:
+                    if hikari.Permissions.SEND_MESSAGES in perms:
+                        return True
+
+                return False
+
+            except Exception as e:
+                return False
+        
+        except Exception as e:
+            self.logger.fatal("Exception occured in %s.__has_send_perms method for channel: %s", self.filePrefix, channel, exc_info=1)
+            raise e
         
