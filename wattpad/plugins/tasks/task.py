@@ -10,7 +10,7 @@ filePrefix = "wattpad.plugins.tasks.task"
 logger = BaseLogger().loggger_init()
 
 
-@tasks.task(m=10, auto_start=True, max_consecutive_failures=100)
+@tasks.task(m=5, auto_start=True, max_consecutive_failures=1000)
 async def get_new_chapters() -> None:
     try:
         logger.info("%s.get_new_chapters method invoked", filePrefix)
@@ -27,7 +27,7 @@ async def get_new_chapters() -> None:
         logger.fatal("Exception occured in %s.get_new_chapters method", filePrefix, exc_info=1)
         raise e
     
-@tasks.task(m=10, auto_start=True, max_consecutive_failures=100)
+@tasks.task(m=5, auto_start=True, max_consecutive_failures=1000)
 async def get_new_announcements() -> None:
     try:
         logger.info("%s.get_new_announcements method invoked", filePrefix)

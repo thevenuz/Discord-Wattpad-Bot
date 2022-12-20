@@ -259,6 +259,7 @@ async def check_custom_channels(ctx: lightbulb.SlashContext) -> None:
 
         guildId= str(ctx.guild_id)
         category= ctx.options.category
+        msg_description = ""
 
         config = Config()
 

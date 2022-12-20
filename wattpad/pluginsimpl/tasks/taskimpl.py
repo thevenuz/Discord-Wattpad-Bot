@@ -138,7 +138,7 @@ class TaskImpl:
                         if not customChannel:
                             #load channels
                             channels = await dataUtil.get_channels()
-                            if guild in channels:
+                            if guild in channels and channels[guild]:
                                 defaultChannel = channels[guild][0]
 
                                 channel = defaultChannel
@@ -169,9 +169,11 @@ class TaskImpl:
                                     title = await wattpadUtil.get_author_name(authorRec["url"])
 
                                     response = msg.format(f"{title}")
-                                    response= response + "\n" + update.NewUpdate
+                                    #response= response + "\n" + update.NewUpdate
 
-                                    await plugin.bot.rest.create_message(channel, response)
+                                    em = hikari.Embed(title='Announcement:', description=f'{update.NewUpdate}', color=0Xff500a)
+
+                                    await plugin.bot.rest.create_message(channel, response, embed = em)
 
                                     #update lastupdated in authors
                                     for eachAuthor in authors[guild]:
