@@ -1,8 +1,9 @@
-import jsonobject
+from dataclasses import dataclass
 
-class Settings(jsonobject.JsonObject):
-    Token = jsonobject.StringProperty(default="")
-    PublicLogChannel = jsonobject.StringProperty(default="")
-    LogChannel = jsonobject.StringProperty(default="")
+@dataclass
+class Settings():
+    Token: str
+    PublicLogChannel:str = ""
+    LogChannel:str = ""
 
 

@@ -53,7 +53,7 @@ class Config:
             with open("config/settings.json") as f:
                 result = json.load(f)
 
-            settings = Settings(result)
+            settings = Settings(Token=result["Token"], PublicLogChannel= result["PublicLogChannel"], LogChannel= result["LogChannel"])
 
             return settings
         

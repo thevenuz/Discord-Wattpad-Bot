@@ -9,7 +9,7 @@ TOKEN = settings.Token
 LOGCHANNEL = settings.LogChannel
 PUBLICLOGCHANNEL = settings.PublicLogChannel
 
-bot = lightbulb.BotApp(token=TOKEN, default_enabled_guilds=[944965667453566976])
+bot = lightbulb.BotApp(token=TOKEN)
 
 tasks.load(bot)
 
@@ -24,4 +24,4 @@ async def msg(event):
     print('bot has started')
 
 
-bot.run(activity=hikari.Activity(name="WATTPAD FOR NEW CHAPTERS", type=hikari.ActivityType.WATCHING))
+bot.run(activity=hikari.Activity(name="WATTPAD FOR NEW CHAPTERS & ANNOUNCEMENTS", type=hikari.ActivityType.WATCHING))
