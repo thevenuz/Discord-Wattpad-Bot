@@ -3,4 +3,3 @@ aiohttp==3.8.1
 beautifulsoup4==4.11.1
 hikari==2.0.0.dev108
 hikari_lightbulb==2.2.1
-lightbulb==0.1d

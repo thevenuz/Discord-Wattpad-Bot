@@ -13,7 +13,7 @@ class BaseLogger:
         try:
             logger=logging.getLogger()
             if (logger.hasHandlers()):
-                logger.handlers.clear()
+                return logger
 
             rootDirectory = os.path.dirname(__file__)
             configDirectory = Path(rootDirectory).parents[1]
@@ -36,7 +36,7 @@ class BaseLogger:
 
             filePath = os.path.join(configDirectory, "logs")
 
-            logname = f"{filePath}\log_{datetime.utcnow().strftime('%Y%m%d')}.txt"
+            logname = f"{filePath}/log_{datetime.utcnow().strftime('%Y%m%d')}.txt"
             handler = TimedRotatingFileHandler(logname, when="midnight", interval=1)
             handler.suffix = "%Y%m%d"
             handler.setFormatter(formatter)
