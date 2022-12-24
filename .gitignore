@@ -1,16 +1,6 @@
-extensions/__pycache__/channel.cpython-310.pyc
-extensions/__pycache__/help.cpython-310.pyc
-extensions/__pycache__/story.cpython-310.pyc
-__pycache__/wattpad.cpython-310.pyc
-.vscode/launch.json
-errorhandler/__pycache__/error.cpython-310.pyc
-.env
-stories.json
-channels.json
-stories.json
-.gitignore
-logs.txt
-stories.json
-authors.json
-channels.json
-stories.json
+.vscode
+config
+data
+logs
+__pycache__/
+ *.pyc

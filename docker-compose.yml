@@ -1,0 +1,10 @@
+version: "3.10"
+
+services:
+  wattpadbot:
+    build: ./
+    image: thevenuz/wattpadbot:master
+    volumes: 
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./config:/app/config

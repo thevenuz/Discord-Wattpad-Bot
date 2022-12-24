@@ -1,7 +1,5 @@
-beautifulsoup4==4.10.0
-hikari==2.0.0.dev105
-python-dotenv==0.19.2
-requests==2.27.1
-hikari-lightbulb==2.2.1
-aiofiles==0.8.0
+aiofiles==22.1.0
 aiohttp==3.8.1
+beautifulsoup4==4.11.1
+hikari==2.0.0.dev108
+hikari_lightbulb==2.2.1
