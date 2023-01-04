@@ -6,7 +6,7 @@ from wattpad.utils.msgutil import MsgUtil
 
 class CustomMessageImpl:
     def __init__(self) -> None:
-        self.filePrefix= "wattpad.pluginsimpl.commands.customchannelimpl"
+        self.filePrefix= "wattpad.pluginsimpl.commands.custommessageimpl"
         self.logger= BaseLogger().loggger_init()
         self.prefix = "wattpad.com"
 
