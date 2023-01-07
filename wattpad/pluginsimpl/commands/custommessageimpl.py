@@ -386,7 +386,7 @@ class CustomMessageImpl:
 
                 storyMsgResult = await msgUtil.build_check_custom_messages_msg(customMsgStories, isStory= True)
 
-                if not storyMsgResult:
+                if not storyMsgResult and not storyCategoryMsg:
                     isStoryEmpty = True
 
             if isauthor:
@@ -402,7 +402,7 @@ class CustomMessageImpl:
 
                 authorMsgResult = await msgUtil.build_check_custom_messages_msg(customMsgStories, isAuthor= True)
 
-                if not authorMsgResult:
+                if not authorMsgResult and not authorCategoryMsg:
                     isAuthorEmpty = True
 
             if isStoryEmpty and isAuthorEmpty:
