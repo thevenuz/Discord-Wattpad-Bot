@@ -254,14 +254,20 @@ async def check_custom_messages(ctx: lightbulb.SlashContext) -> None:
                 if category.lower() == "story":
                     if result.StoryCategoryMsg:
                         msg_description = f"For Story Category: {result.StoryCategoryMsg}\n\n"
+                    
+                    if result.StoryMsg:
+                        msg_description = f"{msg_description}\n{msgs['story:custom:msgs']}\n{result.StoryMsg}"
                         
-                    await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:msgs']}", description=f"{msg_description}\n{msgs['story:custom:msgs']}\n{result.StoryMsg}", color=0Xff500a))
+                    await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:msgs']}", description=f"{msg_description}", color=0Xff500a))
 
                 else:
                     if result.AuthorCategoryMsg:
                         msg_description = f"For Announcement Category: {result.AuthorCategoryMsg}\n\n"
 
-                    await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:msgs']}", description=f"{msg_description}\n{msgs['author:custom:msgs']}\n{result.AuthorMsg}", color=0Xff500a))
+                    if result.AuthorMsg:
+                        msg_description = f"{msg_description}\n{msgs['author:custom:msgs']}\n{result.AuthorMsg}"
+
+                    await ctx.respond(embed=hikari.Embed(title=f"{msgs['custom:msgs']}", description=f"{msg_description}", color=0Xff500a))
             
             else:
                 

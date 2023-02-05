@@ -379,7 +379,7 @@ class CustomMessageImpl:
                 
                 guildStories = dict(filter(lambda x: x[0] == guildId, stories.items()))
 
-                customMsgStories = [story for story in guildStories[guildId] if story["CustomMsg"]]
+                customMsgStories = [story for story in guildStories[guildId] if "CustomMsg" in story and story["CustomMsg"]]
                 
                 if guildId in messages:
                     storyCategoryMsg = messages[guildId]["story"]
@@ -395,7 +395,7 @@ class CustomMessageImpl:
 
                 guildAuthors = dict(filter(lambda x: x[0] == guildId, authors.items()))
 
-                customMsgStories = [author for author in guildAuthors[guildId] if author["CustomMsg"]]
+                customMsgStories = [author for author in guildAuthors[guildId] if "CustomMsg" in author and author["CustomMsg"]]
 
                 if guildId in messages:
                     authorCategoryMsg = messages[guildId]["announcement"]

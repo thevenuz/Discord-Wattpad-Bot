@@ -65,8 +65,16 @@ class TaskImpl:
                                         customMsg = storyRec["CustomMsg"]
                                         msg = customMsg
 
-                                    #if no custom msgs set get default msg
+                                    # If specific custom msg is not found for story, check custom msgs for category
                                     if not customMsg:
+                                        categoryCustomMsgs = await dataUtil.get_messages()
+
+                                        if guild in categoryCustomMsgs and "story" in categoryCustomMsgs[guild]:
+                                            msg = categoryCustomMsgs[guild]["story"]
+
+
+                                    #if no custom msgs set get default msg
+                                    if not msg:
                                         language = await config.get_language(guild)
                                         msgs = await config.get_messages(language)
 
@@ -158,8 +166,15 @@ class TaskImpl:
                                         customMsg = authorRec["CustomMsg"]
                                         msg = customMsg
 
-                                    #if no custom msgs set get default msg
+                                    # If specific custom msg is not found for announcement, check custom msgs for category
                                     if not customMsg:
+                                        categoryCustomMsgs = await dataUtil.get_messages()
+
+                                        if guild in categoryCustomMsgs and "announcement" in categoryCustomMsgs[guild]:
+                                            msg = categoryCustomMsgs[guild]["announcement"]
+
+                                    #if no custom msgs set get default msg
+                                    if not msg:
                                         language = await config.get_language(guild)
                                         msgs = await config.get_messages(language)
 
@@ -206,7 +221,9 @@ class TaskImpl:
 
             try:
                 channelobj= await plugin.bot.rest.fetch_channel(channel)
-                bot_member= plugin.bot.cache.get_member(guild, plugin.bot.get_me())
+                guildObj = await plugin.bot.rest.fetch_guild(guild)
+                bot_member = guildObj.get_member(plugin.bot.get_me())
+                # bot_member= plugin.bot.cache.get_member(guild, plugin.bot.get_me())
 
                 perms= lightbulb.utils.permissions_in(channelobj, bot_member)
 
