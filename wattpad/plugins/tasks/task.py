@@ -49,6 +49,7 @@ async def get_new_announcements() -> None:
             filePrefix,
             exc_info=1,
         )
+        raise e
 
 
 @tasks.task(d=5, auto_start=True, max_consecutive_failures=1000)
@@ -72,6 +73,7 @@ async def cleanup_stored_data() -> None:
             filePrefix,
             exc_info=1,
         )
+        raise e
 
 
 def load(bot):

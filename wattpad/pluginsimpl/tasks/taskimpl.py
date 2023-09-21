@@ -385,6 +385,7 @@ class TaskImpl:
                 self.filePrefix,
                 exc_info=1,
             )
+            return False
 
     async def __has_send_perms(
         self, plugin: lightbulb.Plugin, guild: str, channel: str
